@@ -30,9 +30,8 @@
         const qrCodeImg = document.getElementById('qr-code-img');
         const NETLIFY_URL = 'https://playful-parfait-6bfab1.netlify.app';
 
-        // Genera el QR usando la URL de Netlify
-        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(NETLIFY_URL)}`;
-        qrCodeImg.src = qrApiUrl;
+        // Apunta a tu imagen QR local guardada en la carpeta 'public/assets'
+        qrCodeImg.src = './assets/qr_code.png';
 
         let currentIndex = -1;
         let photos = [];
