@@ -8,7 +8,6 @@ cloudinary.config({
   secure: true,
 });
 
-// Headers para permitir la comunicación (CORS) y los métodos correctos
 const headers = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type',
@@ -16,9 +15,6 @@ const headers = {
 };
 
 exports.handler = async (event) => {
-  console.log('--- Función de subida iniciada ---');
-
-  // AÑADIDO: Responde OK a las peticiones OPTIONS pre-vuelo del navegador
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers };
   }
@@ -31,33 +27,21 @@ exports.handler = async (event) => {
     const result = await multipart.parse(event);
     const file = result.files[0];
 
-    if (!file) {
-      throw new Error('No se recibió ningún archivo.');
-    }
-    
-    console.log('Archivo recibido y procesado, listo para subir.');
+    if (!file) { throw new Error('No se recibió ningún archivo.'); }
     
     const fileStr = `data:${file.contentType};base64,${file.content.toString('base64')}`;
-
-    const uploadResult = await cloudinary.uploader.upload(fileStr, {
-      folder: 'momentos-en-vivo',
-    });
-
-    console.log('Respuesta de Cloudinary:', uploadResult);
+    const uploadResult = await cloudinary.uploader.upload(fileStr, { folder: 'momentos-en-vivo' });
 
     return {
       statusCode: 200,
-      headers, // AÑADIDO: Incluye los headers en la respuesta exitosa
-      body: JSON.stringify({
-        message: '¡Foto subida con éxito!',
-        imageUrl: uploadResult.secure_url
-      }),
+      headers,
+      body: JSON.stringify({ message: '¡Foto subida con éxito!', imageUrl: uploadResult.secure_url }),
     };
   } catch (error) {
-    console.error('--- ERROR ATRAPADO ---:', error);
+    console.error('--- ERROR ATRAPADO EN UPLOAD ---:', error);
     return {
       statusCode: 500,
-      headers, // AÑADIDO: Incluye los headers en la respuesta de error
+      headers,
       body: JSON.stringify({ error: 'Hubo un problema al subir la imagen.' }),
     };
   }

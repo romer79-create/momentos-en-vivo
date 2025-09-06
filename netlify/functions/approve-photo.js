@@ -6,7 +6,6 @@ cloudinary.config({
   api_secret: 'HZKqEzoDAP66cP5ITLC3JAJfw9A',
 });
 
-// Headers para permitir la comunicación (CORS) y los métodos correctos
 const headers = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type',
@@ -14,14 +13,9 @@ const headers = {
 };
 
 exports.handler = async (event) => {
-  // Responde OK a las peticiones OPTIONS pre-vuelo del navegador
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers };
-  }
-  
+  if (event.httpMethod === 'OPTIONS') { return { statusCode: 200, headers }; }
   const { public_id } = JSON.parse(event.body);
   try {
-    // Añade las etiquetas 'moderated' y 'approved' a la imagen
     await cloudinary.uploader.add_tag('moderated', [public_id]);
     await cloudinary.uploader.add_tag('approved', [public_id]);
     return { statusCode: 200, headers, body: 'Imagen aprobada' };

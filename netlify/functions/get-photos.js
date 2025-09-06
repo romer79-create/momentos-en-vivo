@@ -6,7 +6,6 @@ cloudinary.config({
   api_secret: 'HZKqEzoDAP66cP5ITLC3JAJfw9A',
 });
 
-// Headers para permitir la comunicación (CORS)
 const headers = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type',
@@ -14,20 +13,14 @@ const headers = {
 
 exports.handler = async (event) => {
   try {
-    // Busca recursos en Cloudinary que NO tengan la etiqueta "moderated"
     const result = await cloudinary.search
       .expression('folder=momentos-en-vivo AND NOT tags=moderated')
-      .sort_by('created_at', 'desc') // Muestra las más nuevas primero
+      .sort_by('created_at', 'desc')
       .max_results(30)
       .execute();
-
-    return {
-      statusCode: 200,
-      headers, // <-- PERMISOS AÑADIDOS
-      body: JSON.stringify(result.resources),
-    };
+    return { statusCode: 200, headers, body: JSON.stringify(result.resources) };
   } catch (error) {
     console.error(error);
-    return { statusCode: 500, headers, body: JSON.stringify(error) }; // <-- PERMISOS AÑADIDOS
+    return { statusCode: 500, headers, body: JSON.stringify(error) };
   }
 };
