@@ -9,7 +9,8 @@
             margin: 0;
             background-color: #000;
             color: white;
-            overflow: hidden; /* Evita barras de scroll */
+            overflow: hidden;
+            font-family: sans-serif;
         }
         #projection-container {
             position: relative;
@@ -24,57 +25,83 @@
             max-height: 95%;
             position: absolute;
             opacity: 0;
-            transition: opacity 1.5s ease-in-out; /* Transición suave de fundido */
+            transform: scale(1.05);
+            transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
         }
         #projection-container img.visible {
-            opacity: 1; /* Clase para hacer la imagen visible */
+            opacity: 1;
+            transform: scale(1);
+        }
+        #placeholder {
+            font-size: 2em;
+            color: #555;
         }
     </style>
 </head>
 <body>
     <div id="projection-container">
-        </div>
+        <div id="placeholder">Esperando fotos aprobadas...</div>
+    </div>
 
     <script>
         const container = document.getElementById('projection-container');
-        let currentIndex = 0;
+        const placeholder = document.getElementById('placeholder');
+        // IMPORTANTE: Reemplaza esto con la URL real de tu sitio en Netlify
+        const NETLIFY_URL = 'https://playful-parfait-6bfab1.netlify.app';
+
+        let currentIndex = -1;
         let photos = [];
 
         async function fetchApprovedPhotos() {
-            const response = await fetch('/get-approved-photos');
-            photos = await response.json();
+            try {
+                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-approved-photos`);
+                if (!response.ok) return; // Si hay un error, no hacemos nada
+                const newPhotos = await response.json();
+                photos = newPhotos; // Actualizamos nuestra lista de fotos
+                placeholder.style.display = photos.length > 0 ? 'none' : 'block';
+            } catch (error) {
+                console.error("Error cargando fotos:", error);
+            }
         }
 
         function showNextPhoto() {
-            if (photos.length === 0) return; // No hacer nada si no hay fotos
+            if (photos.length === 0) return;
 
-            const currentImage = container.querySelector('img');
+            // Oculta la imagen anterior si existe
+            const currentImage = container.querySelector('img.visible');
             if (currentImage) {
-                currentImage.classList.remove('visible'); // Oculta la imagen actual
+                currentImage.classList.remove('visible');
+            }
+
+            // Calcula el índice de la siguiente foto
+            currentIndex = (currentIndex + 1) % photos.length;
+            const nextPhoto = photos[currentIndex];
+
+            // Si la imagen ya existe en el DOM, la reusamos. Si no, la creamos.
+            let nextImage = document.getElementById(nextPhoto.asset_id);
+            if (!nextImage) {
+                nextImage = document.createElement('img');
+                nextImage.id = nextPhoto.asset_id;
+                nextImage.src = nextPhoto.secure_url;
+                container.appendChild(nextImage);
             }
             
-            // Espera a que termine la transición de salida antes de cambiar la imagen
+            // Hacemos visible la siguiente imagen después de que la anterior se haya ocultado
             setTimeout(() => {
-                currentIndex = (currentIndex + 1) % photos.length;
-                const nextPhotoFile = photos[currentIndex];
-                container.innerHTML = `<img src="/approved/${nextPhotoFile}" class="visible">`;
-            }, 1500); // 1.5s, igual a la duración de la transición CSS
+                nextImage.classList.add('visible');
+            }, 500); // Pequeña pausa para una transición más suave
         }
 
-        async function startSlideshow() {
-            await fetchApprovedPhotos();
-            if (photos.length > 0) {
-                 // Muestra la primera foto inmediatamente
-                container.innerHTML = `<img src="/approved/${photos[0]}" class="visible">`;
-                // Inicia el ciclo para las siguientes
-                setInterval(showNextPhoto, 5000); // Cambia de foto cada 5 segundos
-            }
-            
-            // Revisa si hay fotos nuevas cada 15 segundos
-            setInterval(fetchApprovedPhotos, 15000);
+        // --- INICIO DEL PROGRAMA ---
+        async function start() {
+            await fetchApprovedPhotos(); // Carga las fotos al iniciar
+            showNextPhoto(); // Muestra la primera foto
+
+            setInterval(showNextPhoto, 7000); // Cambia de foto cada 7 segundos
+            setInterval(fetchApprovedPhotos, 20000); // Busca fotos nuevas cada 20 segundos
         }
 
-        startSlideshow();
+        start();
     </script>
 </body>
 </html>
