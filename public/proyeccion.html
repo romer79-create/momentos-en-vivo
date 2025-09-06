@@ -5,14 +5,129 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Momentos en Vivo - Proyección</title>
     <style>
-        body { margin: 0; background-color: #000; color: white; overflow: hidden; font-family: sans-serif; }
-        #projection-container { position: relative; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
-        #projection-container img { max-width: 95%; max-height: 95%; position: absolute; opacity: 0; transform: scale(1.05); transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out; }
-        #projection-container img.visible { opacity: 1; transform: scale(1); }
-        #placeholder { font-size: 2em; color: #555; }
-        #qr-container { position: absolute; bottom: 20px; right: 20px; background-color: rgba(255, 255, 255, 0.9); padding: 10px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; align-items: center; z-index: 100; }
-        #qr-container img { width: 150px; height: 150px; border: 2px solid #333; }
-        #qr-container p { margin: 5px 0 0; font-size: 0.8em; color: #333; text-align: center; }
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@400;600;700&display=swap');
+        
+        body { 
+            margin: 0; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            overflow: hidden; 
+            font-family: 'Poppins', sans-serif; 
+        }
+        
+        #projection-container { 
+            position: relative; 
+            width: 100vw; 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+        }
+        
+        .photo-slide { 
+            position: absolute; 
+            opacity: 0; 
+            transform: scale(1.05); 
+            transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .photo-slide.visible { 
+            opacity: 1; 
+            transform: scale(1); 
+        }
+        
+        .photo-slide img { 
+            max-width: 100%; 
+            max-height: 70vh; 
+            border-radius: 20px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4); 
+            object-fit: contain;
+        }
+        
+        .message-overlay {
+            background: linear-gradient(135deg, rgba(255,217,61,0.95), rgba(255,107,107,0.95));
+            color: white;
+            padding: 20px 30px;
+            border-radius: 25px;
+            margin-top: 20px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 80vw;
+            word-wrap: break-word;
+        }
+        
+        .no-message {
+            display: none;
+        }
+        
+        #placeholder { 
+            font-family: 'Fredoka One', cursive;
+            font-size: 3em; 
+            color: rgba(255,255,255,0.8); 
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        #qr-container { 
+            position: absolute; 
+            bottom: 30px; 
+            right: 30px; 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 15px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            z-index: 100; 
+        }
+        
+        #qr-container img { 
+            width: 120px; 
+            height: 120px; 
+            border-radius: 10px; 
+        }
+        
+        #qr-container p { 
+            margin: 8px 0 0; 
+            font-size: 0.9em; 
+            color: #333; 
+            text-align: center; 
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .message-overlay {
+                font-size: 1.4rem;
+                padding: 15px 20px;
+                margin-top: 15px;
+            }
+            
+            #qr-container {
+                bottom: 20px;
+                right: 20px;
+                padding: 10px;
+            }
+            
+            #qr-container img {
+                width: 80px;
+                height: 80px;
+            }
+            
+            #placeholder {
+                font-size: 2em;
+                padding: 0 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -40,20 +155,38 @@
 
         function displayPhoto(photo) {
             if (!photo) return;
-            const currentImage = container.querySelector('img.visible');
-            if (currentImage) {
-                currentImage.classList.remove('visible');
+            
+            // Remover slide actual
+            const currentSlide = container.querySelector('.photo-slide.visible');
+            if (currentSlide) {
+                currentSlide.classList.remove('visible');
+                setTimeout(() => currentSlide.remove(), 1500);
             }
-            const allImages = container.querySelectorAll('img');
-            if (allImages.length > 10) {
-                allImages[0].remove();
+            
+            // Limpiar slides antiguos
+            const allSlides = container.querySelectorAll('.photo-slide');
+            if (allSlides.length > 5) {
+                allSlides[0].remove();
             }
-            const nextImage = document.createElement('img');
-            nextImage.id = photo.asset_id;
-            nextImage.src = photo.secure_url;
-            container.appendChild(nextImage);
+            
+            // Extraer mensaje del contexto
+            const message = photo.context && photo.context.message ? photo.context.message : '';
+            
+            // Crear nuevo slide
+            const slide = document.createElement('div');
+            slide.className = 'photo-slide';
+            slide.id = photo.asset_id;
+            slide.innerHTML = `
+                <img src="${photo.secure_url}" alt="Foto aprobada">
+                <div class="message-overlay ${message ? '' : 'no-message'}">
+                    ${message}
+                </div>
+            `;
+            
+            container.appendChild(slide);
+            
             setTimeout(() => {
-                nextImage.classList.add('visible');
+                slide.classList.add('visible');
             }, 500);
         }
         

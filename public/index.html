@@ -85,8 +85,53 @@
             transform: scale(1.02);
         }
         
+        .message-container {
+            margin-top: 25px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            max-height: 120px;
+            padding: 15px;
+            border: 3px solid rgba(255,255,255,0.8);
+            border-radius: 15px;
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #ffd93d;
+            box-shadow: 0 8px 35px rgba(255,217,61,0.3);
+            transform: translateY(-2px);
+        }
+        
+        textarea::placeholder {
+            color: #666;
+            font-style: italic;
+        }
+        
+        .char-counter {
+            position: absolute;
+            bottom: -25px;
+            right: 5px;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.8);
+            font-weight: 600;
+        }
+        
         .button-group { 
-            margin-top: 30px; 
+            margin-top: 50px; 
             display: flex; 
             gap: 20px; 
             flex-wrap: wrap;
@@ -185,6 +230,12 @@
     <h1>¡Captura tu Momento!</h1>
     <video id="video" autoplay playsinline></video>
     <canvas id="canvas" style="display:none;"></canvas>
+    
+    <div class="message-container">
+        <textarea id="message" placeholder="¡Escribe un mensaje divertido! (opcional)" maxlength="200"></textarea>
+        <div class="char-counter"><span id="char-count">0</span>/200</div>
+    </div>
+    
     <div class="button-group">
         <button id="snap">📸 Enviar Foto</button>
         <button id="switch-camera">🔄 Cambiar Cámara</button>
@@ -197,10 +248,27 @@
         const snapButton = document.getElementById('snap');
         const switchCameraButton = document.getElementById('switch-camera');
         const statusEl = document.getElementById('status');
+        const messageInput = document.getElementById('message');
+        const charCount = document.getElementById('char-count');
         const functionUrl = '/.netlify/functions/upload';
 
         let currentStream; // Para guardar el stream de la cámara actual
         let currentFacingMode = 'user'; // 'user' para frontal, 'environment' para trasera
+
+        // Contador de caracteres para el mensaje
+        messageInput.addEventListener('input', () => {
+            const count = messageInput.value.length;
+            charCount.textContent = count;
+            
+            // Cambiar color cuando se acerca al límite
+            if (count > 180) {
+                charCount.style.color = '#ff6b6b';
+            } else if (count > 150) {
+                charCount.style.color = '#feca57';
+            } else {
+                charCount.style.color = 'rgba(255,255,255,0.8)';
+            }
+        });
 
         // Función para iniciar la cámara
         async function startCamera() {
@@ -226,7 +294,7 @@
             startCamera();
         });
 
-        // Evento para enviar foto (sin cambios, solo el inicio de la cámara)
+        // Evento para enviar foto con mensaje
         snapButton.addEventListener('click', () => {
             statusEl.textContent = "Procesando...";
             canvas.width = video.videoWidth;
@@ -238,6 +306,12 @@
                 statusEl.textContent = "Enviando...";
                 const formData = new FormData();
                 formData.append('photo', blob, 'foto_celular.jpg');
+                
+                // Agregar el mensaje si existe
+                const message = messageInput.value.trim();
+                if (message) {
+                    formData.append('message', message);
+                }
 
                 fetch(functionUrl, { method: 'POST', body: formData })
                 .then(response => {
@@ -247,6 +321,10 @@
                 .then(data => {
                     console.log(data.message);
                     statusEl.textContent = "¡Gracias! Tu foto fue enviada 🎉";
+                    // Limpiar el mensaje después del envío exitoso
+                    messageInput.value = '';
+                    charCount.textContent = '0';
+                    charCount.style.color = 'rgba(255,255,255,0.8)';
                     setTimeout(() => statusEl.textContent = '', 4000);
                 })
                 .catch(err => {

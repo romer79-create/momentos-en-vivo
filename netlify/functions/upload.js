@@ -29,8 +29,18 @@ exports.handler = async (event) => {
 
     if (!file) { throw new Error('No se recibió ningún archivo.'); }
     
+    // Obtener el mensaje si existe
+    const message = result.message || '';
+    
     const fileStr = `data:${file.contentType};base64,${file.content.toString('base64')}`;
-    const uploadResult = await cloudinary.uploader.upload(fileStr, { folder: 'momentos-en-vivo' });
+    
+    // Configurar opciones de subida con contexto del mensaje
+    const uploadOptions = { 
+      folder: 'momentos-en-vivo',
+      context: message ? `message=${message}` : undefined
+    };
+    
+    const uploadResult = await cloudinary.uploader.upload(fileStr, uploadOptions);
 
     return {
       statusCode: 200,
