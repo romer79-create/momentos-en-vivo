@@ -4,9 +4,9 @@ const cloudinary = require('cloudinary').v2;
 // --- CONFIGURACIÓN DE CLOUDINARY ---
 // Reemplaza estos valores con tus credenciales reales
 cloudinary.config({
-  cloud_name: 'YOUR_CLOUD_NAME', // <-- TU CLOUD NAME AQUÍ
-  api_key: 'YOUR_API_KEY',       // <-- TU API KEY AQUÍ
-  api_secret: 'YOUR_API_SECRET',   // <-- TU API SECRET AQUÍ
+  cloud_name: 'de537y5wb',
+  api_key: '465853636538439',
+  api_secret: 'HZKqEzoDAP66cP5ITLC3JAJfw9A',
   secure: true,
 });
 
