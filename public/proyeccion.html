@@ -5,37 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Momentos en Vivo - Proyección</title>
     <style>
-        body {
-            margin: 0;
-            background-color: #000;
-            color: white;
-            overflow: hidden;
-            font-family: sans-serif;
-        }
-        #projection-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        #projection-container img {
-            max-width: 95%;
-            max-height: 95%;
-            position: absolute;
-            opacity: 0;
-            transform: scale(1.05);
-            transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
-        }
-        #projection-container img.visible {
-            opacity: 1;
-            transform: scale(1);
-        }
-        #placeholder {
-            font-size: 2em;
-            color: #555;
-        }
+        body { margin: 0; background-color: #000; color: white; overflow: hidden; font-family: sans-serif; }
+        #projection-container { position: relative; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        #projection-container img { max-width: 95%; max-height: 95%; position: absolute; opacity: 0; transform: scale(1.05); transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out; }
+        #projection-container img.visible { opacity: 1; transform: scale(1); }
+        #placeholder { font-size: 2em; color: #555; }
     </style>
 </head>
 <body>
@@ -46,26 +20,16 @@
     <script>
         const container = document.getElementById('projection-container');
         const placeholder = document.getElementById('placeholder');
-        // IMPORTANTE: Reemplaza esto con la URL real de tu sitio en Netlify
         const NETLIFY_URL = 'https://playful-parfait-6bfab1.netlify.app';
 
         let currentIndex = -1;
         let photos = [];
+        let knownPhotoIds = new Set(); // Para llevar registro de las fotos que ya conocemos
+        let slideshowInterval; // Variable para controlar el intervalo del carrusel
 
-        async function fetchApprovedPhotos() {
-            try {
-                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-approved-photos`);
-                if (!response.ok) return; // Si hay un error, no hacemos nada
-                const newPhotos = await response.json();
-                photos = newPhotos; // Actualizamos nuestra lista de fotos
-                placeholder.style.display = photos.length > 0 ? 'none' : 'block';
-            } catch (error) {
-                console.error("Error cargando fotos:", error);
-            }
-        }
-
-        function showNextPhoto() {
-            if (photos.length === 0) return;
+        // Función para mostrar una foto específica
+        function displayPhoto(photo) {
+            if (!photo) return;
 
             // Oculta la imagen anterior si existe
             const currentImage = container.querySelector('img.visible');
@@ -73,32 +37,67 @@
                 currentImage.classList.remove('visible');
             }
 
-            // Calcula el índice de la siguiente foto
-            currentIndex = (currentIndex + 1) % photos.length;
-            const nextPhoto = photos[currentIndex];
-
-            // Si la imagen ya existe en el DOM, la reusamos. Si no, la creamos.
-            let nextImage = document.getElementById(nextPhoto.asset_id);
-            if (!nextImage) {
-                nextImage = document.createElement('img');
-                nextImage.id = nextPhoto.asset_id;
-                nextImage.src = nextPhoto.secure_url;
-                container.appendChild(nextImage);
+            // Elimina imágenes viejas del DOM para no acumularlas
+            const allImages = container.querySelectorAll('img');
+            if (allImages.length > 10) { // Mantenemos un máximo de 10 imágenes en el DOM
+                allImages[0].remove();
             }
             
-            // Hacemos visible la siguiente imagen después de que la anterior se haya ocultado
+            // Creamos y mostramos la nueva imagen
+            const nextImage = document.createElement('img');
+            nextImage.id = photo.asset_id;
+            nextImage.src = photo.secure_url;
+            container.appendChild(nextImage);
+            
             setTimeout(() => {
                 nextImage.classList.add('visible');
-            }, 500); // Pequeña pausa para una transición más suave
+            }, 500);
+        }
+        
+        // El bucle normal del carrusel
+        function showNextPhotoInLoop() {
+            if (photos.length === 0) return;
+            currentIndex = (currentIndex + 1) % photos.length;
+            displayPhoto(photos[currentIndex]);
+        }
+
+        async function fetchApprovedPhotos() {
+            try {
+                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-approved-photos`);
+                if (!response.ok) return;
+                const newPhotos = await response.json();
+
+                // Detectamos si hay una foto nueva que no conozcamos
+                const newPhoto = newPhotos.find(p => !knownPhotoIds.has(p.asset_id));
+
+                // Actualizamos la lista de fotos y los IDs conocidos
+                photos = newPhotos;
+                photos.forEach(p => knownPhotoIds.add(p.asset_id));
+                placeholder.style.display = photos.length > 0 ? 'none' : 'block';
+
+                if (newPhoto) {
+                    console.log("¡Nueva foto detectada! Mostrando ahora:", newPhoto.public_id);
+                    // Si hay una foto nueva, la mostramos inmediatamente
+                    displayPhoto(newPhoto);
+                    // Y reiniciamos el intervalo para que la siguiente foto aparezca después del tiempo normal
+                    clearInterval(slideshowInterval);
+                    slideshowInterval = setInterval(showNextPhotoInLoop, 7000);
+                }
+
+            } catch (error) {
+                console.error("Error cargando fotos:", error);
+            }
         }
 
         // --- INICIO DEL PROGRAMA ---
         async function start() {
-            await fetchApprovedPhotos(); // Carga las fotos al iniciar
-            showNextPhoto(); // Muestra la primera foto
+            await fetchApprovedPhotos(); // Carga inicial
+            if (photos.length > 0) {
+                showNextPhotoInLoop(); // Muestra la primera foto
+            }
 
-            setInterval(showNextPhoto, 7000); // Cambia de foto cada 7 segundos
-            setInterval(fetchApprovedPhotos, 20000); // Busca fotos nuevas cada 20 segundos
+            slideshowInterval = setInterval(showNextPhotoInLoop, 7000); // Bucle normal cada 7 segundos
+            setInterval(fetchApprovedPhotos, 10000); // Busca fotos nuevas cada 10 segundos
         }
 
         start();
