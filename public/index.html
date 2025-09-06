@@ -23,7 +23,9 @@
         const canvas = document.getElementById('canvas');
         const snapButton = document.getElementById('snap');
         const statusEl = document.getElementById('status');
+        const functionUrl = '/.netlify/functions/upload';
 
+        // Pide acceso a la cámara del celular
         navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
             .then(stream => video.srcObject = stream)
             .catch(err => {
@@ -31,30 +33,48 @@
                 statusEl.textContent = "No se pudo acceder a la cámara.";
             });
 
+        // Al hacer clic en el botón...
         snapButton.addEventListener('click', () => {
-            statusEl.textContent = "Enviando...";
+            statusEl.textContent = "Procesando...";
+            
+            // Dibuja el frame actual del video en el canvas
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
 
+            // Convierte la imagen del canvas a un archivo Blob
             canvas.toBlob(blob => {
-                const formData = new FormData();
-                formData.append('photo', blob, 'foto.jpg');
+                if (!blob) {
+                    statusEl.textContent = "Error al capturar la imagen.";
+                    return;
+                }
                 
-                // --- LÍNEA MODIFICADA ---
-                // Ahora apunta a nuestra función de Netlify
-                fetch('/.netlify/functions/upload', { method: 'POST', body: formData })
-                    .then(res => res.json())
-                    .then(data => {
-                        console.log(data.message);
-                        statusEl.textContent = "¡Gracias! Tu foto fue enviada 🎉";
-                        setTimeout(() => statusEl.textContent = '', 3000);
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        statusEl.textContent = "Error al enviar. Intenta de nuevo.";
-                    });
-            }, 'image/jpeg');
+                statusEl.textContent = "Enviando...";
+                const formData = new FormData();
+                formData.append('photo', blob, 'foto_celular.jpg');
+
+                // Envía el formulario con el archivo al servidor
+                fetch(functionUrl, {
+                    method: 'POST',
+                    body: formData // No establecemos 'Content-Type', el navegador lo hace automáticamente por nosotros
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        // Si la respuesta no es 2xx, lanzamos un error para que lo capture el .catch
+                        throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data.message);
+                    statusEl.textContent = "¡Gracias! Tu foto fue enviada 🎉";
+                    setTimeout(() => statusEl.textContent = '', 4000);
+                })
+                .catch(err => {
+                    console.error('Error al subir la foto:', err);
+                    statusEl.textContent = "Hubo un error al enviar. Intenta de nuevo.";
+                });
+            }, 'image/jpeg', 0.9); // Calidad de la imagen al 90%
         });
     </script>
 </body>
