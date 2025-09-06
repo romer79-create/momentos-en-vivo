@@ -309,8 +309,17 @@
                 
                 // Agregar el mensaje si existe
                 const message = messageInput.value.trim();
+                console.log('--- DEBUG Frontend: Mensaje a enviar:', message);
                 if (message) {
                     formData.append('message', message);
+                    console.log('--- DEBUG Frontend: Mensaje agregado al FormData');
+                } else {
+                    console.log('--- DEBUG Frontend: No hay mensaje para enviar');
+                }
+
+                // Debug: mostrar contenido del FormData
+                for (let [key, value] of formData.entries()) {
+                    console.log('--- DEBUG Frontend FormData:', key, value);
                 }
 
                 fetch(functionUrl, { method: 'POST', body: formData })

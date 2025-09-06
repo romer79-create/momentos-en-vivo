@@ -25,22 +25,44 @@ exports.handler = async (event) => {
 
   try {
     const result = await multipart.parse(event);
+    console.log('--- DEBUG: Estructura completa del resultado:', JSON.stringify(result, null, 2));
+    
     const file = result.files[0];
 
     if (!file) { throw new Error('No se recibió ningún archivo.'); }
     
-    // Obtener el mensaje si existe - corregir la extracción del FormData
-    const message = result.message || (result.fields && result.fields.message) || '';
+    // Múltiples formas de extraer el mensaje del FormData
+    let message = '';
     
-    console.log('--- DEBUG: Mensaje recibido:', message);
-    console.log('--- DEBUG: Resultado completo:', JSON.stringify(result, null, 2));
+    // Opción 1: Directamente del resultado
+    if (result.message) {
+      message = result.message;
+      console.log('--- DEBUG: Mensaje encontrado en result.message:', message);
+    }
+    // Opción 2: En el array de fields
+    else if (result.fields && result.fields.message) {
+      message = result.fields.message;
+      console.log('--- DEBUG: Mensaje encontrado en result.fields.message:', message);
+    }
+    // Opción 3: Buscar en todos los campos
+    else if (result.fields) {
+      for (const [key, value] of Object.entries(result.fields)) {
+        console.log('--- DEBUG: Campo encontrado:', key, '=', value);
+        if (key === 'message') {
+          message = value;
+          break;
+        }
+      }
+    }
+    
+    console.log('--- DEBUG: Mensaje final extraído:', message);
     
     const fileStr = `data:${file.contentType};base64,${file.content.toString('base64')}`;
     
-    // Configurar opciones de subida con contexto del mensaje
+    // Configurar opciones de subida con tags para el mensaje
     const uploadOptions = { 
       folder: 'momentos-en-vivo',
-      context: message ? `message=${encodeURIComponent(message)}` : undefined
+      tags: message ? [`msg:${encodeURIComponent(message)}`] : []
     };
     
     const uploadResult = await cloudinary.uploader.upload(fileStr, uploadOptions);

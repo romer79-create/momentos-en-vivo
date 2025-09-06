@@ -169,19 +169,16 @@
                 allSlides[0].remove();
             }
             
-            // Extraer mensaje del contexto - múltiples formas de acceso
+            // Extraer mensaje de los tags de Cloudinary
             let message = '';
-            if (photo.context) {
-                if (typeof photo.context === 'string') {
-                    // Si el contexto es string, extraer el mensaje
-                    const match = photo.context.match(/message=([^&]*)/);
-                    message = match ? decodeURIComponent(match[1]) : '';
-                } else if (photo.context.message) {
-                    message = photo.context.message;
+            if (photo.tags && Array.isArray(photo.tags)) {
+                const messageTag = photo.tags.find(tag => tag.startsWith('msg:'));
+                if (messageTag) {
+                    message = decodeURIComponent(messageTag.substring(4)); // Remover 'msg:' del inicio
                 }
             }
             
-            console.log('--- DEBUG Proyección: Foto:', photo.public_id, 'Contexto:', photo.context, 'Mensaje extraído:', message);
+            console.log('--- DEBUG Proyección: Foto:', photo.public_id, 'Tags:', photo.tags, 'Mensaje extraído:', message);
             
             // Crear nuevo slide
             const slide = document.createElement('div');
