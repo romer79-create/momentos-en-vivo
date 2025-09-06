@@ -13,14 +13,26 @@ const headers = {
 
 exports.handler = async (event) => {
   try {
-    const result = await cloudinary.search
-      .expression('folder=momentos-en-vivo AND NOT tags=moderated')
-      .sort_by('created_at', 'desc')
-      .max_results(30)
-      .execute();
-    return { statusCode: 200, headers, body: JSON.stringify(result.resources) };
+    // NUEVO MÉTODO: Pide los recursos directamente de la carpeta
+    const result = await cloudinary.api.resources({
+      type: 'upload',
+      prefix: 'momentos-en-vivo', // La carpeta que queremos
+      max_results: 50,
+      tags: true // Le pedimos que nos incluya las etiquetas (tags)
+    });
+
+    // FILTRO MANUAL: Filtramos las fotos que NO tengan la etiqueta "moderated"
+    const pendingPhotos = result.resources.filter(photo => {
+      return !photo.tags.includes('moderated');
+    });
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify(pendingPhotos),
+    };
   } catch (error) {
-    console.error(error);
+    console.error("Error al obtener fotos:", error);
     return { statusCode: 500, headers, body: JSON.stringify(error) };
   }
 };
