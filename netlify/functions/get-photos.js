@@ -13,18 +13,25 @@ const headers = {
 
 exports.handler = async (event) => {
   try {
-    // NUEVO MÉTODO: Pide los recursos directamente de la carpeta
+    console.log("--- 1. Iniciando get-photos ---");
+
     const result = await cloudinary.api.resources({
       type: 'upload',
-      prefix: 'momentos-en-vivo', // La carpeta que queremos
+      prefix: 'momentos-en-vivo',
       max_results: 50,
-      tags: true // Le pedimos que nos incluya las etiquetas (tags)
+      tags: true
     });
 
-    // FILTRO MANUAL: Filtramos las fotos que NO tengan la etiqueta "moderated"
+    console.log("--- 2. Respuesta cruda de Cloudinary:", JSON.stringify(result.resources, null, 2));
+
     const pendingPhotos = result.resources.filter(photo => {
-      return !photo.tags.includes('moderated');
+      // Una foto está pendiente si NO tiene la etiqueta 'moderated'
+      const isModerated = photo.tags && photo.tags.includes('moderated');
+      console.log(`--- 3. Verificando foto ${photo.public_id}: ¿Tiene 'moderated'?`, isModerated);
+      return !isModerated;
     });
+
+    console.log("--- 4. Fotos después del filtro:", JSON.stringify(pendingPhotos, null, 2));
 
     return {
       statusCode: 200,
@@ -32,7 +39,7 @@ exports.handler = async (event) => {
       body: JSON.stringify(pendingPhotos),
     };
   } catch (error) {
-    console.error("Error al obtener fotos:", error);
+    console.error("--- 5. ERROR ATRAPADO EN get-photos ---:", error);
     return { statusCode: 500, headers, body: JSON.stringify(error) };
   }
 };
