@@ -26,7 +26,7 @@
     <script>
         const pendingContainer = document.getElementById('pending-container');
         // IMPORTANTE: Reemplaza esto con la URL real de tu sitio en Netlify
-        const NETLIFY_URL = 'https://68bb887586969bff15262a9a--playful-parfait-6bfab1.netlify.app/';
+        const NETLIFY_URL = 'https://68bb887586969bff15262a9a--playful-parfait-6bfab1.netlify.app';
 
         async function handleAction(action, public_id, cardElement) {
             const response = await fetch(`${NETLIFY_URL}/.netlify/functions/${action}-photo`, {
