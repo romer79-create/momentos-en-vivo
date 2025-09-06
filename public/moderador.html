@@ -172,8 +172,20 @@
             }
 
             photos.forEach(photo => {
-                // Extraer el mensaje del contexto de Cloudinary
-                const message = photo.context && photo.context.message ? photo.context.message : '';
+                // Extraer el mensaje del contexto de Cloudinary - múltiples formas de acceso
+                let message = '';
+                if (photo.context) {
+                    if (typeof photo.context === 'string') {
+                        // Si el contexto es string, extraer el mensaje
+                        const match = photo.context.match(/message=([^&]*)/);
+                        message = match ? decodeURIComponent(match[1]) : '';
+                    } else if (photo.context.message) {
+                        message = photo.context.message;
+                    }
+                }
+                
+                console.log('--- DEBUG Moderador: Foto:', photo.public_id, 'Contexto:', photo.context, 'Mensaje extraído:', message);
+                
                 const createdDate = new Date(photo.created_at).toLocaleString('es-ES');
                 
                 const card = document.createElement('div');

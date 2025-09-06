@@ -29,15 +29,18 @@ exports.handler = async (event) => {
 
     if (!file) { throw new Error('No se recibió ningún archivo.'); }
     
-    // Obtener el mensaje si existe
-    const message = result.message || '';
+    // Obtener el mensaje si existe - corregir la extracción del FormData
+    const message = result.message || (result.fields && result.fields.message) || '';
+    
+    console.log('--- DEBUG: Mensaje recibido:', message);
+    console.log('--- DEBUG: Resultado completo:', JSON.stringify(result, null, 2));
     
     const fileStr = `data:${file.contentType};base64,${file.content.toString('base64')}`;
     
     // Configurar opciones de subida con contexto del mensaje
     const uploadOptions = { 
       folder: 'momentos-en-vivo',
-      context: message ? `message=${message}` : undefined
+      context: message ? `message=${encodeURIComponent(message)}` : undefined
     };
     
     const uploadResult = await cloudinary.uploader.upload(fileStr, uploadOptions);
