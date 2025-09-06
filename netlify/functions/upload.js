@@ -1,8 +1,6 @@
 const multipart = require('lambda-multipart-parser');
 const cloudinary = require('cloudinary').v2;
 
-// --- CONFIGURACIÓN DE CLOUDINARY ---
-// Reemplaza estos valores con tus credenciales reales
 cloudinary.config({
   cloud_name: 'de537y5wb',
   api_key: '465853636538439',
@@ -11,28 +9,30 @@ cloudinary.config({
 });
 
 exports.handler = async (event) => {
+  console.log('--- Función de subida iniciada ---'); // LOG 1
+
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
   try {
-    // 1. Parseamos la imagen que viene en la petición con el nuevo paquete
     const result = await multipart.parse(event);
     const file = result.files[0];
 
     if (!file) {
       throw new Error('No se recibió ningún archivo.');
     }
-
-    // 2. Preparamos la imagen para subirla a Cloudinary desde la memoria
+    
+    console.log('Archivo recibido y procesado, listo para subir.'); // LOG 2
+    
     const fileStr = `data:${file.contentType};base64,${file.content.toString('base64')}`;
 
-    // 3. Subimos la imagen a Cloudinary
     const uploadResult = await cloudinary.uploader.upload(fileStr, {
-      folder: 'momentos-en-vivo', // Opcional: crea una carpeta en Cloudinary
+      folder: 'momentos-en-vivo',
     });
 
-    // 4. Devolvemos una respuesta exitosa
+    console.log('Respuesta de Cloudinary:', uploadResult); // LOG 3: El más importante
+
     return {
       statusCode: 200,
       body: JSON.stringify({
@@ -41,7 +41,7 @@ exports.handler = async (event) => {
       }),
     };
   } catch (error) {
-    console.error('Error en la subida:', error);
+    console.error('--- ERROR ATRAPADO ---:', error); // LOG 4
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Hubo un problema al subir la imagen.' }),
