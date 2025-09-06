@@ -7,7 +7,9 @@
     <style>
         body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #333; color: white; text-align: center; }
         video { width: 90%; max-width: 400px; border-radius: 10px; border: 3px solid white; }
-        button { font-size: 1.2rem; padding: 15px 30px; margin-top: 20px; cursor: pointer; border-radius: 50px; border: none; background-color: #007bff; color: white; font-weight: bold; }
+        .button-group { margin-top: 20px; display: flex; gap: 15px; }
+        button { font-size: 1.2rem; padding: 15px 30px; cursor: pointer; border-radius: 50px; border: none; background-color: #007bff; color: white; font-weight: bold; }
+        #switch-camera { background-color: #6c757d; } /* Estilo diferente para el botón de cámara */
         #status { margin-top: 15px; font-size: 1rem; height: 20px; }
     </style>
 </head>
@@ -15,54 +17,63 @@
     <h1>¡Captura tu Momento!</h1>
     <video id="video" autoplay playsinline></video>
     <canvas id="canvas" style="display:none;"></canvas>
-    <button id="snap">📸 Enviar Foto</button>
+    <div class="button-group">
+        <button id="snap">📸 Enviar Foto</button>
+        <button id="switch-camera">🔄 Cambiar Cámara</button>
+    </div>
     <p id="status"></p>
 
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const snapButton = document.getElementById('snap');
+        const switchCameraButton = document.getElementById('switch-camera');
         const statusEl = document.getElementById('status');
         const functionUrl = '/.netlify/functions/upload';
 
-        // Pide acceso a la cámara del celular
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-            .then(stream => video.srcObject = stream)
-            .catch(err => {
+        let currentStream; // Para guardar el stream de la cámara actual
+        let currentFacingMode = 'user'; // 'user' para frontal, 'environment' para trasera
+
+        // Función para iniciar la cámara
+        async function startCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop()); // Detener cámara anterior
+            }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: currentFacingMode } 
+                });
+                video.srcObject = stream;
+                currentStream = stream;
+                statusEl.textContent = "";
+            } catch (err) {
                 console.error("Error de cámara:", err);
                 statusEl.textContent = "No se pudo acceder a la cámara.";
-            });
+            }
+        }
 
-        // Al hacer clic en el botón...
+        // Evento para cambiar de cámara
+        switchCameraButton.addEventListener('click', () => {
+            currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+            startCamera();
+        });
+
+        // Evento para enviar foto (sin cambios, solo el inicio de la cámara)
         snapButton.addEventListener('click', () => {
             statusEl.textContent = "Procesando...";
-            
-            // Dibuja el frame actual del video en el canvas
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            // Convierte la imagen del canvas a un archivo Blob
             canvas.toBlob(blob => {
-                if (!blob) {
-                    statusEl.textContent = "Error al capturar la imagen.";
-                    return;
-                }
-                
+                if (!blob) { statusEl.textContent = "Error al capturar la imagen."; return; }
                 statusEl.textContent = "Enviando...";
                 const formData = new FormData();
                 formData.append('photo', blob, 'foto_celular.jpg');
 
-                // Envía el formulario con el archivo al servidor
-                fetch(functionUrl, {
-                    method: 'POST',
-                    body: formData // No establecemos 'Content-Type', el navegador lo hace automáticamente por nosotros
-                })
+                fetch(functionUrl, { method: 'POST', body: formData })
                 .then(response => {
-                    if (!response.ok) {
-                        // Si la respuesta no es 2xx, lanzamos un error para que lo capture el .catch
-                        throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
-                    }
+                    if (!response.ok) { throw new Error(`Error del servidor: ${response.status} ${response.statusText}`); }
                     return response.json();
                 })
                 .then(data => {
@@ -74,8 +85,11 @@
                     console.error('Error al subir la foto:', err);
                     statusEl.textContent = "Hubo un error al enviar. Intenta de nuevo.";
                 });
-            }, 'image/jpeg', 0.9); // Calidad de la imagen al 90%
+            }, 'image/jpeg', 0.9);
         });
+
+        // Iniciar la cámara al cargar la página
+        startCamera();
     </script>
 </body>
 </html>
