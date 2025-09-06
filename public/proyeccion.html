@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Momentos en Vivo - Proyección</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #000;
+            color: white;
+            overflow: hidden; /* Evita barras de scroll */
+        }
+        #projection-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #projection-container img {
+            max-width: 95%;
+            max-height: 95%;
+            position: absolute;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out; /* Transición suave de fundido */
+        }
+        #projection-container img.visible {
+            opacity: 1; /* Clase para hacer la imagen visible */
+        }
+    </style>
+</head>
+<body>
+    <div id="projection-container">
+        </div>
+
+    <script>
+        const container = document.getElementById('projection-container');
+        let currentIndex = 0;
+        let photos = [];
+
+        async function fetchApprovedPhotos() {
+            const response = await fetch('/get-approved-photos');
+            photos = await response.json();
+        }
+
+        function showNextPhoto() {
+            if (photos.length === 0) return; // No hacer nada si no hay fotos
+
+            const currentImage = container.querySelector('img');
+            if (currentImage) {
+                currentImage.classList.remove('visible'); // Oculta la imagen actual
+            }
+            
+            // Espera a que termine la transición de salida antes de cambiar la imagen
+            setTimeout(() => {
+                currentIndex = (currentIndex + 1) % photos.length;
+                const nextPhotoFile = photos[currentIndex];
+                container.innerHTML = `<img src="/approved/${nextPhotoFile}" class="visible">`;
+            }, 1500); // 1.5s, igual a la duración de la transición CSS
+        }
+
+        async function startSlideshow() {
+            await fetchApprovedPhotos();
+            if (photos.length > 0) {
+                 // Muestra la primera foto inmediatamente
+                container.innerHTML = `<img src="/approved/${photos[0]}" class="visible">`;
+                // Inicia el ciclo para las siguientes
+                setInterval(showNextPhoto, 5000); // Cambia de foto cada 5 segundos
+            }
+            
+            // Revisa si hay fotos nuevas cada 15 segundos
+            setInterval(fetchApprovedPhotos, 15000);
+        }
+
+        startSlideshow();
+    </script>
+</body>
+</html>

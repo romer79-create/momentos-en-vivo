@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Moderación</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+        h1 { color: #333; }
+        .container { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .photo-card { background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; }
+        .photo-card img { width: 100%; height: auto; display: block; }
+        .actions { display: flex; justify-content: space-around; padding: 10px; }
+        .actions button {
+            border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;
+            font-weight: bold; width: 45%;
+        }
+        .approve-btn { background-color: #28a745; color: white; }
+        .reject-btn { background-color: #dc3545; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Panel de Moderación - Fotos Pendientes</h1>
+    <div id="pending-container" class="container">
+        </div>
+
+    <script>
+        const pendingContainer = document.getElementById('pending-container');
+
+        async function loadPendingPhotos() {
+            // 1. Pide la lista de fotos al servidor
+            const response = await fetch('/get-photos');
+            const photoFiles = await response.json();
+
+            // Limpiamos el contenedor para no duplicar fotos
+            pendingContainer.innerHTML = '';
+
+            // 2. Por cada nombre de archivo, crea una tarjeta con la foto y los botones
+            photoFiles.forEach(file => {
+                const card = document.createElement('div');
+                card.className = 'photo-card';
+
+                card.innerHTML = `
+                    <img src="/uploads/${file}" alt="Foto pendiente">
+                    <div class="actions">
+                        <button class="approve-btn">Aprobar</button>
+                        <button class="reject-btn">Rechazar</button>
+                    </div>
+                `;
+                pendingContainer.appendChild(card);
+            });
+        }
+
+        // Carga las fotos cuando la página se abre
+        loadPendingPhotos();
+
+        // Opcional: Recarga las fotos cada 5 segundos para ver si hay nuevas
+        setInterval(loadPendingPhotos, 5000);
+    </script>
+</body>
+</html>
