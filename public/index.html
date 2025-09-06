@@ -294,8 +294,38 @@
             startCamera();
         });
 
+        // Verificar límite de fotos por usuario
+        function checkPhotoLimit() {
+            const photoCount = parseInt(localStorage.getItem('photoCount') || '0');
+            return photoCount < 2;
+        }
+
+        function incrementPhotoCount() {
+            const photoCount = parseInt(localStorage.getItem('photoCount') || '0');
+            localStorage.setItem('photoCount', (photoCount + 1).toString());
+            updatePhotoCounter();
+        }
+
+        function updatePhotoCounter() {
+            const photoCount = parseInt(localStorage.getItem('photoCount') || '0');
+            const remaining = 2 - photoCount;
+            if (remaining <= 0) {
+                snapButton.disabled = true;
+                snapButton.textContent = "📸 Límite alcanzado";
+                snapButton.style.background = "linear-gradient(135deg, #6c757d, #495057)";
+                statusEl.textContent = `Has alcanzado el límite de 2 fotos por evento`;
+            } else {
+                statusEl.textContent = `Te quedan ${remaining} foto${remaining === 1 ? '' : 's'}`;
+            }
+        }
+
         // Evento para enviar foto con mensaje
         snapButton.addEventListener('click', () => {
+            if (!checkPhotoLimit()) {
+                statusEl.textContent = "Has alcanzado el límite de 2 fotos por evento";
+                return;
+            }
+
             statusEl.textContent = "Procesando...";
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
@@ -329,22 +359,25 @@
                 })
                 .then(data => {
                     console.log(data.message);
+                    incrementPhotoCount(); // Incrementar contador después del envío exitoso
                     statusEl.textContent = "¡Gracias! Tu foto fue enviada 🎉";
                     // Limpiar el mensaje después del envío exitoso
                     messageInput.value = '';
                     charCount.textContent = '0';
                     charCount.style.color = 'rgba(255,255,255,0.8)';
-                    setTimeout(() => statusEl.textContent = '', 4000);
+                    setTimeout(() => updatePhotoCounter(), 4000);
                 })
                 .catch(err => {
                     console.error('Error al subir la foto:', err);
                     statusEl.textContent = "Hubo un error al enviar. Intenta de nuevo.";
                 });
-            }, 'image/jpeg', 0.9);
+            }, 'image/jpeg', 0.7); // Reducir calidad para comprimir más
         });
 
         // Iniciar la cámara al cargar la página
         startCamera();
+        // Mostrar contador inicial
+        updatePhotoCounter();
     </script>
 </body>
 </html>
