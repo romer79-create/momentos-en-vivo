@@ -10,38 +10,14 @@
         #projection-container img { max-width: 95%; max-height: 95%; position: absolute; opacity: 0; transform: scale(1.05); transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out; }
         #projection-container img.visible { opacity: 1; transform: scale(1); }
         #placeholder { font-size: 2em; color: #555; }
-
-        /* Estilos para el QR */
-        #qr-container {
-            position: absolute;
-            bottom: 20px; /* Abajo */
-            right: 20px; /* A la derecha */
-            background-color: rgba(255, 255, 255, 0.9); /* Fondo blanco semitransparente */
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 100; /* Para que esté por encima de las fotos */
-        }
-        #qr-container img {
-            max-width: 150px; /* Tamaño del QR */
-            height: auto;
-            border: 2px solid #333;
-        }
-        #qr-container p {
-            margin-top: 5px;
-            font-size: 0.8em;
-            color: #333;
-            text-align: center;
-        }
+        #qr-container { position: absolute; bottom: 20px; right: 20px; background-color: rgba(255, 255, 255, 0.9); padding: 10px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; align-items: center; z-index: 100; }
+        #qr-container img { width: 150px; height: 150px; border: 2px solid #333; }
+        #qr-container p { margin: 5px 0 0; font-size: 0.8em; color: #333; text-align: center; }
     </style>
 </head>
 <body>
     <div id="projection-container">
         <div id="placeholder">Esperando fotos aprobadas...</div>
-
         <div id="qr-container">
             <img id="qr-code-img" alt="Código QR para subir fotos">
             <p>¡Escanea para enviar tu foto!</p>
@@ -52,23 +28,70 @@
         const container = document.getElementById('projection-container');
         const placeholder = document.getElementById('placeholder');
         const qrCodeImg = document.getElementById('qr-code-img');
-        const NETLIFY_URL = 'https://playful-parfait-6bfab1.netlify.app'; // CONFIRMA TU URL FINAL AQUÍ
+        const NETLIFY_URL = 'https://playful-parfait-6bfab1.netlify.app';
 
-        // Genera el QR. Usamos un servicio externo para generar la imagen del QR.
-        // Reemplaza YOUR_NETLIFY_URL_HERE con tu URL real.
+        // Genera el QR usando la URL de Netlify
         const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(NETLIFY_URL)}`;
         qrCodeImg.src = qrApiUrl;
-
 
         let currentIndex = -1;
         let photos = [];
         let knownPhotoIds = new Set();
         let slideshowInterval;
 
-        function displayPhoto(photo) { /* ... (esta función es la misma) ... */ }
-        function showNextPhotoInLoop() { /* ... (esta función es la misma) ... */ }
-        async function fetchApprovedPhotos() { /* ... (esta función es la misma) ... */ }
-        async function start() { /* ... (esta función es la misma) ... */ }
+        function displayPhoto(photo) {
+            if (!photo) return;
+            const currentImage = container.querySelector('img.visible');
+            if (currentImage) {
+                currentImage.classList.remove('visible');
+            }
+            const allImages = container.querySelectorAll('img');
+            if (allImages.length > 10) {
+                allImages[0].remove();
+            }
+            const nextImage = document.createElement('img');
+            nextImage.id = photo.asset_id;
+            nextImage.src = photo.secure_url;
+            container.appendChild(nextImage);
+            setTimeout(() => {
+                nextImage.classList.add('visible');
+            }, 500);
+        }
+        
+        function showNextPhotoInLoop() {
+            if (photos.length === 0) return;
+            currentIndex = (currentIndex + 1) % photos.length;
+            displayPhoto(photos[currentIndex]);
+        }
+
+        async function fetchApprovedPhotos() {
+            try {
+                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-approved-photos`);
+                if (!response.ok) return;
+                const newPhotos = await response.json();
+                const newPhoto = newPhotos.find(p => !knownPhotoIds.has(p.asset_id));
+                photos = newPhotos;
+                photos.forEach(p => knownPhotoIds.add(p.asset_id));
+                placeholder.style.display = photos.length > 0 ? 'none' : 'block';
+                if (newPhoto) {
+                    console.log("¡Nueva foto detectada! Mostrando ahora:", newPhoto.public_id);
+                    displayPhoto(newPhoto);
+                    clearInterval(slideshowInterval);
+                    slideshowInterval = setInterval(showNextPhotoInLoop, 7000);
+                }
+            } catch (error) {
+                console.error("Error cargando fotos:", error);
+            }
+        }
+
+        async function start() {
+            await fetchApprovedPhotos();
+            if (photos.length > 0) {
+                showNextPhotoInLoop();
+            }
+            slideshowInterval = setInterval(showNextPhotoInLoop, 7000);
+            setInterval(fetchApprovedPhotos, 10000);
+        }
 
         start();
     </script>
