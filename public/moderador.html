@@ -21,41 +21,51 @@
 </head>
 <body>
     <h1>Panel de Moderación - Fotos Pendientes</h1>
-    <div id="pending-container" class="container">
-        </div>
+    <div id="pending-container" class="container"></div>
 
     <script>
         const pendingContainer = document.getElementById('pending-container');
+        // IMPORTANTE: Reemplaza esto con la URL real de tu sitio en Netlify
+        const NETLIFY_URL = 'https://68bb887586969bff15262a9a--playful-parfait-6bfab1.netlify.app/';
+
+        async function handleAction(action, public_id, cardElement) {
+            const response = await fetch(`${NETLIFY_URL}/.netlify/functions/${action}-photo`, {
+                method: 'POST',
+                body: JSON.stringify({ public_id: public_id })
+            });
+            if (response.ok) {
+                cardElement.remove();
+            } else {
+                alert(`Error al procesar la foto.`);
+            }
+        }
 
         async function loadPendingPhotos() {
-            // 1. Pide la lista de fotos al servidor
-            const response = await fetch('/get-photos');
-            const photoFiles = await response.json();
+            const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-photos`);
+            const photos = await response.json();
+            
+            pendingContainer.innerHTML = ''; // Limpia el contenedor
 
-            // Limpiamos el contenedor para no duplicar fotos
-            pendingContainer.innerHTML = '';
-
-            // 2. Por cada nombre de archivo, crea una tarjeta con la foto y los botones
-            photoFiles.forEach(file => {
+            photos.forEach(photo => {
                 const card = document.createElement('div');
                 card.className = 'photo-card';
-
                 card.innerHTML = `
-                    <img src="/uploads/${file}" alt="Foto pendiente">
+                    <img src="${photo.secure_url}" alt="Foto pendiente">
                     <div class="actions">
                         <button class="approve-btn">Aprobar</button>
                         <button class="reject-btn">Rechazar</button>
                     </div>
                 `;
+                
+                card.querySelector('.approve-btn').addEventListener('click', () => handleAction('approve', photo.public_id, card));
+                card.querySelector('.reject-btn').addEventListener('click', () => handleAction('reject', photo.public_id, card));
+
                 pendingContainer.appendChild(card);
             });
         }
 
-        // Carga las fotos cuando la página se abre
         loadPendingPhotos();
-
-        // Opcional: Recarga las fotos cada 5 segundos para ver si hay nuevas
-        setInterval(loadPendingPhotos, 5000);
+        setInterval(loadPendingPhotos, 10000); // Revisa si hay fotos nuevas cada 10 segundos
     </script>
 </body>
 </html>
