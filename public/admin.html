@@ -262,121 +262,14 @@
             border: 1px solid #3498db;
         }
         
-        .login-container {
-            background: rgba(255,255,255,0.95);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            text-align: center;
-            max-width: 400px;
-            width: 100%;
-            border: 2px solid rgba(52, 152, 219, 0.3);
-        }
-
-        .login-title {
-            color: #2c3e50;
-            font-size: 2rem;
-            margin-bottom: 30px;
-            font-weight: 700;
-        }
-
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .login-input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid rgba(52, 152, 219, 0.3);
-            border-radius: 10px;
-            background: rgba(255,255,255,0.9);
-            color: #2c3e50;
-            font-family: 'Poppins', sans-serif;
-            font-size: 1rem;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-        }
-
-        .login-input:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
-        }
-
-        .login-btn {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.4);
-        }
-
-        .login-btn:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .login-error {
-            color: #e74c3c;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            font-weight: 500;
-        }
-
-        .logout-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .logout-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Formulario de Login -->
-        <div id="login-screen" class="login-container" style="display: none;">
-            <h1 class="login-title">🔐 Panel de Administración</h1>
-            <form id="login-form" class="login-form">
-                <input type="text" id="username" class="login-input" placeholder="Usuario" required>
-                <input type="password" id="password" class="login-input" placeholder="Contraseña" required>
-                <button type="submit" class="login-btn">🚀 Iniciar Sesión</button>
-            </form>
-            <div id="login-error" class="login-error" style="display: none;"></div>
+        <div class="header">
+            <h1>🎯 Panel de Administración Multi-Tenant</h1>
+            <div class="subtitle">Gestiona eventos y genera QR codes automáticamente</div>
         </div>
-
-        <!-- Panel Principal de Administración -->
-        <div id="admin-panel" style="display: none;">
-            <div class="header">
-                <h1>🎯 Panel de Administración Multi-Tenant</h1>
-                <div class="subtitle">Gestiona eventos y genera QR codes automáticamente</div>
-                <button class="logout-btn" onclick="logout()">🚪 Cerrar Sesión</button>
-            </div>
         
         <div class="main-content">
             <!-- Sección: Crear Evento -->
@@ -496,72 +389,6 @@
         const statusEl = document.getElementById('status');
         let events = JSON.parse(localStorage.getItem('events') || '[]');
 
-        // Sistema de Autenticación
-        const ADMIN_CREDENTIALS = {
-            username: 'admin',
-            password: 'admin123'
-        };
-
-        // Cerrar sesión
-        function logout() {
-            localStorage.removeItem('admin_session');
-            showLoginScreen();
-        }
-
-        // Mostrar pantalla de login
-        function showLoginScreen() {
-            document.getElementById('login-screen').style.display = 'block';
-            document.getElementById('admin-panel').style.display = 'none';
-        }
-
-        // Mostrar panel de administración
-        function showAdminPanel() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('admin-panel').style.display = 'block';
-        }
-
-        // Verificar si el usuario está logueado
-        function isLoggedIn() {
-            const session = localStorage.getItem('admin_session');
-            if (!session) return false;
-
-            const sessionData = JSON.parse(session);
-            const now = new Date().getTime();
-
-            // Verificar si la sesión expiró (24 horas)
-            if (now > sessionData.expiresAt) {
-                logout();
-                return false;
-            }
-
-            return sessionData.loggedIn === true;
-        }
-
-        // Iniciar sesión
-        function login(username, password) {
-            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-                const session = {
-                    loggedIn: true,
-                    loginTime: new Date().getTime(),
-                    expiresAt: new Date().getTime() + (24 * 60 * 60 * 1000), // 24 horas
-                    username: username
-                };
-                localStorage.setItem('admin_session', JSON.stringify(session));
-                return true;
-            }
-            return false;
-        }
-
-        // Inicializar aplicación
-        function initApp() {
-            if (isLoggedIn()) {
-                showAdminPanel();
-                loadEventsList();
-            } else {
-                showLoginScreen();
-            }
-        }
-        
         // Generar ID único para evento
         function generateEventId(name) {
             return name.toUpperCase()
@@ -857,25 +684,6 @@ ${event.urls.projection}
             }
         }
 
-        // Manejar formulario de login
-        document.getElementById('login-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-
-            if (login(username, password)) {
-                showAdminPanel();
-                loadEventsList();
-                // Limpiar formulario
-                document.getElementById('login-form').reset();
-                document.getElementById('login-error').style.display = 'none';
-            } else {
-                document.getElementById('login-error').textContent = '❌ Usuario o contraseña incorrectos';
-                document.getElementById('login-error').style.display = 'block';
-            }
-        });
-
         // Mostrar status
         function showStatus(message, type = 'info') {
             const statusEl = document.getElementById('status');
@@ -891,6 +699,11 @@ ${event.urls.projection}
                 console.log('Status message:', message, type);
             }
         }
+
+        // Inicializar aplicación
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEventsList();
+        });
 
         // Mostrar eventos archivados
         function showArchivedEvents() {
