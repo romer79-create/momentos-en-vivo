@@ -679,6 +679,8 @@ ${event.urls.projection}
                 console.log('Status message:', message, type);
             }
         }
+
+        // Mostrar eventos archivados
         function showArchivedEvents() {
             const archivedEvents = JSON.parse(localStorage.getItem('archivedEvents') || '[]');
 
