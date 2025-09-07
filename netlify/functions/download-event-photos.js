@@ -1,5 +1,7 @@
 const cloudinary = require('cloudinary').v2;
 const JSZip = require('jszip');
+const https = require('https');
+const http = require('http');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -60,13 +62,30 @@ exports.handler = async (event, context) => {
     const zip = new JSZip();
     const folder = zip.folder(`fotos_evento_${eventId}`);
 
+    // Función para descargar imagen usando Node.js nativo
+    const downloadImage = (url) => {
+      return new Promise((resolve, reject) => {
+        const protocol = url.startsWith('https:') ? https : http;
+        protocol.get(url, (response) => {
+          if (response.statusCode !== 200) {
+            reject(new Error(`HTTP ${response.statusCode}`));
+            return;
+          }
+          
+          const chunks = [];
+          response.on('data', (chunk) => chunks.push(chunk));
+          response.on('end', () => resolve(Buffer.concat(chunks)));
+          response.on('error', reject);
+        }).on('error', reject);
+      });
+    };
+
     // Descargar cada imagen y agregarla al ZIP
     const downloadPromises = result.resources.map(async (photo, index) => {
       try {
-        const response = await fetch(photo.secure_url);
-        const arrayBuffer = await response.arrayBuffer();
+        const imageBuffer = await downloadImage(photo.secure_url);
         const filename = `foto_${index + 1}_${photo.public_id.split('/').pop()}.jpg`;
-        folder.file(filename, arrayBuffer);
+        folder.file(filename, imageBuffer);
         return { success: true, filename };
       } catch (error) {
         console.error(`Error descargando foto ${photo.public_id}:`, error);
