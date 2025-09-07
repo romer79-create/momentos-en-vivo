@@ -410,6 +410,14 @@
                 }
             };
 
+            // Debug: mostrar la construcción del evento
+            console.log('🏗️ Construyendo evento:', {
+                eventId,
+                eventName,
+                NETLIFY_URL,
+                captureUrl: `${NETLIFY_URL}/index.html?event=${eventId}`
+            });
+
             // Guardar evento
             events.push(event);
             localStorage.setItem('events', JSON.stringify(events));
@@ -432,6 +440,13 @@
             document.getElementById('moderation-url').textContent = event.urls.moderation;
             document.getElementById('projection-url').textContent = event.urls.projection;
 
+            // Debug: mostrar las URLs que se están generando
+            console.log('🔗 URLs del evento:', {
+                capture: event.urls.capture,
+                moderation: event.urls.moderation,
+                projection: event.urls.projection
+            });
+
             // Generar QR Code
             const qrContainer = document.getElementById('qr-code-container');
             qrContainer.innerHTML = '';
@@ -449,10 +464,12 @@
             // Agregar evento de carga para confirmar
             qrImg.onload = () => {
                 console.log('QR Code cargado exitosamente para:', event.urls.capture);
+                console.log('QR Code src:', qrImg.src);
             };
 
             qrImg.onerror = () => {
                 console.error('Error cargando QR desde API externa');
+                console.error('URL de QR que falló:', qrImg.src);
                 qrContainer.innerHTML = `
                     <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 8px;">
                         <p style="color: #666; margin: 0;">QR Code no disponible</p>
@@ -463,6 +480,7 @@
 
             qrContainer.appendChild(qrImg);
             console.log('Generando QR para:', event.urls.capture);
+            console.log('QR final src:', qrImg.src);
 
             document.getElementById('event-result').style.display = 'block';
 
