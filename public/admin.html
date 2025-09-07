@@ -315,6 +315,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script>
+        // Verificar que QRCode esté disponible
+        if (typeof QRCode === 'undefined') {
+            console.error('QRCode library no cargada');
+        } else {
+            console.log('QRCode library cargada correctamente');
+        }
         const NETLIFY_URL = 'https://playful-parfait-6bfab1.netlify.app';
         const statusEl = document.getElementById('status');
         let events = JSON.parse(localStorage.getItem('events') || '[]');
@@ -379,19 +385,33 @@
             const qrContainer = document.getElementById('qr-code-container');
             qrContainer.innerHTML = '';
             
-            try {
-                await QRCode.toCanvas(qrContainer, event.urls.capture, {
-                    width: 200,
-                    margin: 2,
-                    color: {
-                        dark: '#000000',
-                        light: '#FFFFFF'
-                    }
-                });
-            } catch (error) {
-                console.error('Error generando QR:', error);
-                qrContainer.innerHTML = '<p>Error generando QR code</p>';
-            }
+            // Usar directamente API externa para QR (más confiable)
+            const qrImg = document.createElement('img');
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(event.urls.capture)}&bgcolor=FFFFFF&color=000000&margin=10`;
+            qrImg.style.maxWidth = '100%';
+            qrImg.style.height = 'auto';
+            qrImg.style.border = '2px solid #ddd';
+            qrImg.style.borderRadius = '8px';
+            qrImg.alt = 'QR Code para ' + event.name;
+            qrImg.title = 'QR Code para captura de fotos';
+            
+            // Agregar evento de carga para confirmar
+            qrImg.onload = () => {
+                console.log('QR Code cargado exitosamente para:', event.urls.capture);
+            };
+            
+            qrImg.onerror = () => {
+                console.error('Error cargando QR desde API externa');
+                qrContainer.innerHTML = `
+                    <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                        <p style="color: #666; margin: 0;">QR Code no disponible</p>
+                        <p style="color: #999; font-size: 0.8rem; margin: 5px 0 0;">Usa la URL directamente</p>
+                    </div>
+                `;
+            };
+            
+            qrContainer.appendChild(qrImg);
+            console.log('Generando QR para:', event.urls.capture);
             
             document.getElementById('event-result').style.display = 'block';
             
@@ -401,14 +421,42 @@
         }
         
         // Descargar QR
-        function downloadQR(event) {
-            const canvas = document.querySelector('#qr-code-container canvas');
-            if (canvas) {
-                const link = document.createElement('a');
-                link.download = `QR_${event.id}.png`;
-                link.href = canvas.toDataURL();
-                link.click();
-                showStatus('📥 QR descargado', 'success');
+        async function downloadQR(event) {
+            const img = document.querySelector('#qr-code-container img');
+            
+            if (img && img.src) {
+                try {
+                    // Crear canvas para convertir imagen a descarga
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Esperar a que la imagen esté cargada
+                    if (!img.complete) {
+                        await new Promise(resolve => {
+                            img.onload = resolve;
+                        });
+                    }
+                    
+                    canvas.width = img.naturalWidth || 200;
+                    canvas.height = img.naturalHeight || 200;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    // Descargar
+                    const link = document.createElement('a');
+                    link.download = `QR_${event.id}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    showStatus('📥 QR descargado', 'success');
+                } catch (error) {
+                    console.error('Error descargando QR:', error);
+                    // Fallback: abrir imagen en nueva pestaña
+                    window.open(img.src, '_blank');
+                    showStatus('📥 QR abierto en nueva pestaña', 'info');
+                }
+            } else {
+                showStatus('❌ No se encontró el QR code para descargar', 'error');
+                console.error('Imagen QR no encontrada');
             }
         }
         
