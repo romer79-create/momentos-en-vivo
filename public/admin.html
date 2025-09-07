@@ -463,6 +463,24 @@
             password: 'admin123'
         };
 
+        // Cerrar sesión
+        function logout() {
+            localStorage.removeItem('admin_session');
+            showLoginScreen();
+        }
+
+        // Mostrar pantalla de login
+        function showLoginScreen() {
+            document.getElementById('login-screen').style.display = 'block';
+            document.getElementById('admin-panel').style.display = 'none';
+        }
+
+        // Mostrar panel de administración
+        function showAdminPanel() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'block';
+        }
+
         // Verificar si el usuario está logueado
         function isLoggedIn() {
             const session = localStorage.getItem('admin_session');
@@ -493,24 +511,6 @@
                 return true;
             }
             return false;
-        }
-
-        // Cerrar sesión
-        function logout() {
-            localStorage.removeItem('admin_session');
-            showLoginScreen();
-        }
-
-        // Mostrar pantalla de login
-        function showLoginScreen() {
-            document.getElementById('login-screen').style.display = 'block';
-            document.getElementById('admin-panel').style.display = 'none';
-        }
-
-        // Mostrar panel de administración
-        function showAdminPanel() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('admin-panel').style.display = 'block';
         }
 
         // Inicializar aplicación
