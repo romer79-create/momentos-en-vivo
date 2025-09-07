@@ -663,6 +663,22 @@ ${event.urls.projection}
                 showStatus(`❌ Error de conectividad: ${error.message}`, 'error');
             }
         }
+
+        // Mostrar status
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.className = `status ${type}`;
+                statusEl.style.display = 'block';
+
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 3000);
+            } else {
+                console.log('Status message:', message, type);
+            }
+        }
         function showArchivedEvents() {
             const archivedEvents = JSON.parse(localStorage.getItem('archivedEvents') || '[]');
 
