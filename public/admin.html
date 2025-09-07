@@ -4,79 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - Momentos en Vivo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@400;600;700&display=swap');
-        
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); 
-            margin: 0; 
-            padding: 20px; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             min-height: 100vh;
             color: white;
+            padding: 20px;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
-        
+
         .header {
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
             text-align: center;
+            margin-bottom: 40px;
         }
-        
-        h1 { 
-            font-family: 'Fredoka One', cursive; 
-            color: white; 
-            font-size: 2.5rem; 
-            margin: 0;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        
+
         .subtitle {
-            opacity: 0.8;
-            margin-top: 10px;
             font-size: 1.1rem;
+            opacity: 0.8;
+            font-weight: 400;
         }
-        
+
         .main-content {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
             gap: 30px;
-            margin-bottom: 30px;
         }
-        
+
         .section {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        
+
         .section h2 {
             font-size: 1.5rem;
             margin-bottom: 20px;
+            font-weight: 600;
             color: #3498db;
-            border-bottom: 2px solid rgba(52, 152, 219, 0.3);
-            padding-bottom: 10px;
         }
-        
+
         .form-group {
             margin-bottom: 20px;
         }
-        
+
         .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
             color: rgba(255,255,255,0.9);
         }
-        
+
         .form-group input, .form-group select {
             width: 100%;
             padding: 12px;
@@ -128,43 +131,6 @@
             box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
         }
         
-        .events-list {
-            max-height: 400px;
-            overflow-y: auto;
-            margin-top: 20px;
-        }
-        
-        .event-item {
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-left: 4px solid #3498db;
-        }
-        
-        .event-name {
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 5px;
-        }
-        
-        .event-id {
-            font-size: 0.9rem;
-            opacity: 0.7;
-            margin-bottom: 10px;
-        }
-        
-        .event-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .event-actions button {
-            font-size: 0.8rem;
-            padding: 6px 12px;
-        }
-        
         button {
             font-family: 'Poppins', sans-serif;
             font-size: 1rem;
@@ -211,6 +177,43 @@
             background: #95a5a6 !important;
             cursor: not-allowed;
             transform: none;
+        }
+        
+        .events-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .event-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .event-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        
+        .event-id {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-bottom: 10px;
+        }
+        
+        .event-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .event-actions button {
+            font-size: 0.8rem;
+            padding: 6px 12px;
         }
         
         .qr-container {
@@ -261,7 +264,14 @@
             background: rgba(52, 152, 219, 0.2);
             border: 1px solid #3498db;
         }
-        
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            button { width: 100%; margin-bottom: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -270,21 +280,21 @@
             <h1>🎯 Panel de Administración Multi-Tenant</h1>
             <div class="subtitle">Gestiona eventos y genera QR codes automáticamente</div>
         </div>
-        
+
         <div class="main-content">
             <!-- Sección: Crear Evento -->
             <div class="section">
                 <h2>📅 Crear Nuevo Evento</h2>
                 <form id="create-event-form">
-<div class="form-group">
+                    <div class="form-group">
                         <label for="event-name">Nombre del Evento</label>
                         <input type="text" id="event-name" placeholder="Ej: Boda de María y Juan" required>
                     </div>
-<div class="form-group">
+                    <div class="form-group">
                         <label for="event-id">Código del Evento</label>
                         <input type="text" id="event-id" placeholder="Ej: BODA2024" required>
                     </div>
-<div class="form-group">
+                    <div class="form-group">
                         <label for="event-type">Tipo de Evento</label>
                         <select id="event-type">
                             <option value="boda">Boda</option>
@@ -293,47 +303,27 @@
                             <option value="graduacion">Graduación</option>
                             <option value="empresa">Evento Empresarial</option>
                             <option value="otro">Otro</option>
-                        }</div>
-<div class="form-group">
-                        <label for="event-theme">Tema del Evento</label>
-                        <select id="event-theme">
-                            <option value="cumpleanos">Cumpleaños Divertido</option>
-                            <option value="boda">Boda Elegante</option>
-                            <option value="corporativo">Evento Corporativo</option>
-                            <option value="graduacion">Graduación</option>
-                            <option value="fiesta">Fiesta Temática</option>
                         </select>
                     </div>
-<div class="form-group" id="custom-theme-section" style="display: none;">
-                        <label>Personalizar Tema</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <input type="color" id="primary-color" value="#ff6b6b" title="Color primario">
-                            <input type="color" id="secondary-color" value="#ffd93d" title="Color secundario">
-                            <input type="color" id="accent-color" value="#6bcf7f" title="Color de acento">
-                        </div>
-                        <button type="button" id="save-custom-theme" class="primary-btn" style="margin-top: 10px;">💾 Guardar Tema Personalizado</button>
-                    </div>
-<div class="form-group">
-                        <label><input type="checkbox" id="enable-custom-theme"> Usar tema personalizado</label>
-                    </div>
+                    <button type="submit" class="primary-btn">🚀 Crear Evento</button>
                 </form>
-                
+
                 <div id="event-result" style="display: none;">
-<div class="qr-container">
+                    <div class="qr-container">
                         <h3>✅ Evento Creado</h3>
-    <div class="url-display">
+                        <div class="url-display">
                             <strong>📱 URL Captura:</strong><br>
                             <span id="capture-url"></span>
                         </div>
-    <div class="url-display">
+                        <div class="url-display">
                             <strong>🛡️ URL Moderación:</strong><br>
                             <span id="moderation-url"></span>
                         </div>
-    <div class="url-display">
+                        <div class="url-display">
                             <strong>📺 URL Proyección:</strong><br>
                             <span id="projection-url"></span>
                         </div>
-    <div class="qr-code" id="qr-code-container">
+                        <div class="qr-code" id="qr-code-container">
                             <!-- QR Code will be generated here -->
                         </div>
                         <button id="copy-urls" class="primary-btn">📋 Copiar URLs</button>
@@ -342,7 +332,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Sección: Eventos Existentes -->
             <div class="section">
                 <h2>📋 Eventos Activos</h2>
@@ -353,27 +343,8 @@
                 <button class="info-btn" onclick="showArchivedEvents()">📦 Archivados</button>
                 <button class="secondary-btn" onclick="testNetlifyConnection()">🧪 Probar Conexión</button>
             </div>
-            
-            <!-- Sección: Gestión de Temas -->
-            <div class="section">
-                <h2>🎨 Gestión de Temas</h2>
-                <div class="form-group">
-                    <label for="theme-selector">Tema Actual</label>
-                    <select id="theme-selector" onchange="previewTheme(this.value)">
-                        <option value="cumpleanos">Cumpleaños Divertido</option>
-                        <option value="boda">Boda Elegante</option>
-                        <option value="corporativo">Evento Corporativo</option>
-                        <option value="graduacion">Graduación</option>
-                        <option value="fiesta">Fiesta Temática</option>
-                    </select>
-                </div>
-                <div id="theme-preview" class="theme-preview" style="margin-top: 20px; padding: 15px; border-radius: 10px; background: var(--background-gradient); color: white;">
-                    <h3>👁️ Vista Previa del Tema</h3>
-                    <p>Este es cómo se verá tu evento con el tema seleccionado.</p>
-                </div>
-            </div>
         </div>
-        
+
         <div id="status" class="status" style="display: none;"></div>
     </div>
 
@@ -385,6 +356,7 @@
         } else {
             console.log('QRCode library cargada correctamente');
         }
+
         const NETLIFY_URL = 'https://playful-parfait-6bfab1.netlify.app';
         const statusEl = document.getElementById('status');
         let events = JSON.parse(localStorage.getItem('events') || '[]');
@@ -393,21 +365,62 @@
         function generateEventId(name) {
             return name.toUpperCase()
                 .replace(/[^A-Z0-9]/g, '')
-                .substring(0, 10) + 
+                .substring(0, 10) +
                 Math.random().toString(36).substring(2, 6).toUpperCase();
         }
-        
-        
+
+        // Crear evento
+        document.getElementById('create-event-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const eventName = document.getElementById('event-name').value;
+            const eventId = document.getElementById('event-id').value || generateEventId(eventName);
+            const eventType = document.getElementById('event-type').value;
+
+            // Validar que el ID no exista
+            if (events.find(e => e.id === eventId)) {
+                showStatus('❌ Ya existe un evento con ese código', 'error');
+                return;
+            }
+
+            const event = {
+                id: eventId,
+                name: eventName,
+                type: eventType,
+                created: new Date().toISOString(),
+                urls: {
+                    capture: `${NETLIFY_URL}/index.html?event=${eventId}`,
+                    moderation: `${NETLIFY_URL}/moderador.html?event=${eventId}`,
+                    projection: `${NETLIFY_URL}/proyeccion.html?event=${eventId}`
+                }
+            };
+
+            // Guardar evento
+            events.push(event);
+            localStorage.setItem('events', JSON.stringify(events));
+
+            // Mostrar resultado
+            await showEventResult(event);
+
+            // Limpiar formulario
+            document.getElementById('create-event-form').reset();
+
+            // Actualizar lista
+            loadEventsList();
+
+            showStatus('✅ Evento creado exitosamente', 'success');
+        });
+
         // Mostrar resultado del evento creado
         async function showEventResult(event) {
             document.getElementById('capture-url').textContent = event.urls.capture;
             document.getElementById('moderation-url').textContent = event.urls.moderation;
             document.getElementById('projection-url').textContent = event.urls.projection;
-            
+
             // Generar QR Code
             const qrContainer = document.getElementById('qr-code-container');
             qrContainer.innerHTML = '';
-            
+
             // Usar directamente API externa para QR (más confiable)
             const qrImg = document.createElement('img');
             qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(event.urls.capture)}&bgcolor=FFFFFF&color=000000&margin=10`;
@@ -417,12 +430,12 @@
             qrImg.style.borderRadius = '8px';
             qrImg.alt = 'QR Code para ' + event.name;
             qrImg.title = 'QR Code para captura de fotos';
-            
+
             // Agregar evento de carga para confirmar
             qrImg.onload = () => {
                 console.log('QR Code cargado exitosamente para:', event.urls.capture);
             };
-            
+
             qrImg.onerror = () => {
                 console.error('Error cargando QR desde API externa');
                 qrContainer.innerHTML = `
@@ -432,68 +445,68 @@
                     </div>
                 `;
             };
-            
+
             qrContainer.appendChild(qrImg);
             console.log('Generando QR para:', event.urls.capture);
-            
+
             document.getElementById('event-result').style.display = 'block';
-            
+
             // Event listeners para botones
             document.getElementById('download-qr').onclick = () => downloadQR(event);
             document.getElementById('copy-urls').onclick = () => copyURLs(event);
             document.getElementById('download-photos').onclick = () => downloadEventPhotos(event);
         }
-        
+
         // Descargar fotos del evento
         async function downloadEventPhotos(event) {
             const downloadBtn = document.getElementById('download-photos');
             downloadBtn.disabled = true;
             downloadBtn.textContent = '⏳ Verificando fotos...';
-            
+
             try {
                 showStatus('📸 Verificando fotos del evento...', 'info');
                 console.log('Buscando fotos para evento:', event.id);
-                
+
                 const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-event-photos-urls?eventId=${event.id}`);
                 console.log('Response status:', response.status);
-                
+
                 const data = await response.json();
                 console.log('Response data:', data);
-                
+
                 if (!response.ok) {
                     throw new Error(data.error || 'Error obteniendo fotos');
                 }
-                
+
                 if (data.success && data.photos && data.photos.length > 0) {
                     showStatus(`📋 Encontradas ${data.photos.length} fotos. Abriendo ventanas...`, 'info');
-                    
+
                     // Mostrar lista de fotos encontradas
                     console.log('Fotos encontradas:', data.photos);
-                    
+
                     // Abrir cada foto en una nueva pestaña (más confiable)
                     data.photos.forEach((photo, index) => {
                         setTimeout(() => {
                             window.open(photo.url, '_blank');
                         }, index * 1000); // 1 segundo entre cada apertura
                     });
-                    
+
                     showStatus(`📥 ${data.photos.length} fotos abiertas en nuevas pestañas. Guarda manualmente cada una.`, 'success');
                 } else if (data.success && data.photos && data.photos.length === 0) {
                     showStatus('⚠️ No hay fotos aprobadas para este evento aún', 'warning');
                 } else {
                     throw new Error('No se encontraron fotos para este evento');
                 }
-                
+
             } catch (error) {
                 console.error('Error obteniendo fotos:', error);
                 showStatus(`❌ Error: ${error.message}`, 'error');
-                
+
                 // Fallback: intentar con función alternativa
                 try {
                     showStatus('🔄 Intentando método alternativo...', 'info');
                     const fallbackResponse = await fetch(`${NETLIFY_URL}/.netlify/functions/get-approved-photos?eventId=${event.id}`);
                     const fallbackData = await fallbackResponse.json();
-                    
+
                     if (fallbackData.length > 0) {
                         showStatus(`📋 Método alternativo: ${fallbackData.length} fotos encontradas`, 'info');
                         fallbackData.forEach((photo, index) => {
@@ -529,14 +542,14 @@ ${event.urls.moderation}
 📺 URL PROYECCIÓN:
 ${event.urls.projection}
             `.trim();
-            
+
             navigator.clipboard.writeText(text).then(() => {
                 showStatus('📋 URLs copiadas al portapapeles', 'success');
             }).catch(() => {
                 showStatus('❌ Error copiando URLs', 'error');
             });
         }
-        
+
         // Cargar lista de eventos
         function loadEventsList() {
             const container = document.getElementById('events-list');
@@ -576,7 +589,7 @@ ${event.urls.projection}
                 showStatus('🔄 QR regenerado', 'info');
             }
         }
-        
+
         // Archivar evento
         window.deleteEvent = async function(eventId) {
             console.log('🗑️ Intentando archivar evento:', eventId);
@@ -812,52 +825,6 @@ ${event.urls.projection}
             document.body.appendChild(modal);
         }
 
-        // Mostrar resultado del evento creado
-        async function showEventResult(event) {
-            document.getElementById('capture-url').textContent = event.urls.capture;
-            document.getElementById('moderation-url').textContent = event.urls.moderation;
-            document.getElementById('projection-url').textContent = event.urls.projection;
-
-            // Generar QR Code
-            const qrContainer = document.getElementById('qr-code-container');
-            qrContainer.innerHTML = '';
-
-            // Usar directamente API externa para QR (más confiable)
-            const qrImg = document.createElement('img');
-            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(event.urls.capture)}&bgcolor=FFFFFF&color=000000&margin=10`;
-            qrImg.style.maxWidth = '100%';
-            qrImg.style.height = 'auto';
-            qrImg.style.border = '2px solid #ddd';
-            qrImg.style.borderRadius = '8px';
-            qrImg.alt = 'QR Code para ' + event.name;
-            qrImg.title = 'QR Code para captura de fotos';
-
-            // Agregar evento de carga para confirmar
-            qrImg.onload = () => {
-                console.log('QR Code cargado exitosamente para:', event.urls.capture);
-            };
-
-            qrImg.onerror = () => {
-                console.error('Error cargando QR desde API externa');
-                qrContainer.innerHTML = `
-                    <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 8px;">
-                        <p style="color: #666; margin: 0;">QR Code no disponible</p>
-                        <p style="color: #999; font-size: 0.8rem; margin: 5px 0 0;">Usa la URL directamente</p>
-                    </div>
-                `;
-            };
-
-            qrContainer.appendChild(qrImg);
-            console.log('Generando QR para:', event.urls.capture);
-
-            document.getElementById('event-result').style.display = 'block';
-
-            // Event listeners para botones
-            document.getElementById('download-qr').onclick = () => downloadQR(event);
-            document.getElementById('copy-urls').onclick = () => copyURLs(event);
-            document.getElementById('download-photos').onclick = () => downloadEventPhotos(event);
-        }
-
         // Función para cerrar el modal de eventos archivados
         function closeArchivedModal() {
             const modal = document.getElementById('archived-events-modal');
@@ -865,130 +832,6 @@ ${event.urls.projection}
                 modal.remove();
             }
         }
-
-        // Inicializar la aplicación cuando se carga la página
-        document.addEventListener('DOMContentLoaded', initApp);
-    </script>
-    
-    <!-- Cargar Theme Manager -->
-    <script src="theme-manager.js"></script>
-    
-    <script>
-        // Variables globales para temas
-        let availableThemes = [];
-        let currentPreviewTheme = null;
-        
-        // Cargar temas disponibles
-        async function loadThemes() {
-            try {
-                const response = await fetch('/themes.json');
-                const data = await response.json();
-                availableThemes = Object.keys(data.themes);
-                
-                // Actualizar selectores de tema
-                updateThemeSelectors(data.themes);
-                
-                console.log('✅ Temas cargados en admin');
-            } catch (error) {
-                console.error('❌ Error cargando temas:', error);
-            }
-        }
-        
-        // Actualizar selectores de tema
-        function updateThemeSelectors(themes) {
-            const selectors = ['event-theme', 'theme-selector'];
-            selectors.forEach(selectorId => {
-                const select = document.getElementById(selectorId);
-                if (select) {
-                    select.innerHTML = Object.keys(themes).map(themeId => 
-                        `<option value="${themeId}">${themes[themeId].name}</option>`
-                    ).join('');
-                }
-            });
-        }
-        
-        // Toggle tema personalizado
-        document.getElementById('enable-custom-theme').addEventListener('change', function() {
-            const customSection = document.getElementById('custom-theme-section');
-            customSection.style.display = this.checked ? 'block' : 'none';
-        });
-        
-        // Guardar tema personalizado
-        document.getElementById('save-custom-theme').addEventListener('click', function() {
-            const themeName = prompt('Nombre del tema personalizado:');
-            if (!themeName) return;
-            
-            const customTheme = {
-                name: themeName,
-                colors: {
-                    primary: document.getElementById('primary-color').value,
-                    secondary: document.getElementById('secondary-color').value,
-                    accent: document.getElementById('accent-color').value,
-                    background: `linear-gradient(135deg, ${document.getElementById('primary-color').value}, ${document.getElementById('secondary-color').value})`,
-                    text: '#ffffff',
-                    textSecondary: '#f8f9fa'
-                },
-                fonts: { primary: "'Poppins', sans-serif", secondary: "'Poppins', sans-serif" },
-                icons: { camera: '📸', heart: '❤️', photo: '📷' },
-                animations: { gradientShift: '8s', bounce: '2s' }
-            };
-            
-            themeManager.saveCustomTheme(themeName.toLowerCase().replace(/\s+/g, ''), customTheme);
-            showStatus('✅ Tema personalizado guardado', 'success');
-            loadThemes(); // Recargar lista
-        });
-        
-        // Vista previa de tema
-        function previewTheme(themeName) {
-            if (themeManager && themeManager.themes[themeName]) {
-                const theme = themeManager.themes[themeName];
-                const preview = document.getElementById('theme-preview');
-                preview.style.background = theme.colors.background;
-                preview.innerHTML = `
-                    <h3>👁️ Vista Previa del Tema</h3>
-                    <p>Este es cómo se verá tu evento con el tema seleccionado.</p>
-                `;
-                currentPreviewTheme = themeName;
-            }
-        }
-        
-        // Modificar creación de evento para incluir tema
-        document.getElementById('create-event-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const eventName = document.getElementById('event-name').value;
-            const eventId = document.getElementById('event-id').value || generateEventId(eventName);
-            const eventType = document.getElementById('event-type').value;
-            const eventTheme = document.getElementById('event-theme').value;
-            
-            const event = {
-                id: eventId,
-                name: eventName,
-                type: eventType,
-                theme: eventTheme,
-                created: new Date().toISOString(),
-                urls: {
-                    capture: `${NETLIFY_URL}/index.html?event=${eventId}`,
-                    moderation: `${NETLIFY_URL}/moderador.html?event=${eventId}`,
-                    projection: `${NETLIFY_URL}/proyeccion.html?event=${eventId}`
-                }
-            };
-            
-            events.push(event);
-            localStorage.setItem('events', JSON.stringify(events));
-            
-            await showEventResult(event);
-            document.getElementById('create-event-form').reset();
-            loadEventsList();
-            showStatus('✅ Evento creado exitosamente con tema', 'success');
-        });
-        
-        // Inicializar temas
-        document.addEventListener('DOMContentLoaded', () => {
-            initApp();
-            loadThemes();
-            setTimeout(() => previewTheme('cumpleanos'), 500);
-        });
     </script>
 </body>
 </html>
