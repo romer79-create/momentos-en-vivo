@@ -252,18 +252,5 @@
         start();
     </script>
     
-    <!-- Cargar Theme Manager -->
-    <script src="theme-manager.js"></script>
-    
-    <script>
-        // Inicializar tema del evento
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const eventId = urlParams.get('event');
-            if (eventId && themeManager) {
-                themeManager.applyThemeFromEvent(eventId);
-            }
-        });
-    </script>
 </body>
 </html>
