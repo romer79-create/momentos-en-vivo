@@ -294,8 +294,9 @@
                         <div class="qr-code" id="qr-code-container">
                             <!-- QR Code will be generated here -->
                         </div>
-                        <button class="success-btn" id="download-qr">📥 Descargar QR</button>
-                        <button class="info-btn" id="copy-urls">📋 Copiar URLs</button>
+                        <button id="copy-urls" class="primary-btn">📋 Copiar URLs</button>
+                        <button id="download-qr" class="secondary-btn">📥 Descargar QR</button>
+                        <button id="download-photos" class="success-btn">📸 Descargar Fotos</button>
                     </div>
                 </div>
             </div>
@@ -418,6 +419,7 @@
             // Event listeners para botones
             document.getElementById('download-qr').onclick = () => downloadQR(event);
             document.getElementById('copy-urls').onclick = () => copyURLs(event);
+            document.getElementById('download-photos').onclick = () => downloadEventPhotos(event);
         }
         
         // Descargar QR
@@ -532,23 +534,6 @@ ${event.urls.projection}
             }
         }
         
-        // Actualizar lista
-        document.getElementById('refresh-events').addEventListener('click', loadEventsList);
-        
-        // Función para mostrar status
-        function showStatus(message, type) {
-            statusEl.textContent = message;
-            statusEl.className = `status ${type}`;
-            statusEl.style.display = 'block';
-            
-            if (type === 'success' || type === 'info') {
-                setTimeout(() => {
-                    statusEl.style.display = 'none';
-                }, 5000);
-            }
-        }
-        
-        // Cargar eventos al inicio
         loadEventsList();
         
         // Auto-generar ID cuando se escribe el nombre
