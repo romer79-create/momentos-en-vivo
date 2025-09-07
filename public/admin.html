@@ -715,12 +715,12 @@ ${event.urls.projection}
         // Cargar lista de eventos
         function loadEventsList() {
             const container = document.getElementById('events-list');
-            
+
             if (events.length === 0) {
                 container.innerHTML = '<p style="text-align: center; opacity: 0.7;">No hay eventos creados</p>';
                 return;
             }
-            
+
             container.innerHTML = events.map(event => `
                 <div class="event-item">
                     <div class="event-name">${event.name}</div>
@@ -734,7 +734,7 @@ ${event.urls.projection}
                 </div>
             `).join('');
         }
-        
+
         // Ver evento
         window.viewEvent = async function(eventId) {
             const event = events.find(e => e.id === eventId);
@@ -742,7 +742,7 @@ ${event.urls.projection}
                 await showEventResult(event);
             }
         }
-        
+
         // Regenerar QR
         window.regenerateQR = async function(eventId) {
             const event = events.find(e => e.id === eventId);
@@ -1001,6 +1001,52 @@ ${event.urls.projection}
             document.body.appendChild(modal);
         }
 
+        // Mostrar resultado del evento creado
+        async function showEventResult(event) {
+            document.getElementById('capture-url').textContent = event.urls.capture;
+            document.getElementById('moderation-url').textContent = event.urls.moderation;
+            document.getElementById('projection-url').textContent = event.urls.projection;
+
+            // Generar QR Code
+            const qrContainer = document.getElementById('qr-code-container');
+            qrContainer.innerHTML = '';
+
+            // Usar directamente API externa para QR (más confiable)
+            const qrImg = document.createElement('img');
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(event.urls.capture)}&bgcolor=FFFFFF&color=000000&margin=10`;
+            qrImg.style.maxWidth = '100%';
+            qrImg.style.height = 'auto';
+            qrImg.style.border = '2px solid #ddd';
+            qrImg.style.borderRadius = '8px';
+            qrImg.alt = 'QR Code para ' + event.name;
+            qrImg.title = 'QR Code para captura de fotos';
+
+            // Agregar evento de carga para confirmar
+            qrImg.onload = () => {
+                console.log('QR Code cargado exitosamente para:', event.urls.capture);
+            };
+
+            qrImg.onerror = () => {
+                console.error('Error cargando QR desde API externa');
+                qrContainer.innerHTML = `
+                    <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                        <p style="color: #666; margin: 0;">QR Code no disponible</p>
+                        <p style="color: #999; font-size: 0.8rem; margin: 5px 0 0;">Usa la URL directamente</p>
+                    </div>
+                `;
+            };
+
+            qrContainer.appendChild(qrImg);
+            console.log('Generando QR para:', event.urls.capture);
+
+            document.getElementById('event-result').style.display = 'block';
+
+            // Event listeners para botones
+            document.getElementById('download-qr').onclick = () => downloadQR(event);
+            document.getElementById('copy-urls').onclick = () => copyURLs(event);
+            document.getElementById('download-photos').onclick = () => downloadEventPhotos(event);
+        }
+
         // Función para cerrar el modal de eventos archivados
         function closeArchivedModal() {
             const modal = document.getElementById('archived-events-modal');
@@ -1008,15 +1054,9 @@ ${event.urls.projection}
                 modal.remove();
             }
         }
-        
-        loadEventsList();
-        
-        // Auto-generar ID cuando se escribe el nombre
-        document.getElementById('event-name').addEventListener('input', (e) => {
-            if (!document.getElementById('event-id').value) {
-                document.getElementById('event-id').value = generateEventId(e.target.value);
-            }
-        });
+
+        // Inicializar la aplicación cuando se carga la página
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
