@@ -309,6 +309,7 @@
                 </div>
                 <button class="warning-btn" id="refresh-events">🔄 Actualizar Lista</button>
                 <button class="info-btn" onclick="showArchivedEvents()">📦 Archivados</button>
+                <button class="secondary-btn" onclick="testNetlifyConnection()">🧪 Probar Conexión</button>
             </div>
         </div>
         
@@ -558,12 +559,16 @@ ${event.urls.projection}
         
         // Archivar evento
         window.deleteEvent = async function(eventId) {
+            console.log('🗑️ Intentando archivar evento:', eventId);
+
             if (!confirm('⚠️ ¿Estás seguro de que quieres archivar este evento?\n\n✅ Las fotos se moverán a archivo\n🚫 Las URLs dejarán de funcionar\n\n¿Continuar?')) {
+                console.log('❌ Usuario canceló el archivado');
                 return;
             }
 
             const deleteBtn = document.querySelector(`button[onclick*="${eventId}"]`);
             const originalText = deleteBtn?.textContent || '🗑️ Borrar';
+            console.log('🎯 Botón encontrado:', deleteBtn);
 
             try {
                 if (deleteBtn) {
@@ -572,10 +577,17 @@ ${event.urls.projection}
                 }
 
                 showStatus('⏳ Archivando fotos del evento...', 'info');
+                console.log('📡 URL de Netlify:', NETLIFY_URL);
 
                 // 1. Archivar fotos en Cloudinary
-                const archiveResponse = await fetch(`${NETLIFY_URL}/.netlify/functions/archive-event?eventId=${eventId}`);
+                const archiveUrl = `${NETLIFY_URL}/.netlify/functions/archive-event?eventId=${eventId}`;
+                console.log('🔗 URL de archivado:', archiveUrl);
+
+                const archiveResponse = await fetch(archiveUrl);
+                console.log('📡 Respuesta de archivado:', archiveResponse.status, archiveResponse.statusText);
+
                 const archiveResult = await archiveResponse.json();
+                console.log('📋 Resultado del archivado:', archiveResult);
 
                 if (!archiveResponse.ok) {
                     throw new Error(archiveResult.error || 'Error al archivar fotos');
@@ -583,7 +595,10 @@ ${event.urls.projection}
 
                 // 2. Eliminar evento del localStorage
                 const events = JSON.parse(localStorage.getItem('events') || '[]');
+                console.log('📋 Eventos antes de filtrar:', events.length);
+
                 const eventToArchive = events.find(e => e.id === eventId);
+                console.log('🎯 Evento a archivar encontrado:', eventToArchive);
 
                 if (eventToArchive) {
                     // 3. Guardar en eventos archivados
@@ -594,18 +609,27 @@ ${event.urls.projection}
                         photosArchived: archiveResult.archivedPhotos || 0
                     });
                     localStorage.setItem('archivedEvents', JSON.stringify(archivedEvents));
+                    console.log('💾 Evento guardado en archivados');
 
                     // 4. Eliminar de eventos activos
                     const updatedEvents = events.filter(e => e.id !== eventId);
                     localStorage.setItem('events', JSON.stringify(updatedEvents));
+                    console.log('🗑️ Evento eliminado de activos, eventos restantes:', updatedEvents.length);
                 }
 
                 loadEventsList();
                 showStatus(`✅ Evento archivado (${archiveResult.archivedPhotos || 0} fotos)`, 'success');
+                console.log('✅ Proceso de archivado completado');
 
             } catch (error) {
-                console.error('Error al archivar evento:', error);
+                console.error('❌ Error al archivar evento:', error);
+                console.error('❌ Stack trace:', error.stack);
                 showStatus(`❌ Error: ${error.message}`, 'error');
+
+                // Mostrar más detalles del error en consola
+                if (error.message.includes('fetch')) {
+                    console.error('❌ Problema de conectividad. Verifica la URL:', NETLIFY_URL);
+                }
             } finally {
                 if (deleteBtn) {
                     deleteBtn.disabled = false;
@@ -614,7 +638,31 @@ ${event.urls.projection}
             }
         };
 
-        // Mostrar eventos archivados
+        // Función de prueba para verificar conectividad
+        async function testNetlifyConnection() {
+            try {
+                console.log('🧪 Probando conectividad con Netlify Functions...');
+                console.log('📡 URL base:', NETLIFY_URL);
+
+                const testUrl = `${NETLIFY_URL}/.netlify/functions/archive-event?eventId=TEST`;
+                console.log('🔗 URL de prueba:', testUrl);
+
+                const response = await fetch(testUrl);
+                console.log('📡 Respuesta de prueba:', response.status, response.statusText);
+
+                const result = await response.json();
+                console.log('📋 Resultado de prueba:', result);
+
+                if (response.ok) {
+                    showStatus('✅ Conectividad con Netlify OK', 'success');
+                } else {
+                    showStatus(`⚠️ Error de conectividad: ${result.error}`, 'warning');
+                }
+            } catch (error) {
+                console.error('❌ Error de conectividad:', error);
+                showStatus(`❌ Error de conectividad: ${error.message}`, 'error');
+            }
+        }
         function showArchivedEvents() {
             const archivedEvents = JSON.parse(localStorage.getItem('archivedEvents') || '[]');
 
