@@ -426,49 +426,67 @@
         async function downloadEventPhotos(event) {
             const downloadBtn = document.getElementById('download-photos');
             downloadBtn.disabled = true;
-            downloadBtn.textContent = '⏳ Obteniendo fotos...';
+            downloadBtn.textContent = '⏳ Verificando fotos...';
             
             try {
-                showStatus('📸 Obteniendo lista de fotos...', 'info');
+                showStatus('📸 Verificando fotos del evento...', 'info');
+                console.log('Buscando fotos para evento:', event.id);
                 
                 const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-event-photos-urls?eventId=${event.id}`);
+                console.log('Response status:', response.status);
+                
                 const data = await response.json();
+                console.log('Response data:', data);
                 
                 if (!response.ok) {
                     throw new Error(data.error || 'Error obteniendo fotos');
                 }
                 
                 if (data.success && data.photos && data.photos.length > 0) {
-                    showStatus(`📥 Descargando ${data.photos.length} fotos...`, 'info');
+                    showStatus(`📋 Encontradas ${data.photos.length} fotos. Abriendo ventanas...`, 'info');
                     
-                    // Descargar cada foto individualmente
-                    let downloadedCount = 0;
-                    for (const photo of data.photos) {
-                        try {
-                            const link = document.createElement('a');
-                            link.href = photo.url;
-                            link.download = photo.filename;
-                            link.target = '_blank';
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            downloadedCount++;
-                            
-                            // Pequeña pausa entre descargas
-                            await new Promise(resolve => setTimeout(resolve, 500));
-                        } catch (photoError) {
-                            console.error(`Error descargando ${photo.filename}:`, photoError);
-                        }
-                    }
+                    // Mostrar lista de fotos encontradas
+                    console.log('Fotos encontradas:', data.photos);
                     
-                    showStatus(`📥 ${downloadedCount} fotos iniciadas para descarga`, 'success');
+                    // Abrir cada foto en una nueva pestaña (más confiable)
+                    data.photos.forEach((photo, index) => {
+                        setTimeout(() => {
+                            window.open(photo.url, '_blank');
+                        }, index * 1000); // 1 segundo entre cada apertura
+                    });
+                    
+                    showStatus(`📥 ${data.photos.length} fotos abiertas en nuevas pestañas. Guarda manualmente cada una.`, 'success');
+                } else if (data.success && data.photos && data.photos.length === 0) {
+                    showStatus('⚠️ No hay fotos aprobadas para este evento aún', 'warning');
                 } else {
                     throw new Error('No se encontraron fotos para este evento');
                 }
                 
             } catch (error) {
-                console.error('Error descargando fotos:', error);
+                console.error('Error obteniendo fotos:', error);
                 showStatus(`❌ Error: ${error.message}`, 'error');
+                
+                // Fallback: intentar con función alternativa
+                try {
+                    showStatus('🔄 Intentando método alternativo...', 'info');
+                    const fallbackResponse = await fetch(`${NETLIFY_URL}/.netlify/functions/get-approved-photos?eventId=${event.id}`);
+                    const fallbackData = await fallbackResponse.json();
+                    
+                    if (fallbackData.length > 0) {
+                        showStatus(`📋 Método alternativo: ${fallbackData.length} fotos encontradas`, 'info');
+                        fallbackData.forEach((photo, index) => {
+                            setTimeout(() => {
+                                window.open(photo.secure_url, '_blank');
+                            }, index * 1000);
+                        });
+                        showStatus(`📥 ${fallbackData.length} fotos abiertas (método alternativo)`, 'success');
+                    } else {
+                        showStatus('❌ No hay fotos aprobadas para descargar', 'error');
+                    }
+                } catch (fallbackError) {
+                    console.error('Error en método alternativo:', fallbackError);
+                    showStatus('❌ No se pudieron obtener las fotos', 'error');
+                }
             } finally {
                 downloadBtn.disabled = false;
                 downloadBtn.textContent = '📸 Descargar Fotos';
