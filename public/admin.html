@@ -357,7 +357,7 @@
             console.log('QRCode library cargada correctamente');
         }
 
-        const NETLIFY_URL = 'https://playful-parfait-6bfab1.netlify.app';
+        const NETLIFY_URL = window.location.origin;
         const statusEl = document.getElementById('status');
         let events = JSON.parse(localStorage.getItem('events') || '[]');
 
