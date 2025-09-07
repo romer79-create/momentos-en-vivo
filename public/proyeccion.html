@@ -161,8 +161,14 @@
         const eventId = urlParams.get('event') || 'DEFAULT';
         console.log('EventId extraído de la URL (proyección):', eventId);
 
-        // Apunta a tu imagen QR local guardada en la carpeta 'public/assets'
-        qrCodeImg.src = './assets/qr_code.png';
+        // Generar QR dinámicamente con la URL del evento
+        const captureUrl = `${window.location.origin}/index.html?event=${eventId}`;
+        console.log('🎯 Generando QR para captura desde proyección:', captureUrl);
+        
+        // Usar API de QR externa para generar QR dinámico
+        qrCodeImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(captureUrl)}&bgcolor=FFFFFF&color=000000&margin=4`;
+        
+        console.log('✅ QR generado en proyección para URL:', captureUrl);
 
         let currentIndex = -1;
         let photos = [];
