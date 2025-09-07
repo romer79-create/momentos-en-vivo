@@ -14,11 +14,20 @@ const headers = {
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') { return { statusCode: 200, headers }; }
-  const { public_id } = JSON.parse(event.body);
+  
+  const { public_id, eventId } = JSON.parse(event.body);
+  const finalEventId = eventId || 'DEFAULT';
+  
   try {
+    // Remover el tag pending_${eventId} antes de eliminar
+    await cloudinary.uploader.remove_tag(`pending_${finalEventId}`, [public_id]);
+    
+    // Eliminar la imagen completamente
     await cloudinary.uploader.destroy(public_id);
-    return { statusCode: 200, headers, body: 'Imagen rechazada' };
+    
+    return { statusCode: 200, headers, body: 'Imagen rechazada y eliminada' };
   } catch (error) {
+    console.error('Error al rechazar imagen:', error);
     return { statusCode: 500, headers, body: JSON.stringify(error) };
   }
 };

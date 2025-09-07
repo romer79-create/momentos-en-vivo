@@ -145,6 +145,11 @@
         const qrCodeImg = document.getElementById('qr-code-img');
         const NETLIFY_URL = 'https://playful-parfait-6bfab1.netlify.app';
 
+        // Extraer eventId de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventId = urlParams.get('event') || 'DEFAULT';
+        console.log('EventId extraído de la URL (proyección):', eventId);
+
         // Apunta a tu imagen QR local guardada en la carpeta 'public/assets'
         qrCodeImg.src = './assets/qr_code.png';
 
@@ -206,7 +211,7 @@
 
         async function fetchApprovedPhotos() {
             try {
-                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-approved-photos`);
+                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-approved-photos?eventId=${eventId}`);
                 if (!response.ok) return;
                 const newPhotos = await response.json();
                 const newPhoto = newPhotos.find(p => !knownPhotoIds.has(p.asset_id));

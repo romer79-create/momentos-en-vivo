@@ -31,38 +31,60 @@ exports.handler = async (event) => {
 
     if (!file) { throw new Error('No se recibió ningún archivo.'); }
     
-    // Múltiples formas de extraer el mensaje del FormData
+    // Extraer mensaje y event_id del FormData
     let message = '';
+    let eventId = 'DEFAULT';
     
     // Opción 1: Directamente del resultado
     if (result.message) {
       message = result.message;
       console.log('--- DEBUG: Mensaje encontrado en result.message:', message);
     }
-    // Opción 2: En el array de fields
-    else if (result.fields && result.fields.message) {
-      message = result.fields.message;
-      console.log('--- DEBUG: Mensaje encontrado en result.fields.message:', message);
+    if (result.eventId) {
+      eventId = result.eventId;
+      console.log('--- DEBUG: EventId encontrado en result.eventId:', eventId);
     }
-    // Opción 3: Buscar en todos los campos
-    else if (result.fields) {
+    
+    // Opción 2: En el array de fields
+    if (result.fields) {
+      if (result.fields.message) {
+        message = result.fields.message;
+        console.log('--- DEBUG: Mensaje encontrado en result.fields.message:', message);
+      }
+      if (result.fields.eventId) {
+        eventId = result.fields.eventId;
+        console.log('--- DEBUG: EventId encontrado en result.fields.eventId:', eventId);
+      }
+      
+      // Opción 3: Buscar en todos los campos
       for (const [key, value] of Object.entries(result.fields)) {
         console.log('--- DEBUG: Campo encontrado:', key, '=', value);
         if (key === 'message') {
           message = value;
-          break;
+        } else if (key === 'eventId') {
+          eventId = value;
         }
       }
     }
     
     console.log('--- DEBUG: Mensaje final extraído:', message);
+    console.log('--- DEBUG: EventId final extraído:', eventId);
     
     const fileStr = `data:${file.contentType};base64,${file.content.toString('base64')}`;
     
-    // Configurar opciones de subida con tags para el mensaje
+    // Configurar opciones de subida con tags para evento, mensaje y estado
+    const tags = [
+      `event_${eventId}`,
+      `pending_${eventId}`
+    ];
+    
+    if (message) {
+      tags.push(`msg:${encodeURIComponent(message)}`);
+    }
+    
     const uploadOptions = { 
       folder: 'momentos-en-vivo',
-      tags: message ? [`msg:${encodeURIComponent(message)}`] : []
+      tags: tags
     };
     
     const uploadResult = await cloudinary.uploader.upload(fileStr, uploadOptions);

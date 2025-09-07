@@ -13,12 +13,18 @@ const headers = {
 
 exports.handler = async (event) => {
   try {
-    // Busca recursos que SÍ tengan la etiqueta "approved"
+    // Extraer eventId de los parámetros de consulta
+    const eventId = event.queryStringParameters?.eventId || 'DEFAULT';
+    console.log("EventId recibido para fotos aprobadas:", eventId);
+
+    // Busca recursos que tengan la etiqueta "approved_${eventId}"
     const result = await cloudinary.search
-      .expression('folder=momentos-en-vivo AND tags=approved')
+      .expression(`folder=momentos-en-vivo AND tags=approved_${eventId}`)
       .sort_by('created_at', 'desc') // Muestra las más nuevas primero
       .max_results(50) // Mostramos hasta 50 fotos aprobadas
       .execute();
+
+    console.log(`Fotos aprobadas encontradas para evento ${eventId}:`, result.resources.length);
 
     return {
       statusCode: 200,

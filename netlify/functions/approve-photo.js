@@ -14,12 +14,22 @@ const headers = {
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') { return { statusCode: 200, headers }; }
-  const { public_id } = JSON.parse(event.body);
+  
+  const { public_id, eventId } = JSON.parse(event.body);
+  const finalEventId = eventId || 'DEFAULT';
+  
   try {
+    // Remover el tag pending_${eventId} y agregar approved_${eventId}
+    await cloudinary.uploader.remove_tag(`pending_${finalEventId}`, [public_id]);
+    await cloudinary.uploader.add_tag(`approved_${finalEventId}`, [public_id]);
+    
+    // Mantener compatibilidad con el sistema anterior
     await cloudinary.uploader.add_tag('moderated', [public_id]);
     await cloudinary.uploader.add_tag('approved', [public_id]);
+    
     return { statusCode: 200, headers, body: 'Imagen aprobada' };
   } catch (error) {
+    console.error('Error al aprobar imagen:', error);
     return { statusCode: 500, headers, body: JSON.stringify(error) };
   }
 };

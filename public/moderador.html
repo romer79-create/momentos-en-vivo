@@ -148,10 +148,18 @@
         // IMPORTANTE: Reemplaza esto con la URL real de tu sitio en Netlify
         const NETLIFY_URL = 'https://playful-parfait-6bfab1.netlify.app';
 
+        // Extraer eventId de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventId = urlParams.get('event') || 'DEFAULT';
+        console.log('EventId extraído de la URL (moderador):', eventId);
+
         async function handleAction(action, public_id, cardElement) {
             const response = await fetch(`${NETLIFY_URL}/.netlify/functions/${action}-photo`, {
                 method: 'POST',
-                body: JSON.stringify({ public_id: public_id })
+                body: JSON.stringify({ 
+                    public_id: public_id,
+                    eventId: eventId
+                })
             });
             if (response.ok) {
                 cardElement.remove();
@@ -161,7 +169,7 @@
         }
 
         async function loadPendingPhotos() {
-            const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-photos`);
+            const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-photos?eventId=${eventId}`);
             const photos = await response.json();
             
             pendingContainer.innerHTML = ''; // Limpia el contenedor

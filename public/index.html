@@ -252,6 +252,11 @@
         const charCount = document.getElementById('char-count');
         const functionUrl = 'https://playful-parfait-6bfab1.netlify.app/.netlify/functions/upload';
 
+        // Extraer eventId de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventId = urlParams.get('event') || 'DEFAULT';
+        console.log('EventId extraído de la URL:', eventId);
+
         let currentStream; // Para guardar el stream de la cámara actual
         let currentFacingMode = 'user'; // 'user' para frontal, 'environment' para trasera
 
@@ -294,28 +299,28 @@
             startCamera();
         });
 
-        // Verificar límite de fotos por usuario
+        // Verificar límite de fotos por usuario (por evento)
         function checkPhotoLimit() {
-            const photoCount = parseInt(localStorage.getItem('photoCount') || '0');
+            const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
             return photoCount < 2;
         }
 
         function incrementPhotoCount() {
-            const photoCount = parseInt(localStorage.getItem('photoCount') || '0');
-            localStorage.setItem('photoCount', (photoCount + 1).toString());
+            const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
+            localStorage.setItem(`photoCount_${eventId}`, (photoCount + 1).toString());
             updatePhotoCounter();
         }
 
         function updatePhotoCounter() {
-            const photoCount = parseInt(localStorage.getItem('photoCount') || '0');
+            const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
             const remaining = 2 - photoCount;
             if (remaining <= 0) {
                 snapButton.disabled = true;
                 snapButton.textContent = "📸 Límite alcanzado";
                 snapButton.style.background = "linear-gradient(135deg, #6c757d, #495057)";
-                statusEl.textContent = `Has alcanzado el límite de 2 fotos por evento`;
+                statusEl.textContent = `Has alcanzado el límite de 2 fotos para este evento`;
             } else {
-                statusEl.textContent = `Te quedan ${remaining} foto${remaining === 1 ? '' : 's'}`;
+                statusEl.textContent = `Te quedan ${remaining} foto${remaining === 1 ? '' : 's'} para este evento`;
             }
         }
 
@@ -336,6 +341,10 @@
                 statusEl.textContent = "Enviando...";
                 const formData = new FormData();
                 formData.append('photo', blob, 'foto_celular.jpg');
+                
+                // Agregar el eventId
+                formData.append('eventId', eventId);
+                console.log('--- DEBUG Frontend: EventId agregado al FormData:', eventId);
                 
                 // Agregar el mensaje si existe
                 const message = messageInput.value.trim();
