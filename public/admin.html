@@ -705,25 +705,80 @@ ${event.urls.projection}
             `;
 
             modal.innerHTML = `
-                <div style="background: white; padding: 20px; border-radius: 10px; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto;">
-                    <h2>📦 Eventos Archivados</h2>
-                    <div id="archived-events-list" style="margin: 15px 0;"></div>
-                    <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()"
-                            style="padding: 8px 16px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                        Cerrar
-                    </button>
+                <div style="
+                    background: rgba(255,255,255,0.95);
+                    padding: 25px;
+                    border-radius: 15px;
+                    max-width: 600px;
+                    width: 100%;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                    border: 2px solid rgba(52, 152, 219, 0.3);
+                ">
+                    <h2 style="
+                        color: #2c3e50;
+                        margin: 0 0 20px 0;
+                        font-size: 1.5rem;
+                        font-weight: 700;
+                        text-align: center;
+                        border-bottom: 2px solid #3498db;
+                        padding-bottom: 10px;
+                    ">📦 Eventos Archivados</h2>
+                    <div id="archived-events-list" style="
+                        margin: 20px 0;
+                        max-height: 400px;
+                        overflow-y: auto;
+                    "></div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()"
+                                style="
+                                    padding: 10px 20px;
+                                    background: linear-gradient(135deg, #e74c3c, #c0392b);
+                                    color: white;
+                                    border: none;
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-weight: 600;
+                                    font-size: 1rem;
+                                    transition: all 0.3s ease;
+                                    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+                                "
+                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(231, 76, 60, 0.4)';"
+                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(231, 76, 60, 0.3)';">
+                            ❌ Cerrar
+                        </button>
+                    </div>
                 </div>
             `;
 
             const listContainer = modal.querySelector('#archived-events-list');
             archivedEvents.forEach(event => {
                 const eventEl = document.createElement('div');
-                eventEl.style.cssText = 'padding: 10px; border-bottom: 1px solid #eee;';
+                eventEl.style.cssText = `
+                    padding: 15px;
+                    border: 1px solid #e1e8ed;
+                    border-radius: 8px;
+                    margin-bottom: 10px;
+                    background: rgba(255,255,255,0.8);
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                `;
                 eventEl.innerHTML = `
-                    <strong>${event.name}</strong> (${event.id})<br>
-                    <small>Tipo: ${event.type || 'N/A'}</small><br>
-                    <small>Archivado: ${new Date(event.archivedAt).toLocaleString()}</small><br>
-                    <small>📸 ${event.photosArchived || 0} fotos archivadas</small>
+                    <div style="font-weight: 700; font-size: 1.1rem; color: #2c3e50; margin-bottom: 8px;">
+                        ${event.name}
+                    </div>
+                    <div style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 4px;">
+                        <strong>ID:</strong> ${event.id}
+                    </div>
+                    <div style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 4px;">
+                        <strong>Tipo:</strong> ${event.type || 'N/A'}
+                    </div>
+                    <div style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 4px;">
+                        <strong>Archivado:</strong> ${new Date(event.archivedAt).toLocaleString()}
+                    </div>
+                    <div style="color: #27ae60; font-size: 0.9rem; font-weight: 600;">
+                        📸 ${event.photosArchived || 0} fotos archivadas
+                    </div>
                 `;
                 listContainer.appendChild(eventEl);
             });
