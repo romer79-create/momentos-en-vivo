@@ -690,6 +690,7 @@ ${event.urls.projection}
             }
 
             const modal = document.createElement('div');
+            modal.id = 'archived-events-modal';
             modal.style.cssText = `
                 position: fixed;
                 top: 0;
@@ -731,7 +732,7 @@ ${event.urls.projection}
                         overflow-y: auto;
                     "></div>
                     <div style="text-align: center; margin-top: 20px;">
-                        <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()"
+                        <button onclick="closeArchivedModal()"
                                 style="
                                     padding: 10px 20px;
                                     background: linear-gradient(135deg, #e74c3c, #c0392b);
@@ -784,6 +785,14 @@ ${event.urls.projection}
             });
 
             document.body.appendChild(modal);
+        }
+
+        // Función para cerrar el modal de eventos archivados
+        function closeArchivedModal() {
+            const modal = document.getElementById('archived-events-modal');
+            if (modal) {
+                modal.remove();
+            }
         }
         
         loadEventsList();
