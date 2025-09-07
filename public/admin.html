@@ -570,47 +570,6 @@
                 Math.random().toString(36).substring(2, 6).toUpperCase();
         }
         
-        // Crear evento
-        document.getElementById('create-event-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const eventName = document.getElementById('event-name').value;
-            const eventId = document.getElementById('event-id').value || generateEventId(eventName);
-            const eventType = document.getElementById('event-type').value;
-            
-            // Validar que el ID no exista
-            if (events.find(e => e.id === eventId)) {
-                showStatus('❌ Ya existe un evento con ese código', 'error');
-                return;
-            }
-            
-            const event = {
-                id: eventId,
-                name: eventName,
-                type: eventType,
-                created: new Date().toISOString(),
-                urls: {
-                    capture: `${NETLIFY_URL}/index.html?event=${eventId}`,
-                    moderation: `${NETLIFY_URL}/moderador.html?event=${eventId}`,
-                    projection: `${NETLIFY_URL}/proyeccion.html?event=${eventId}`
-                }
-            };
-            
-            // Guardar evento
-            events.push(event);
-            localStorage.setItem('events', JSON.stringify(events));
-            
-            // Mostrar resultado
-            await showEventResult(event);
-            
-            // Limpiar formulario
-            document.getElementById('create-event-form').reset();
-            
-            // Actualizar lista
-            loadEventsList();
-            
-            showStatus('✅ Evento creado exitosamente', 'success');
-        });
         
         // Mostrar resultado del evento creado
         async function showEventResult(event) {
@@ -1181,7 +1140,6 @@ ${event.urls.projection}
         }
         
         // Modificar creación de evento para incluir tema
-        const originalCreateEvent = document.getElementById('create-event-form').onsubmit;
         document.getElementById('create-event-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
