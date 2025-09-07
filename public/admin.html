@@ -447,13 +447,25 @@
                 projection: event.urls.projection
             });
 
+            // Debug: verificar valores individuales
+            console.log('📝 Detalles del evento:', {
+                eventId: event.id,
+                eventName: event.name,
+                NETLIFY_URL: window.location.origin,
+                fullCaptureUrl: `${window.location.origin}/index.html?event=${event.id}`
+            });
+
             // Generar QR Code
             const qrContainer = document.getElementById('qr-code-container');
             qrContainer.innerHTML = '';
 
-            // Usar directamente API externa para QR (más confiable)
+            // Usar la URL completa asegurada
+            const qrUrl = `${window.location.origin}/index.html?event=${event.id}`;
+            console.log('🎯 URL que irá al QR:', qrUrl);
+
+            // Usar directamente API externa para QR
             const qrImg = document.createElement('img');
-            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(event.urls.capture)}&bgcolor=FFFFFF&color=000000&margin=10`;
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrUrl)}&bgcolor=FFFFFF&color=000000&margin=10`;
             qrImg.style.maxWidth = '100%';
             qrImg.style.height = 'auto';
             qrImg.style.border = '2px solid #ddd';
@@ -463,24 +475,24 @@
 
             // Agregar evento de carga para confirmar
             qrImg.onload = () => {
-                console.log('QR Code cargado exitosamente para:', event.urls.capture);
-                console.log('QR Code src:', qrImg.src);
+                console.log('✅ QR Code cargado exitosamente');
+                console.log('🔍 QR src final:', qrImg.src);
+                console.log('📱 URL decodificada del QR:', decodeURIComponent(qrUrl));
             };
 
             qrImg.onerror = () => {
-                console.error('Error cargando QR desde API externa');
-                console.error('URL de QR que falló:', qrImg.src);
+                console.error('❌ Error cargando QR');
+                console.error('❌ URL del QR que falló:', qrImg.src);
                 qrContainer.innerHTML = `
                     <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 8px;">
                         <p style="color: #666; margin: 0;">QR Code no disponible</p>
-                        <p style="color: #999; font-size: 0.8rem; margin: 5px 0 0;">Usa la URL directamente</p>
+                        <p style="color: #999; font-size: 0.8rem; margin: 5px 0 0;">Usa la URL directamente: ${qrUrl}</p>
                     </div>
                 `;
             };
 
             qrContainer.appendChild(qrImg);
-            console.log('Generando QR para:', event.urls.capture);
-            console.log('QR final src:', qrImg.src);
+            console.log('🚀 Generando QR para URL:', qrUrl);
 
             document.getElementById('event-result').style.display = 'block';
 
