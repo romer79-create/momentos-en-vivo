@@ -383,15 +383,15 @@
             <div class="section">
                 <h2>📅 Crear Nuevo Evento</h2>
                 <form id="create-event-form">
-                    <div class="form-group">
+<div class="form-group">
                         <label for="event-name">Nombre del Evento</label>
                         <input type="text" id="event-name" placeholder="Ej: Boda de María y Juan" required>
                     </div>
-                    <div class="form-group">
+<div class="form-group">
                         <label for="event-id">Código del Evento</label>
                         <input type="text" id="event-id" placeholder="Ej: BODA2024" required>
                     </div>
-                    <div class="form-group">
+<div class="form-group">
                         <label for="event-type">Tipo de Evento</label>
                         <select id="event-type">
                             <option value="boda">Boda</option>
@@ -401,7 +401,7 @@
                             <option value="empresa">Evento Empresarial</option>
                             <option value="otro">Otro</option>
                         }</div>
-                    <div class="form-group">
+<div class="form-group">
                         <label for="event-theme">Tema del Evento</label>
                         <select id="event-theme">
                             <option value="cumpleanos">Cumpleaños Divertido</option>
@@ -411,7 +411,7 @@
                             <option value="fiesta">Fiesta Temática</option>
                         </select>
                     </div>
-                    <div class="form-group" id="custom-theme-section" style="display: none;">
+<div class="form-group" id="custom-theme-section" style="display: none;">
                         <label>Personalizar Tema</label>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                             <input type="color" id="primary-color" value="#ff6b6b" title="Color primario">
@@ -420,27 +420,27 @@
                         </div>
                         <button type="button" id="save-custom-theme" class="primary-btn" style="margin-top: 10px;">💾 Guardar Tema Personalizado</button>
                     </div>
-                    <div class="form-group">
+<div class="form-group">
                         <label><input type="checkbox" id="enable-custom-theme"> Usar tema personalizado</label>
                     </div>
                 </form>
                 
                 <div id="event-result" style="display: none;">
-                    <div class="qr-container">
+<div class="qr-container">
                         <h3>✅ Evento Creado</h3>
-                        <div class="url-display">
+    <div class="url-display">
                             <strong>📱 URL Captura:</strong><br>
                             <span id="capture-url"></span>
                         </div>
-                        <div class="url-display">
+    <div class="url-display">
                             <strong>🛡️ URL Moderación:</strong><br>
                             <span id="moderation-url"></span>
                         </div>
-                        <div class="url-display">
+    <div class="url-display">
                             <strong>📺 URL Proyección:</strong><br>
                             <span id="projection-url"></span>
                         </div>
-                        <div class="qr-code" id="qr-code-container">
+    <div class="qr-code" id="qr-code-container">
                             <!-- QR Code will be generated here -->
                         </div>
                         <button id="copy-urls" class="primary-btn">📋 Copiar URLs</button>
@@ -721,9 +721,9 @@ ${event.urls.projection}
 
             container.innerHTML = events.map(event => `
                 <div class="event-item">
-                    <div class="event-name">${event.name}</div>
-                    <div class="event-id">ID: ${event.id} | Tipo: ${event.type}</div>
-                    <div class="event-actions">
+<div class="event-name">${event.name}</div>
+<div class="event-id">ID: ${event.id} | Tipo: ${event.type}</div>
+<div class="event-actions">
                         <button class="success-btn" onclick="viewEvent('${event.id}')">👁️ Ver</button>
                         <button class="info-btn" onclick="copyURLs(${JSON.stringify(event).replace(/"/g, '&quot;')})">📋 Copiar</button>
                         <button class="warning-btn" onclick="regenerateQR('${event.id}')">🔄 QR</button>
