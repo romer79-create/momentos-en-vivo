@@ -7,18 +7,29 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@400;600;700&display=swap');
         
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #ffd93d;
+            --accent-color: #6bcf7f;
+            --background-gradient: linear-gradient(135deg, #ff6b6b, #ffd93d, #6bcf7f, #4ecdc4, #45b7d1);
+            --text-color: #ffffff;
+            --text-secondary: #f8f9fa;
+            --primary-font: 'Fredoka One', cursive;
+            --secondary-font: 'Poppins', sans-serif;
+        }
+        
         body { 
-            font-family: 'Poppins', sans-serif; 
+            font-family: var(--secondary-font); 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             justify-content: center; 
             min-height: 100vh; 
             margin: 0; 
-            background: linear-gradient(135deg, #ff6b6b, #ffd93d, #6bcf7f, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+            background: var(--background-gradient);
             background-size: 400% 400%;
             animation: gradientShift 8s ease infinite;
-            color: white; 
+            color: var(--text-color); 
             text-align: center;
             position: relative;
             overflow-x: hidden;
@@ -35,19 +46,19 @@
             position: absolute;
             width: 10px;
             height: 10px;
-            background: #ff6b6b;
+            background: var(--primary-color);
             animation: confetti-fall 3s linear infinite;
         }
         
-        .confetti:nth-child(1) { left: 10%; animation-delay: 0s; background: #ffd93d; }
-        .confetti:nth-child(2) { left: 20%; animation-delay: 0.5s; background: #6bcf7f; }
+        .confetti:nth-child(1) { left: 10%; animation-delay: 0s; background: var(--secondary-color); }
+        .confetti:nth-child(2) { left: 20%; animation-delay: 0.5s; background: var(--accent-color); }
         .confetti:nth-child(3) { left: 30%; animation-delay: 1s; background: #4ecdc4; }
         .confetti:nth-child(4) { left: 40%; animation-delay: 1.5s; background: #45b7d1; }
-        .confetti:nth-child(5) { left: 50%; animation-delay: 2s; background: #ff6b6b; }
+        .confetti:nth-child(5) { left: 50%; animation-delay: 2s; background: var(--primary-color); }
         .confetti:nth-child(6) { left: 60%; animation-delay: 2.5s; background: #feca57; }
         .confetti:nth-child(7) { left: 70%; animation-delay: 0.8s; background: #96ceb4; }
-        .confetti:nth-child(8) { left: 80%; animation-delay: 1.3s; background: #ffd93d; }
-        .confetti:nth-child(9) { left: 90%; animation-delay: 1.8s; background: #6bcf7f; }
+        .confetti:nth-child(8) { left: 80%; animation-delay: 1.3s; background: var(--secondary-color); }
+        .confetti:nth-child(9) { left: 90%; animation-delay: 1.8s; background: var(--accent-color); }
         
         @keyframes confetti-fall {
             0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
@@ -55,12 +66,12 @@
         }
         
         h1 { 
-            font-family: 'Fredoka One', cursive; 
+            font-family: var(--primary-font); 
             font-size: 2.8rem; 
             margin: 20px 0; 
             text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
             animation: bounce 2s ease-in-out infinite;
-            background: linear-gradient(45deg, #fff, #ffd93d, #fff);
+            background: linear-gradient(45deg, var(--text-color), var(--secondary-color), var(--text-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -98,27 +109,17 @@
             max-height: 120px;
             padding: 15px;
             border: 3px solid rgba(255,255,255,0.8);
-            border-radius: 15px;
-            background: rgba(255,255,255,0.95);
-            color: #333;
-            font-family: 'Poppins', sans-serif;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.9);
+            color: #2c3e50;
+            font-family: var(--secondary-font);
             font-size: 1rem;
             resize: vertical;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
             box-sizing: border-box;
         }
         
-        textarea:focus {
-            outline: none;
-            border-color: #ffd93d;
-            box-shadow: 0 8px 35px rgba(255,217,61,0.3);
-            transform: translateY(-2px);
-        }
-        
         textarea::placeholder {
-            color: #666;
-            font-style: italic;
+            color: rgba(44, 62, 80, 0.6);
         }
         
         .char-counter {
@@ -139,7 +140,7 @@
         }
         
         button { 
-            font-family: 'Poppins', sans-serif;
+            font-family: var(--secondary-font);
             font-size: 1.3rem; 
             padding: 18px 35px; 
             cursor: pointer; 
@@ -168,8 +169,8 @@
         }
         
         #snap { 
-            background: linear-gradient(135deg, #ff6b6b, #feca57); 
-            color: white;
+            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color)); 
+            color: #2c3e50;
             animation: pulse 2s infinite;
         }
         
@@ -388,5 +389,167 @@
         // Mostrar contador inicial
         updatePhotoCounter();
     </script>
+    
+    <!-- Cargar Theme Manager -->
+    <script src="theme-manager.js"></script>
+    
+    <script>
+        // Sistema de Compartir en Redes Sociales
+        class SocialShare {
+            constructor() {
+                this.photoUrl = null;
+                this.eventName = '';
+                this.eventId = '';
+            }
+            
+            // Inicializar con datos del evento
+            init(eventId) {
+                this.eventId = eventId;
+                const events = JSON.parse(localStorage.getItem('events') || '[]');
+                const event = events.find(e => e.id === eventId);
+                if (event) {
+                    this.eventName = event.name;
+                }
+                
+                // Extraer eventId de URL si no se proporciona
+                const urlParams = new URLSearchParams(window.location.search);
+                this.eventId = urlParams.get('event') || eventId;
+            }
+            
+            // Compartir en Facebook
+            shareToFacebook(photoUrl) {
+                const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(photoUrl)}&quote=${encodeURIComponent(`¡Foto del evento ${this.eventName}! 📸 #MomentosEnVivo #${this.eventId}`)}`;
+                this.openShareWindow(url, 'Facebook');
+            }
+            
+            // Compartir en Twitter
+            shareToTwitter(photoUrl) {
+                const text = `¡Nueva foto del evento ${this.eventName}! 📸 #MomentosEnVivo #${this.eventId}`;
+                const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(photoUrl)}`;
+                this.openShareWindow(url, 'Twitter');
+            }
+            
+            // Compartir en WhatsApp
+            shareToWhatsApp(photoUrl) {
+                const text = `¡Mira esta foto del evento ${this.eventName}! 📸 ${photoUrl} #MomentosEnVivo #${this.eventId}`;
+                const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                this.openShareWindow(url, 'WhatsApp');
+            }
+            
+            // Compartir en Instagram (abre Instagram app)
+            shareToInstagram(photoUrl) {
+                // Instagram no permite compartir URLs directamente, así que copiamos al portapapeles
+                const text = `¡Foto del evento ${this.eventName}! 📸 ${photoUrl} #MomentosEnVivo #${this.eventId}`;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: `Foto de ${this.eventName}`,
+                        text: text,
+                        url: photoUrl
+                    }).catch(() => {
+                        this.copyToClipboard(text);
+                    });
+                } else {
+                    this.copyToClipboard(text);
+                }
+                
+                // Abrir Instagram app
+                window.open('instagram://camera', '_blank');
+                alert('Texto copiado al portapapeles. Pégalo en Instagram!');
+            }
+            
+            // Compartir en LinkedIn
+            shareToLinkedIn(photoUrl) {
+                const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(photoUrl)}`;
+                this.openShareWindow(url, 'LinkedIn');
+            }
+            
+            // Abrir ventana de compartir
+            openShareWindow(url, platform) {
+                const width = 600;
+                const height = 400;
+                const left = (window.innerWidth - width) / 2;
+                const top = (window.innerHeight - height) / 2;
+                
+                window.open(url, `share-${platform}`, 
+                    `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+                );
+            }
+            
+            // Copiar al portapapeles
+            copyToClipboard(text) {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        console.log('Texto copiado al portapapeles');
+                    }).catch(err => {
+                        console.error('Error copiando:', err);
+                        this.fallbackCopyTextToClipboard(text);
+                    });
+                } else {
+                    this.fallbackCopyTextToClipboard(text);
+                }
+            }
+            
+            // Fallback para copiar
+            fallbackCopyTextToClipboard(text) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    console.log('Texto copiado (fallback)');
+                } catch (err) {
+                    console.error('Error en fallback copy:', err);
+                }
+                
+                document.body.removeChild(textArea);
+            }
+            
+            // Crear botones de compartir
+            createShareButtons(container, photoUrl) {
+                this.photoUrl = photoUrl;
+                
+                const buttonsHtml = `
+                    <div class="social-share-buttons" style="margin-top: 20px;">
+                        <button class="share-btn share-facebook" onclick="socialShare.shareToFacebook('${photoUrl}')">
+                            📘 Facebook
+                        </button>
+                        <button class="share-btn share-twitter" onclick="socialShare.shareToTwitter('${photoUrl}')">
+                            🐦 Twitter
+                        </button>
+                        <button class="share-btn share-instagram" onclick="socialShare.shareToInstagram('${photoUrl}')">
+                            📷 Instagram
+                        </button>
+                        <button class="share-btn share-whatsapp" onclick="socialShare.shareToWhatsApp('${photoUrl}')" style="background: #25d366; color: white;">
+                            💬 WhatsApp
+                        </button>
+                        <button class="share-btn" onclick="socialShare.shareToLinkedIn('${photoUrl}')" style="background: #0077b5; color: white;">
+                            💼 LinkedIn
+                        </button>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', buttonsHtml);
+            }
+        }
+        
+        // Instancia global de SocialShare
+        const socialShare = new SocialShare();
+        
+        // Inicializar compartir cuando se carga la página
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventId = urlParams.get('event');
+            if (eventId) {
+                socialShare.init(eventId);
+            }
+        });
+    </script>
 </body>
-</html>
+</html> 

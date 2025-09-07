@@ -7,18 +7,29 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@400;600;700&display=swap');
         
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #e74c3c;
+            --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --text-color: #ffffff;
+            --text-secondary: #bdc3c7;
+            --primary-font: 'Fredoka One', cursive;
+            --secondary-font: 'Poppins', sans-serif;
+        }
+        
         body { 
-            font-family: 'Poppins', sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            font-family: var(--secondary-font); 
+            background: var(--background-gradient); 
             margin: 0; 
             padding: 20px; 
             min-height: 100vh;
-            color: white;
+            color: var(--text-color);
         }
         
         h1 { 
-            font-family: 'Fredoka One', cursive; 
-            color: white; 
+            font-family: var(--primary-font); 
+            color: var(--text-color); 
             text-align: center; 
             font-size: 2.5rem; 
             margin-bottom: 30px;
@@ -58,7 +69,7 @@
         }
         
         .message-text {
-            background: linear-gradient(135deg, #ffd93d, #ff6b6b);
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
             color: white;
             padding: 12px;
             border-radius: 15px;
@@ -71,8 +82,8 @@
         }
         
         .no-message {
-            background: #e9ecef;
-            color: #6c757d;
+            background: #e9ecef !important;
+            color: #6c757d !important;
             font-style: italic;
         }
         
@@ -95,25 +106,97 @@
             border-radius: 25px; 
             cursor: pointer;
             font-weight: 700;
-            font-family: 'Poppins', sans-serif;
+            font-family: var(--secondary-font);
             flex: 1;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
         
-        .approve-btn { 
-            background: linear-gradient(135deg, #28a745, #20c997); 
-            color: white; 
+        .approve-btn {
+            background: linear-gradient(135deg, var(--secondary-color), #27ae60);
+            color: white;
         }
         
-        .reject-btn { 
-            background: linear-gradient(135deg, #dc3545, #fd7e14); 
-            color: white; 
-        }
-        
-        .actions button:hover {
+        .approve-btn:hover {
+            background: linear-gradient(135deg, #27ae60, var(--secondary-color));
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .reject-btn {
+            background: linear-gradient(135deg, var(--accent-color), #c0392b);
+            color: white;
+        }
+        
+        .reject-btn:hover {
+            background: linear-gradient(135deg, #c0392b, var(--accent-color));
+            transform: translateY(-2px);
+        }
+        
+        .share-section {
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .share-section.show {
+            display: block;
+        }
+        
+        .share-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .share-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .share-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .share-facebook {
+            background: #1877f2;
+            color: white;
+        }
+        
+        .share-twitter {
+            background: #1da1f2;
+            color: white;
+        }
+        
+        .share-instagram {
+            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+            color: white;
+        }
+        
+        .share-whatsapp {
+            background: #25d366;
+            color: white;
+        }
+        
+        .share-linkedin {
+            background: #0077b5;
+            color: white;
+        }
+        
+        .share-copy {
+            background: var(--primary-color);
+            color: white;
         }
         
         .loading {
@@ -162,10 +245,129 @@
                 })
             });
             if (response.ok) {
-                cardElement.remove();
+                if (action === 'approve') {
+                    // Mostrar botones de compartir después de aprobar
+                    showShareButtons(public_id, cardElement);
+                } else {
+                    cardElement.remove();
+                }
             } else {
                 alert(`Error al procesar la foto.`);
             }
+        }
+
+        // Función para mostrar botones de compartir
+        async function showShareButtons(public_id, cardElement) {
+            try {
+                // Obtener la URL de la foto aprobada
+                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-approved-photos?eventId=${eventId}`);
+                const photos = await response.json();
+                
+                const approvedPhoto = photos.find(photo => photo.public_id === public_id);
+                if (!approvedPhoto) {
+                    cardElement.remove();
+                    return;
+                }
+
+                // Generar URLs de compartir
+                const shareResponse = await fetch(`${NETLIFY_URL}/.netlify/functions/social-share?action=generate-share-urls&photoUrl=${encodeURIComponent(approvedPhoto.secure_url)}&eventId=${eventId}`);
+                const shareData = await shareResponse.json();
+
+                if (shareData.success) {
+                    const shareSection = cardElement.querySelector('.share-section');
+                    const shareButtons = cardElement.querySelector('.share-buttons');
+                    
+                    shareButtons.innerHTML = `
+                        <button class="share-btn share-facebook" onclick="shareToPlatform('${shareData.shareUrls.facebook}', 'Facebook', '${public_id}')">
+                            📘 Facebook
+                        </button>
+                        <button class="share-btn share-twitter" onclick="shareToPlatform('${shareData.shareUrls.twitter}', 'Twitter', '${public_id}')">
+                            🐦 Twitter
+                        </button>
+                        <button class="share-btn share-instagram" onclick="shareToPlatform('${shareData.shareUrls.instagram}', 'Instagram', '${public_id}')">
+                            📷 Instagram
+                        </button>
+                        <button class="share-btn share-whatsapp" onclick="shareToPlatform('${shareData.shareUrls.whatsapp}', 'WhatsApp', '${public_id}')">
+                            💬 WhatsApp
+                        </button>
+                        <button class="share-btn share-linkedin" onclick="shareToPlatform('${shareData.shareUrls.linkedin}', 'LinkedIn', '${public_id}')">
+                            💼 LinkedIn
+                        </button>
+                        <button class="share-btn share-copy" onclick="copyToClipboard('${approvedPhoto.secure_url}')">
+                            📋 Copiar
+                        </button>
+                    `;
+                    
+                    shareSection.classList.add('show');
+                    
+                    // Cambiar el texto del botón de aprobar
+                    const approveBtn = cardElement.querySelector('.approve-btn');
+                    approveBtn.textContent = '✅ Aprobada';
+                    approveBtn.disabled = true;
+                    approveBtn.style.background = '#95a5a6';
+                    
+                    // Ocultar botón de rechazar
+                    const rejectBtn = cardElement.querySelector('.reject-btn');
+                    rejectBtn.style.display = 'none';
+                } else {
+                    cardElement.remove();
+                }
+            } catch (error) {
+                console.error('Error mostrando botones de compartir:', error);
+                cardElement.remove();
+            }
+        }
+
+        // Función para compartir en plataforma específica
+        function shareToPlatform(url, platform, photoId) {
+            // Registrar el compartir
+            fetch(`${NETLIFY_URL}/.netlify/functions/social-share?action=log-share&platform=${platform}&photoId=${photoId}&eventId=${eventId}`);
+            
+            // Abrir ventana de compartir
+            const width = 600;
+            const height = 400;
+            const left = (window.innerWidth - width) / 2;
+            const top = (window.innerHeight - height) / 2;
+            
+            window.open(url, `share-${platform}`, 
+                `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+            );
+        }
+
+        // Función para copiar al portapapeles
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('✅ URL copiada al portapapeles');
+                }).catch(err => {
+                    console.error('Error copiando:', err);
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text);
+            }
+        }
+
+        // Fallback para copiar
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                alert('✅ URL copiada al portapapeles');
+            } catch (err) {
+                console.error('Error en fallback copy:', err);
+                alert('❌ Error copiando la URL');
+            }
+            
+            document.body.removeChild(textArea);
         }
 
         async function loadPendingPhotos() {
@@ -209,6 +411,11 @@
                         <button class="approve-btn">✅ Aprobar</button>
                         <button class="reject-btn">❌ Rechazar</button>
                     </div>
+                    <div class="share-section" id="share-${photo.public_id}">
+                        <div class="share-buttons" id="share-buttons-${photo.public_id}">
+                            <!-- Botones de compartir se agregarán aquí dinámicamente -->
+                        </div>
+                    </div>
                 `;
                 
                 card.querySelector('.approve-btn').addEventListener('click', () => handleAction('approve', photo.public_id, card));
@@ -220,6 +427,20 @@
 
         loadPendingPhotos();
         setInterval(loadPendingPhotos, 10000); // Revisa si hay fotos nuevas cada 10 segundos
+    </script>
+    
+    <!-- Cargar Theme Manager -->
+    <script src="theme-manager.js"></script>
+    
+    <script>
+        // Inicializar tema del evento
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventId = urlParams.get('event');
+            if (eventId && themeManager) {
+                themeManager.applyThemeFromEvent(eventId);
+            }
+        });
     </script>
 </body>
 </html>

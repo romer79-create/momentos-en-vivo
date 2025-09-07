@@ -400,9 +400,29 @@
                             <option value="graduacion">Graduación</option>
                             <option value="empresa">Evento Empresarial</option>
                             <option value="otro">Otro</option>
+                        }</div>
+                    <div class="form-group">
+                        <label for="event-theme">Tema del Evento</label>
+                        <select id="event-theme">
+                            <option value="cumpleanos">Cumpleaños Divertido</option>
+                            <option value="boda">Boda Elegante</option>
+                            <option value="corporativo">Evento Corporativo</option>
+                            <option value="graduacion">Graduación</option>
+                            <option value="fiesta">Fiesta Temática</option>
                         </select>
                     </div>
-                    <button type="submit" class="primary-btn">🚀 Crear Evento</button>
+                    <div class="form-group" id="custom-theme-section" style="display: none;">
+                        <label>Personalizar Tema</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <input type="color" id="primary-color" value="#ff6b6b" title="Color primario">
+                            <input type="color" id="secondary-color" value="#ffd93d" title="Color secundario">
+                            <input type="color" id="accent-color" value="#6bcf7f" title="Color de acento">
+                        </div>
+                        <button type="button" id="save-custom-theme" class="primary-btn" style="margin-top: 10px;">💾 Guardar Tema Personalizado</button>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="enable-custom-theme"> Usar tema personalizado</label>
+                    </div>
                 </form>
                 
                 <div id="event-result" style="display: none;">
@@ -439,6 +459,25 @@
                 <button class="warning-btn" id="refresh-events">🔄 Actualizar Lista</button>
                 <button class="info-btn" onclick="showArchivedEvents()">📦 Archivados</button>
                 <button class="secondary-btn" onclick="testNetlifyConnection()">🧪 Probar Conexión</button>
+            </div>
+            
+            <!-- Sección: Gestión de Temas -->
+            <div class="section">
+                <h2>🎨 Gestión de Temas</h2>
+                <div class="form-group">
+                    <label for="theme-selector">Tema Actual</label>
+                    <select id="theme-selector" onchange="previewTheme(this.value)">
+                        <option value="cumpleanos">Cumpleaños Divertido</option>
+                        <option value="boda">Boda Elegante</option>
+                        <option value="corporativo">Evento Corporativo</option>
+                        <option value="graduacion">Graduación</option>
+                        <option value="fiesta">Fiesta Temática</option>
+                    </select>
+                </div>
+                <div id="theme-preview" class="theme-preview" style="margin-top: 20px; padding: 15px; border-radius: 10px; background: var(--background-gradient); color: white;">
+                    <h3>👁️ Vista Previa del Tema</h3>
+                    <p>Este es cómo se verá tu evento con el tema seleccionado.</p>
+                </div>
             </div>
         </div>
         
@@ -1057,6 +1096,128 @@ ${event.urls.projection}
 
         // Inicializar la aplicación cuando se carga la página
         document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+    
+    <!-- Cargar Theme Manager -->
+    <script src="theme-manager.js"></script>
+    
+    <script>
+        // Variables globales para temas
+        let availableThemes = [];
+        let currentPreviewTheme = null;
+        
+        // Cargar temas disponibles
+        async function loadThemes() {
+            try {
+                const response = await fetch('/themes.json');
+                const data = await response.json();
+                availableThemes = Object.keys(data.themes);
+                
+                // Actualizar selectores de tema
+                updateThemeSelectors(data.themes);
+                
+                console.log('✅ Temas cargados en admin');
+            } catch (error) {
+                console.error('❌ Error cargando temas:', error);
+            }
+        }
+        
+        // Actualizar selectores de tema
+        function updateThemeSelectors(themes) {
+            const selectors = ['event-theme', 'theme-selector'];
+            selectors.forEach(selectorId => {
+                const select = document.getElementById(selectorId);
+                if (select) {
+                    select.innerHTML = Object.keys(themes).map(themeId => 
+                        `<option value="${themeId}">${themes[themeId].name}</option>`
+                    ).join('');
+                }
+            });
+        }
+        
+        // Toggle tema personalizado
+        document.getElementById('enable-custom-theme').addEventListener('change', function() {
+            const customSection = document.getElementById('custom-theme-section');
+            customSection.style.display = this.checked ? 'block' : 'none';
+        });
+        
+        // Guardar tema personalizado
+        document.getElementById('save-custom-theme').addEventListener('click', function() {
+            const themeName = prompt('Nombre del tema personalizado:');
+            if (!themeName) return;
+            
+            const customTheme = {
+                name: themeName,
+                colors: {
+                    primary: document.getElementById('primary-color').value,
+                    secondary: document.getElementById('secondary-color').value,
+                    accent: document.getElementById('accent-color').value,
+                    background: `linear-gradient(135deg, ${document.getElementById('primary-color').value}, ${document.getElementById('secondary-color').value})`,
+                    text: '#ffffff',
+                    textSecondary: '#f8f9fa'
+                },
+                fonts: { primary: "'Poppins', sans-serif", secondary: "'Poppins', sans-serif" },
+                icons: { camera: '📸', heart: '❤️', photo: '📷' },
+                animations: { gradientShift: '8s', bounce: '2s' }
+            };
+            
+            themeManager.saveCustomTheme(themeName.toLowerCase().replace(/\s+/g, ''), customTheme);
+            showStatus('✅ Tema personalizado guardado', 'success');
+            loadThemes(); // Recargar lista
+        });
+        
+        // Vista previa de tema
+        function previewTheme(themeName) {
+            if (themeManager && themeManager.themes[themeName]) {
+                const theme = themeManager.themes[themeName];
+                const preview = document.getElementById('theme-preview');
+                preview.style.background = theme.colors.background;
+                preview.innerHTML = `
+                    <h3>👁️ Vista Previa del Tema</h3>
+                    <p>Este es cómo se verá tu evento con el tema seleccionado.</p>
+                `;
+                currentPreviewTheme = themeName;
+            }
+        }
+        
+        // Modificar creación de evento para incluir tema
+        const originalCreateEvent = document.getElementById('create-event-form').onsubmit;
+        document.getElementById('create-event-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const eventName = document.getElementById('event-name').value;
+            const eventId = document.getElementById('event-id').value || generateEventId(eventName);
+            const eventType = document.getElementById('event-type').value;
+            const eventTheme = document.getElementById('event-theme').value;
+            
+            const event = {
+                id: eventId,
+                name: eventName,
+                type: eventType,
+                theme: eventTheme,
+                created: new Date().toISOString(),
+                urls: {
+                    capture: `${NETLIFY_URL}/index.html?event=${eventId}`,
+                    moderation: `${NETLIFY_URL}/moderador.html?event=${eventId}`,
+                    projection: `${NETLIFY_URL}/proyeccion.html?event=${eventId}`
+                }
+            };
+            
+            events.push(event);
+            localStorage.setItem('events', JSON.stringify(events));
+            
+            await showEventResult(event);
+            document.getElementById('create-event-form').reset();
+            loadEventsList();
+            showStatus('✅ Evento creado exitosamente con tema', 'success');
+        });
+        
+        // Inicializar temas
+        document.addEventListener('DOMContentLoaded', () => {
+            initApp();
+            loadThemes();
+            setTimeout(() => previewTheme('cumpleanos'), 500);
+        });
     </script>
 </body>
 </html>

@@ -7,12 +7,23 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@400;600;700&display=swap');
         
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #e74c3c;
+            --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --text-color: #ffffff;
+            --text-secondary: #bdc3c7;
+            --primary-font: 'Fredoka One', cursive;
+            --secondary-font: 'Poppins', sans-serif;
+        }
+        
         body { 
             margin: 0; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            color: white; 
+            background: var(--background-gradient); 
+            color: var(--text-color); 
             overflow: hidden; 
-            font-family: 'Poppins', sans-serif; 
+            font-family: var(--secondary-font); 
         }
         
         #projection-container { 
@@ -51,7 +62,7 @@
         }
         
         .message-overlay {
-            background: linear-gradient(135deg, rgba(255,217,61,0.95), rgba(255,107,107,0.95));
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
             color: white;
             padding: 20px 30px;
             border-radius: 25px;
@@ -70,9 +81,9 @@
         }
         
         #placeholder { 
-            font-family: 'Fredoka One', cursive;
+            font-family: var(--primary-font);
             font-size: 3em; 
-            color: rgba(255,255,255,0.8); 
+            color: var(--text-secondary); 
             text-align: center;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
@@ -239,6 +250,20 @@
         }
 
         start();
+    </script>
+    
+    <!-- Cargar Theme Manager -->
+    <script src="theme-manager.js"></script>
+    
+    <script>
+        // Inicializar tema del evento
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventId = urlParams.get('event');
+            if (eventId && themeManager) {
+                themeManager.applyThemeFromEvent(eventId);
+            }
+        });
     </script>
 </body>
 </html>
