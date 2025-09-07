@@ -308,6 +308,7 @@
                     <!-- Los eventos se cargarán aquí -->
                 </div>
                 <button class="warning-btn" id="refresh-events">🔄 Actualizar Lista</button>
+                <button class="info-btn" onclick="showArchivedEvents()">📦 Archivados</button>
             </div>
         </div>
         
@@ -555,14 +556,113 @@ ${event.urls.projection}
             }
         }
         
-        // Borrar evento
-        window.deleteEvent = function(eventId) {
-            if (confirm('¿Estás seguro de que quieres borrar este evento?')) {
-                events = events.filter(e => e.id !== eventId);
-                localStorage.setItem('events', JSON.stringify(events));
-                loadEventsList();
-                showStatus('🗑️ Evento borrado', 'info');
+        // Archivar evento
+        window.deleteEvent = async function(eventId) {
+            if (!confirm('⚠️ ¿Estás seguro de que quieres archivar este evento?\n\n✅ Las fotos se moverán a archivo\n🚫 Las URLs dejarán de funcionar\n\n¿Continuar?')) {
+                return;
             }
+
+            const deleteBtn = document.querySelector(`button[onclick*="${eventId}"]`);
+            const originalText = deleteBtn?.textContent || '🗑️ Borrar';
+
+            try {
+                if (deleteBtn) {
+                    deleteBtn.disabled = true;
+                    deleteBtn.textContent = '⏳ Archivando...';
+                }
+
+                showStatus('⏳ Archivando fotos del evento...', 'info');
+
+                // 1. Archivar fotos en Cloudinary
+                const archiveResponse = await fetch(`${NETLIFY_URL}/.netlify/functions/archive-event?eventId=${eventId}`);
+                const archiveResult = await archiveResponse.json();
+
+                if (!archiveResponse.ok) {
+                    throw new Error(archiveResult.error || 'Error al archivar fotos');
+                }
+
+                // 2. Eliminar evento del localStorage
+                const events = JSON.parse(localStorage.getItem('events') || '[]');
+                const eventToArchive = events.find(e => e.id === eventId);
+
+                if (eventToArchive) {
+                    // 3. Guardar en eventos archivados
+                    const archivedEvents = JSON.parse(localStorage.getItem('archivedEvents') || '[]');
+                    archivedEvents.push({
+                        ...eventToArchive,
+                        archivedAt: new Date().toISOString(),
+                        photosArchived: archiveResult.archivedPhotos || 0
+                    });
+                    localStorage.setItem('archivedEvents', JSON.stringify(archivedEvents));
+
+                    // 4. Eliminar de eventos activos
+                    const updatedEvents = events.filter(e => e.id !== eventId);
+                    localStorage.setItem('events', JSON.stringify(updatedEvents));
+                }
+
+                loadEventsList();
+                showStatus(`✅ Evento archivado (${archiveResult.archivedPhotos || 0} fotos)`, 'success');
+
+            } catch (error) {
+                console.error('Error al archivar evento:', error);
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                if (deleteBtn) {
+                    deleteBtn.disabled = false;
+                    deleteBtn.textContent = originalText;
+                }
+            }
+        };
+
+        // Mostrar eventos archivados
+        function showArchivedEvents() {
+            const archivedEvents = JSON.parse(localStorage.getItem('archivedEvents') || '[]');
+
+            if (archivedEvents.length === 0) {
+                showStatus('📦 No hay eventos archivados', 'info');
+                return;
+            }
+
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+                padding: 20px;
+            `;
+
+            modal.innerHTML = `
+                <div style="background: white; padding: 20px; border-radius: 10px; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto;">
+                    <h2>📦 Eventos Archivados</h2>
+                    <div id="archived-events-list" style="margin: 15px 0;"></div>
+                    <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()"
+                            style="padding: 8px 16px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Cerrar
+                    </button>
+                </div>
+            `;
+
+            const listContainer = modal.querySelector('#archived-events-list');
+            archivedEvents.forEach(event => {
+                const eventEl = document.createElement('div');
+                eventEl.style.cssText = 'padding: 10px; border-bottom: 1px solid #eee;';
+                eventEl.innerHTML = `
+                    <strong>${event.name}</strong> (${event.id})<br>
+                    <small>Tipo: ${event.type || 'N/A'}</small><br>
+                    <small>Archivado: ${new Date(event.archivedAt).toLocaleString()}</small><br>
+                    <small>📸 ${event.photosArchived || 0} fotos archivadas</small>
+                `;
+                listContainer.appendChild(eventEl);
+            });
+
+            document.body.appendChild(modal);
         }
         
         loadEventsList();
