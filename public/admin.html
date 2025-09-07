@@ -374,7 +374,14 @@
             e.preventDefault();
 
             const eventName = document.getElementById('event-name').value;
-            const eventId = document.getElementById('event-id').value || generateEventId(eventName);
+            let eventId = document.getElementById('event-id').value.trim();
+
+            // Generar ID automáticamente si el campo está vacío
+            if (!eventId || eventId === '') {
+                eventId = generateEventId(eventName);
+                console.log('Generando ID automáticamente:', eventId);
+            }
+
             const eventType = document.getElementById('event-type').value;
 
             // Validar que el ID no exista
