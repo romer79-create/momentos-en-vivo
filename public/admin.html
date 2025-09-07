@@ -376,10 +376,18 @@
             const eventName = document.getElementById('event-name').value;
             let eventId = document.getElementById('event-id').value.trim();
 
+            // Debug: mostrar el valor del campo
+            console.log('Valor del campo event-id:', `'${eventId}'`);
+            console.log('Longitud del valor:', eventId.length);
+            console.log('¿Es vacío?', eventId === '');
+            console.log('¿Es falsy?', !eventId);
+
             // Generar ID automáticamente si el campo está vacío
             if (!eventId || eventId === '') {
                 eventId = generateEventId(eventName);
-                console.log('Generando ID automáticamente:', eventId);
+                console.log('✅ Generando ID automáticamente:', eventId);
+            } else {
+                console.log('ℹ️ Usando ID manual:', eventId);
             }
 
             const eventType = document.getElementById('event-type').value;
@@ -723,6 +731,20 @@ ${event.urls.projection}
         // Inicializar aplicación
         document.addEventListener('DOMContentLoaded', () => {
             loadEventsList();
+
+            // Agregar eventos para limpiar el campo de ID al hacer focus
+            const eventIdField = document.getElementById('event-id');
+            eventIdField.addEventListener('focus', function() {
+                if (this.value === this.defaultValue || this.value === '') {
+                    this.value = '';
+                }
+            });
+
+            eventIdField.addEventListener('blur', function() {
+                if (this.value === '') {
+                    console.log('Campo vacío detectado en blur');
+                }
+            });
         });
 
         // Mostrar eventos archivados
