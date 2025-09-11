@@ -350,10 +350,20 @@
             }
 
             statusEl.textContent = "Preparándose... 3";
-            setTimeout(() => statusEl.textContent = "Preparándose... 2", 1000);
-            setTimeout(() => statusEl.textContent = "Preparándose... 1", 2000);
+            statusEl.style.fontSize = '2rem';
+            statusEl.style.fontWeight = 'bold';
+            statusEl.style.color = '#ffd93d';
+            setTimeout(() => {
+                statusEl.textContent = "Preparándose... 2";
+            }, 1000);
+            setTimeout(() => {
+                statusEl.textContent = "Preparándose... 1";
+            }, 2000);
             setTimeout(() => {
                 statusEl.textContent = "Capturando...";
+                statusEl.style.fontSize = '';
+                statusEl.style.fontWeight = '';
+                statusEl.style.color = '';
                 const ctx = canvas.getContext('2d');
                 if (video.videoWidth > video.videoHeight) {
                     // Landscape, make it vertical by rotating 90 degrees
