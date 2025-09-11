@@ -333,9 +333,20 @@
             }
 
             statusEl.textContent = "Procesando...";
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            const ctx = canvas.getContext('2d');
+            if (video.videoWidth > video.videoHeight) {
+                // Already landscape
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            } else {
+                // Portrait, rotate to landscape
+                canvas.width = video.videoHeight;
+                canvas.height = video.videoWidth;
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.rotate(Math.PI / 2);
+                ctx.drawImage(video, -video.videoWidth / 2, -video.videoHeight / 2, video.videoWidth, video.videoHeight);
+            }
 
             canvas.toBlob(blob => {
                 if (!blob) { statusEl.textContent = "Error al capturar la imagen."; return; }
