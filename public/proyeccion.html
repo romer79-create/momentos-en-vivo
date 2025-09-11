@@ -191,16 +191,39 @@
                 allSlides[0].remove();
             }
             
-            // Extraer mensaje de los tags de Cloudinary
+            // Extraer mensaje de los tags de Cloudinary - versión mejorada
             let message = '';
             if (photo.tags && Array.isArray(photo.tags)) {
-                const messageTag = photo.tags.find(tag => tag.startsWith('msg:'));
+                console.log('🔍 Buscando mensaje en tags:', photo.tags);
+                
+                // Buscar tag que empiece con 'msg:'
+                const messageTag = photo.tags.find(tag => {
+                    const isMessageTag = tag && tag.startsWith && tag.startsWith('msg:');
+                    console.log('📋 Revisando tag:', tag, '¿Es mensaje?', isMessageTag);
+                    return isMessageTag;
+                });
+                
                 if (messageTag) {
-                    message = decodeURIComponent(messageTag.substring(4)); // Remover 'msg:' del inicio
+                    try {
+                        // Extraer el mensaje después de 'msg:'
+                        const encodedMessage = messageTag.substring(4);
+                        console.log('📝 Mensaje codificado encontrado:', encodedMessage);
+                        
+                        // Decodificar el mensaje
+                        message = decodeURIComponent(encodedMessage);
+                        console.log('✅ Mensaje decodificado:', message);
+                    } catch (decodeError) {
+                        console.error('❌ Error decodificando mensaje:', decodeError);
+                        // Intentar usar el mensaje sin decodificar si falla
+                        message = messageTag.substring(4);
+                        console.log('⚠️ Usando mensaje sin decodificar:', message);
+                    }
+                } else {
+                    console.log('❌ No se encontró tag de mensaje en:', photo.tags);
                 }
+            } else {
+                console.log('❌ Tags no válidos o vacíos:', photo.tags);
             }
-            
-            console.log('--- DEBUG Proyección: Foto:', photo.public_id, 'Tags:', photo.tags, 'Mensaje extraído:', message);
             
             // Crear nuevo slide
             const slide = document.createElement('div');
