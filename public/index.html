@@ -18,6 +18,15 @@
             --secondary-font: 'Poppins', sans-serif;
         }
         
+        body.dark-mode {
+            --primary-color: #4ecdc4;
+            --secondary-color: #45b7d1;
+            --accent-color: #ff6b6b;
+            --background-gradient: linear-gradient(135deg, #2c3e50, #34495e, #1b2631);
+            --text-color: #ecf0f1;
+            --text-secondary: #bdc3c7;
+        }
+        
         body { 
             font-family: var(--secondary-font); 
             display: flex; 
@@ -116,6 +125,7 @@
             font-size: 1rem;
             resize: vertical;
             box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
         
         textarea::placeholder {
@@ -214,6 +224,47 @@
             button { font-size: 1.1rem; padding: 15px 25px; }
             .button-group { gap: 15px; }
         }
+        
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .toast {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-weight: 600;
+            max-width: 300px;
+            word-wrap: break-word;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .toast-success {
+            background: var(--accent-color);
+        }
+        
+        .toast-error {
+            background: #e74c3c;
+        }
+        
+        .toast-info {
+            background: var(--secondary-color);
+            color: #2c3e50;
+        }
     </style>
 </head>
 <body>
@@ -247,6 +298,11 @@
             <input type="checkbox" id="mirror-checkbox" checked style="margin-right: 10px;">
             Efecto espejo
         </label>
+        <br>
+        <label style="color: white; font-size: 1rem; margin-top: 10px;">
+            <input type="checkbox" id="dark-mode-toggle" style="margin-right: 10px;">
+            Modo Oscuro
+        </label>
     </div>
     
     <p id="status"></p>
@@ -268,6 +324,21 @@
         // Event listener for mirror checkbox
         mirrorCheckbox.addEventListener('change', () => {
             video.style.transform = mirrorCheckbox.checked ? 'scaleX(-1)' : 'none';
+        });
+
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+
+        // Load dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.checked = true;
+        }
+
+        // Event listener for dark mode toggle
+        darkModeToggle.addEventListener('change', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', darkModeToggle.checked);
         });
 
         // Extraer eventId de la URL
@@ -336,7 +407,7 @@
                 snapButton.disabled = true;
                 snapButton.textContent = "📸 Límite alcanzado";
                 snapButton.style.background = "linear-gradient(135deg, #6c757d, #495057)";
-                statusEl.textContent = `Has alcanzado el límite de 10 fotos para este evento`;
+                showToast(`Has alcanzado el límite de 10 fotos para este evento`, 'error');
             } else {
                 statusEl.textContent = `Te quedan ${remaining} foto${remaining === 1 ? '' : 's'} para este evento`;
             }
@@ -345,7 +416,7 @@
         // Evento para enviar foto con mensaje
         snapButton.addEventListener('click', () => {
             if (!checkPhotoLimit()) {
-                statusEl.textContent = "Has alcanzado el límite de 10 fotos por evento";
+                showToast("Has alcanzado el límite de 10 fotos por evento", 'error');
                 return;
             }
 
@@ -387,7 +458,10 @@
                 }
                 
                 canvas.toBlob(blob => {
-                    if (!blob) { statusEl.textContent = "Error al capturar la imagen."; return; }
+                    if (!blob) { 
+                        showToast("Error al capturar la imagen.", 'error'); 
+                        return; 
+                    }
                     statusEl.textContent = "Enviando...";
                     const formData = new FormData();
                     formData.append('photo', blob, 'foto_celular.jpg');
@@ -419,7 +493,7 @@
                     .then(data => {
                         console.log(data.message);
                         incrementPhotoCount(); // Incrementar contador después del envío exitoso
-                        statusEl.textContent = "¡Gracias! Tu foto fue enviada 🎉";
+                        showToast("¡Gracias! Tu foto fue enviada 🎉", 'success');
                         // Limpiar el mensaje después del envío exitoso
                         messageInput.value = '';
                         charCount.textContent = '0';
@@ -428,7 +502,7 @@
                     })
                     .catch(err => {
                         console.error('Error al subir la foto:', err);
-                        statusEl.textContent = "Hubo un error al enviar. Intenta de nuevo.";
+                        showToast("Hubo un error al enviar. Intenta de nuevo.", 'error');
                     });
                 }, 'image/jpeg', 0.7); // Reducir calidad para comprimir más
             }, 3000);
@@ -444,162 +518,27 @@
     <script src="theme-manager.js"></script>
     
     <script>
-        // Sistema de Compartir en Redes Sociales
-        class SocialShare {
-            constructor() {
-                this.photoUrl = null;
-                this.eventName = '';
-                this.eventId = '';
-            }
+        // Sistema de Notificaciones Toast
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
             
-            // Inicializar con datos del evento
-            init(eventId) {
-                this.eventId = eventId;
-                const events = JSON.parse(localStorage.getItem('events') || '[]');
-                const event = events.find(e => e.id === eventId);
-                if (event) {
-                    this.eventName = event.name;
-                }
-                
-                // Extraer eventId de URL si no se proporciona
-                const urlParams = new URLSearchParams(window.location.search);
-                this.eventId = urlParams.get('event') || eventId;
-            }
+            // Mostrar con animación
+            setTimeout(() => toast.classList.add('show'), 10);
             
-            // Compartir en Facebook
-            shareToFacebook(photoUrl) {
-                const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(photoUrl)}&quote=${encodeURIComponent(`¡Foto del evento ${this.eventName}! 📸 #MomentosEnVivo #${this.eventId}`)}`;
-                this.openShareWindow(url, 'Facebook');
-            }
-            
-            // Compartir en Twitter
-            shareToTwitter(photoUrl) {
-                const text = `¡Nueva foto del evento ${this.eventName}! 📸 #MomentosEnVivo #${this.eventId}`;
-                const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(photoUrl)}`;
-                this.openShareWindow(url, 'Twitter');
-            }
-            
-            // Compartir en WhatsApp
-            shareToWhatsApp(photoUrl) {
-                const text = `¡Mira esta foto del evento ${this.eventName}! 📸 ${photoUrl} #MomentosEnVivo #${this.eventId}`;
-                const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-                this.openShareWindow(url, 'WhatsApp');
-            }
-            
-            // Compartir en Instagram (abre Instagram app)
-            shareToInstagram(photoUrl) {
-                // Instagram no permite compartir URLs directamente, así que copiamos al portapapeles
-                const text = `¡Foto del evento ${this.eventName}! 📸 ${photoUrl} #MomentosEnVivo #${this.eventId}`;
-                
-                if (navigator.share) {
-                    navigator.share({
-                        title: `Foto de ${this.eventName}`,
-                        text: text,
-                        url: photoUrl
-                    }).catch(() => {
-                        this.copyToClipboard(text);
-                    });
-                } else {
-                    this.copyToClipboard(text);
-                }
-                
-                // Abrir Instagram app
-                window.open('instagram://camera', '_blank');
-                alert('Texto copiado al portapapeles. Pégalo en Instagram!');
-            }
-            
-            // Compartir en LinkedIn
-            shareToLinkedIn(photoUrl) {
-                const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(photoUrl)}`;
-                this.openShareWindow(url, 'LinkedIn');
-            }
-            
-            // Abrir ventana de compartir
-            openShareWindow(url, platform) {
-                const width = 600;
-                const height = 400;
-                const left = (window.innerWidth - width) / 2;
-                const top = (window.innerHeight - height) / 2;
-                
-                window.open(url, `share-${platform}`, 
-                    `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
-                );
-            }
-            
-            // Copiar al portapapeles
-            copyToClipboard(text) {
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(text).then(() => {
-                        console.log('Texto copiado al portapapeles');
-                    }).catch(err => {
-                        console.error('Error copiando:', err);
-                        this.fallbackCopyTextToClipboard(text);
-                    });
-                } else {
-                    this.fallbackCopyTextToClipboard(text);
-                }
-            }
-            
-            // Fallback para copiar
-            fallbackCopyTextToClipboard(text) {
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                textArea.style.position = 'fixed';
-                textArea.style.left = '-999999px';
-                textArea.style.top = '-999999px';
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-                
-                try {
-                    document.execCommand('copy');
-                    console.log('Texto copiado (fallback)');
-                } catch (err) {
-                    console.error('Error en fallback copy:', err);
-                }
-                
-                document.body.removeChild(textArea);
-            }
-            
-            // Crear botones de compartir
-            createShareButtons(container, photoUrl) {
-                this.photoUrl = photoUrl;
-                
-                const buttonsHtml = `
-                    <div class="social-share-buttons" style="margin-top: 20px;">
-                        <button class="share-btn share-facebook" onclick="socialShare.shareToFacebook('${photoUrl}')">
-                            📘 Facebook
-                        </button>
-                        <button class="share-btn share-twitter" onclick="socialShare.shareToTwitter('${photoUrl}')">
-                            🐦 Twitter
-                        </button>
-                        <button class="share-btn share-instagram" onclick="socialShare.shareToInstagram('${photoUrl}')">
-                            📷 Instagram
-                        </button>
-                        <button class="share-btn share-whatsapp" onclick="socialShare.shareToWhatsApp('${photoUrl}')" style="background: #25d366; color: white;">
-                            💬 WhatsApp
-                        </button>
-                        <button class="share-btn" onclick="socialShare.shareToLinkedIn('${photoUrl}')" style="background: #0077b5; color: white;">
-                            💼 LinkedIn
-                        </button>
-                    </div>
-                `;
-                
-                container.insertAdjacentHTML('beforeend', buttonsHtml);
-            }
-        }
-        
-        // Instancia global de SocialShare
-        const socialShare = new SocialShare();
-        
-        // Inicializar compartir cuando se carga la página
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const eventId = urlParams.get('event');
-            if (eventId) {
-                socialShare.init(eventId);
-            }
+            // Ocultar y remover
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         });
     </script>
+    
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+    
 </body>
-</html> 
+</html>
