@@ -300,29 +300,20 @@
             startCamera();
         });
 
-        // Verificar límite de fotos por usuario (por evento)
+        // Límite de fotos removido - ahora ilimitado
         function checkPhotoLimit() {
-            const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
-            return photoCount < 2;
+            return true; // Siempre permitir subir fotos
         }
 
         function incrementPhotoCount() {
             const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
             localStorage.setItem(`photoCount_${eventId}`, (photoCount + 1).toString());
-            updatePhotoCounter();
+            // updatePhotoCounter(); // Removido - no necesitamos actualizar contador
         }
 
         function updatePhotoCounter() {
-            const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
-            const remaining = 2 - photoCount;
-            if (remaining <= 0) {
-                snapButton.disabled = true;
-                snapButton.textContent = "📸 Límite alcanzado";
-                snapButton.style.background = "linear-gradient(135deg, #6c757d, #495057)";
-                statusEl.textContent = `Has alcanzado el límite de 2 fotos para este evento`;
-            } else {
-                statusEl.textContent = `Te quedan ${remaining} foto${remaining === 1 ? '' : 's'} para este evento`;
-            }
+            // Función removida - no hay límite visual
+            statusEl.textContent = "¡Captura tu momento! 📸";
         }
 
         // Evento para enviar foto con mensaje

@@ -252,14 +252,34 @@
         async function fetchApprovedPhotos() {
             try {
                 const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-approved-photos?eventId=${eventId}`);
-                if (!response.ok) return;
+                if (!response.ok) {
+                    console.error('❌ Error en respuesta de get-approved-photos:', response.status);
+                    return;
+                }
                 const newPhotos = await response.json();
+                
+                console.log('📡 Fotos obtenidas desde get-approved-photos:', newPhotos.length);
+                console.log('🔍 Primera foto de ejemplo:', newPhotos[0]);
+                
                 const newPhoto = newPhotos.find(p => !knownPhotoIds.has(p.asset_id));
                 photos = newPhotos;
-                photos.forEach(p => knownPhotoIds.add(p.asset_id));
+                photos.forEach(p => {
+                    knownPhotoIds.add(p.asset_id);
+                    console.log(`📸 Foto procesada: ${p.public_id}, Tags:`, p.tags);
+                });
+                
                 placeholder.style.display = photos.length > 0 ? 'none' : 'block';
+                
                 if (newPhoto) {
-                    console.log("¡Nueva foto detectada! Mostrando ahora:", newPhoto.public_id);
+                    console.log('🆕 Nueva foto detectada:', newPhoto.public_id);
+                    displayPhoto(newPhoto);
+                    clearInterval(slideshowInterval);
+                    slideshowInterval = setInterval(showNextPhotoInLoop, 7000);
+                }
+            } catch (error) {
+                console.error('❌ Error cargando fotos:', error);
+            }
+        }"¡Nueva foto detectada! Mostrando ahora:", newPhoto.public_id);
                     displayPhoto(newPhoto);
                     clearInterval(slideshowInterval);
                     slideshowInterval = setInterval(showNextPhotoInLoop, 7000);
