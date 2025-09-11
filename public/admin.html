@@ -758,7 +758,26 @@ ${event.urls.projection}
             }
         }
 
-// Mostrar eventos archivados
+        // Inicializar aplicación
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEventsList();
+
+            // Agregar eventos para limpiar el campo de ID al hacer focus
+            const eventIdField = document.getElementById('event-id');
+            eventIdField.addEventListener('focus', function() {
+                if (this.value === this.defaultValue || this.value === '') {
+                    this.value = '';
+                }
+            });
+
+            eventIdField.addEventListener('blur', function() {
+                if (this.value === '') {
+                    console.log('Campo vacío detectado en blur');
+                }
+            });
+        });
+
+        // Mostrar eventos archivados
         function showArchivedEvents() {
             const archivedEvents = JSON.parse(localStorage.getItem('archivedEvents') || '[]');
 
