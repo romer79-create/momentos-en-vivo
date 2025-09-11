@@ -349,75 +349,79 @@
                 return;
             }
 
-            statusEl.textContent = "Procesando...";
-            const ctx = canvas.getContext('2d');
-            if (video.videoWidth > video.videoHeight) {
-                // Landscape, rotate 180 degrees with mirror effect
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                ctx.translate(canvas.width / 2, canvas.height / 2);
-                ctx.rotate(Math.PI); // 180 degrees
-                if (!mirrorCheckbox.checked) {
-                    ctx.scale(-1, 1);
-                }
-                ctx.drawImage(video, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
-            } else {
-                // Portrait, rotate to landscape with mirror effect
-                canvas.width = video.videoHeight;
-                canvas.height = video.videoWidth;
-                ctx.translate(canvas.width / 2, canvas.height / 2);
-                ctx.rotate(Math.PI / 2);
-                if (!mirrorCheckbox.checked) {
-                    ctx.scale(-1, 1);
-                }
-                ctx.drawImage(video, -video.videoWidth / 2, -video.videoHeight / 2, video.videoWidth, video.videoHeight);
-            }
-
-            canvas.toBlob(blob => {
-                if (!blob) { statusEl.textContent = "Error al capturar la imagen."; return; }
-                statusEl.textContent = "Enviando...";
-                const formData = new FormData();
-                formData.append('photo', blob, 'foto_celular.jpg');
-                
-                // Agregar el eventId
-                formData.append('eventId', eventId);
-                console.log('--- DEBUG Frontend: EventId agregado al FormData:', eventId);
-                
-                // Agregar el mensaje si existe
-                const message = messageInput.value.trim();
-                console.log('--- DEBUG Frontend: Mensaje a enviar:', message);
-                if (message) {
-                    formData.append('message', message);
-                    console.log('--- DEBUG Frontend: Mensaje agregado al FormData');
+            statusEl.textContent = "Preparándose... 3";
+            setTimeout(() => statusEl.textContent = "Preparándose... 2", 1000);
+            setTimeout(() => statusEl.textContent = "Preparándose... 1", 2000);
+            setTimeout(() => {
+                statusEl.textContent = "Capturando...";
+                const ctx = canvas.getContext('2d');
+                if (video.videoWidth > video.videoHeight) {
+                    // Landscape, make it vertical by rotating 90 degrees
+                    canvas.width = video.videoHeight;
+                    canvas.height = video.videoWidth;
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
+                    ctx.rotate(Math.PI / 2);
                 } else {
-                    console.log('--- DEBUG Frontend: No hay mensaje para enviar');
+                    // Portrait, keep vertical
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
                 }
-
-                // Debug: mostrar contenido del FormData
-                for (let [key, value] of formData.entries()) {
-                    console.log('--- DEBUG Frontend FormData:', key, value);
+                if (!mirrorCheckbox.checked) {
+                    ctx.scale(-1, 1);
                 }
+                if (video.videoWidth > video.videoHeight) {
+                    ctx.drawImage(video, -video.videoWidth / 2, -video.videoHeight / 2, video.videoWidth, video.videoHeight);
+                } else {
+                    ctx.drawImage(video, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+                }
+                
+                canvas.toBlob(blob => {
+                    if (!blob) { statusEl.textContent = "Error al capturar la imagen."; return; }
+                    statusEl.textContent = "Enviando...";
+                    const formData = new FormData();
+                    formData.append('photo', blob, 'foto_celular.jpg');
+                    
+                    // Agregar el eventId
+                    formData.append('eventId', eventId);
+                    console.log('--- DEBUG Frontend: EventId agregado al FormData:', eventId);
+                    
+                    // Agregar el mensaje si existe
+                    const message = messageInput.value.trim();
+                    console.log('--- DEBUG Frontend: Mensaje a enviar:', message);
+                    if (message) {
+                        formData.append('message', message);
+                        console.log('--- DEBUG Frontend: Mensaje agregado al FormData');
+                    } else {
+                        console.log('--- DEBUG Frontend: No hay mensaje para enviar');
+                    }
 
-                fetch(functionUrl, { method: 'POST', body: formData })
-                .then(response => {
-                    if (!response.ok) { throw new Error(`Error del servidor: ${response.status} ${response.statusText}`); }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log(data.message);
-                    incrementPhotoCount(); // Incrementar contador después del envío exitoso
-                    statusEl.textContent = "¡Gracias! Tu foto fue enviada 🎉";
-                    // Limpiar el mensaje después del envío exitoso
-                    messageInput.value = '';
-                    charCount.textContent = '0';
-                    charCount.style.color = 'rgba(255,255,255,0.8)';
-                    setTimeout(() => updatePhotoCounter(), 4000);
-                })
-                .catch(err => {
-                    console.error('Error al subir la foto:', err);
-                    statusEl.textContent = "Hubo un error al enviar. Intenta de nuevo.";
-                });
-            }, 'image/jpeg', 0.7); // Reducir calidad para comprimir más
+                    // Debug: mostrar contenido del FormData
+                    for (let [key, value] of formData.entries()) {
+                        console.log('--- DEBUG Frontend FormData:', key, value);
+                    }
+
+                    fetch(functionUrl, { method: 'POST', body: formData })
+                    .then(response => {
+                        if (!response.ok) { throw new Error(`Error del servidor: ${response.status} ${response.statusText}`); }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log(data.message);
+                        incrementPhotoCount(); // Incrementar contador después del envío exitoso
+                        statusEl.textContent = "¡Gracias! Tu foto fue enviada 🎉";
+                        // Limpiar el mensaje después del envío exitoso
+                        messageInput.value = '';
+                        charCount.textContent = '0';
+                        charCount.style.color = 'rgba(255,255,255,0.8)';
+                        setTimeout(() => updatePhotoCounter(), 4000);
+                    })
+                    .catch(err => {
+                        console.error('Error al subir la foto:', err);
+                        statusEl.textContent = "Hubo un error al enviar. Intenta de nuevo.";
+                    });
+                }, 'image/jpeg', 0.7); // Reducir calidad para comprimir más
+            }, 3000);
         });
 
         // Iniciar la cámara al cargar la página
