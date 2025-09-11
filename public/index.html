@@ -300,9 +300,10 @@
             startCamera();
         });
 
-        // Sin límite de fotos - siempre permitir subir fotos
+        // Verificar límite de fotos por usuario (por evento)
         function checkPhotoLimit() {
-            return true; // Siempre permitir
+            const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
+            return photoCount < 2;
         }
 
         function incrementPhotoCount() {
@@ -313,9 +314,10 @@
 
         function updatePhotoCounter() {
             const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
-            // Mostrar contador sin límite
-            statusEl.textContent = `¡Captura tu momento! 📸 (Has subido ${photoCount} foto${photoCount === 1 ? '' : 's'})`;
-        }"📸 Límite alcanzado";
+            const remaining = 2 - photoCount;
+            if (remaining <= 0) {
+                snapButton.disabled = true;
+                snapButton.textContent = "📸 Límite alcanzado";
                 snapButton.style.background = "linear-gradient(135deg, #6c757d, #495057)";
                 statusEl.textContent = `Has alcanzado el límite de 2 fotos para este evento`;
             } else {
