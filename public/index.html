@@ -262,6 +262,14 @@
         const mirrorCheckbox = document.getElementById('mirror-checkbox');
         const functionUrl = 'https://playful-parfait-6bfab1.netlify.app/.netlify/functions/upload';
 
+        // Set initial mirror for video
+        video.style.transform = 'scaleX(-1)';
+
+        // Event listener for mirror checkbox
+        mirrorCheckbox.addEventListener('change', () => {
+            video.style.transform = mirrorCheckbox.checked ? 'scaleX(-1)' : 'none';
+        });
+
         // Extraer eventId de la URL
         const urlParams = new URLSearchParams(window.location.search);
         const eventId = urlParams.get('event') || 'DEFAULT';
