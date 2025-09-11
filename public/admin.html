@@ -612,7 +612,6 @@ ${event.urls.projection}
                         <button class="success-btn" onclick="viewEvent('${event.id}')">👁️ Ver</button>
                         <button class="info-btn" onclick="copyURLs(${JSON.stringify(event).replace(/"/g, '&quot;')})">📋 Copiar</button>
                         <button class="warning-btn" onclick="regenerateQR('${event.id}')">🔄 QR</button>
-                        <button class="secondary-btn" onclick="resetPhotoCounter('${event.id}')">🔄 Reset Contador</button>
                         <button class="danger-btn" onclick="deleteEvent('${event.id}')">🗑️ Borrar</button>
                     </div>
                 </div>
@@ -633,41 +632,6 @@ ${event.urls.projection}
             if (event) {
                 await showEventResult(event);
                 showStatus('🔄 QR regenerado', 'info');
-            }
-        }
-
-        // Resetear contador de fotos para un evento
-        window.resetPhotoCounter = async function(eventId) {
-            const event = events.find(e => e.id === eventId);
-            if (!event) return;
-
-            if (!confirm(`⚠️ ¿Estás seguro de resetear el contador de fotos para el evento "${event.name}"?\n\n✅ Los invitados podrán tomar fotos nuevamente\n🔄 El límite de 2 fotos por persona se reiniciará\n\n¿Continuar?`)) {
-                return;
-            }
-
-            try {
-                // Buscar y eliminar todas las entradas de contador para este evento
-                const keysToRemove = [];
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key && key.startsWith(`photoCount_${eventId}`)) {
-                        keysToRemove.push(key);
-                    }
-                }
-
-                // Eliminar las claves encontradas
-                keysToRemove.forEach(key => {
-                    localStorage.removeItem(key);
-                    console.log('🗑️ Eliminada clave de contador:', key);
-                });
-
-                const removedCount = keysToRemove.length;
-                showStatus(`✅ Contador reseteado (${removedCount} usuarios afectados)`, 'success');
-                console.log(`🔄 Contador de fotos reseteado para evento ${eventId}. ${removedCount} usuarios afectados.`);
-
-            } catch (error) {
-                console.error('❌ Error al resetear contador:', error);
-                showStatus('❌ Error al resetear el contador', 'error');
             }
         }
 
