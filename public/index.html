@@ -303,7 +303,7 @@
         // Verificar límite de fotos por usuario (por evento)
         function checkPhotoLimit() {
             const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
-            return photoCount < 2;
+            return photoCount < 10;
         }
 
         function incrementPhotoCount() {
@@ -314,12 +314,12 @@
 
         function updatePhotoCounter() {
             const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
-            const remaining = 2 - photoCount;
+            const remaining = 10 - photoCount;
             if (remaining <= 0) {
                 snapButton.disabled = true;
                 snapButton.textContent = "📸 Límite alcanzado";
                 snapButton.style.background = "linear-gradient(135deg, #6c757d, #495057)";
-                statusEl.textContent = `Has alcanzado el límite de 2 fotos para este evento`;
+                statusEl.textContent = `Has alcanzado el límite de 10 fotos para este evento`;
             } else {
                 statusEl.textContent = `Te quedan ${remaining} foto${remaining === 1 ? '' : 's'} para este evento`;
             }
@@ -328,7 +328,7 @@
         // Evento para enviar foto con mensaje
         snapButton.addEventListener('click', () => {
             if (!checkPhotoLimit()) {
-                statusEl.textContent = "Has alcanzado el límite de 2 fotos por evento";
+                statusEl.textContent = "Has alcanzado el límite de 10 fotos por evento";
                 return;
             }
 
