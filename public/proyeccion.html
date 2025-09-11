@@ -118,6 +118,45 @@
             font-weight: 600;
         }
         
+        #upload-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+        
+        #upload-btn:hover {
+            background: var(--accent-color);
+        }
+        
+        .vote-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255,0,0,0.8);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .vote-btn:hover {
+            background: rgba(255,0,0,1);
+        }
+        
+        .vote-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
         @media (max-width: 768px) {
             .message-overlay {
                 font-size: 1.4rem;
@@ -147,8 +186,9 @@
     <div id="projection-container">
         <div id="placeholder">Esperando fotos aprobadas...</div>
         <div id="qr-container">
-            <img id="qr-code-img" alt="Código QR para subir fotos">
-            <p>¡Escanea para enviar tu foto!</p>
+            <img id="qr-code-img" alt="Código QR para votar">
+            <p>¡Escanea para votar!</p>
+            <button id="upload-btn">📸 Subir Foto</button>
         </div>
     </div>
 
@@ -163,9 +203,14 @@
         const eventId = urlParams.get('event') || 'DEFAULT';
         console.log('EventId extraído de la URL (proyección):', eventId);
 
-        // Generar QR dinámicamente con la URL del evento
-        const captureUrl = `${window.location.origin}/index.html?event=${eventId}`;
-        console.log('🎯 Generando QR para captura desde proyección:', captureUrl);
+        // Set upload button href
+        document.getElementById('upload-btn').onclick = () => {
+            window.location.href = `index.html?event=${eventId}`;
+        };
+
+        // Generar QR dinámicamente con la URL de la proyección (para votación)
+        const captureUrl = `${window.location.origin}/proyeccion.html?event=${eventId}`;
+        console.log('🎯 Generando QR para votación desde proyección:', captureUrl);
         
         // Usar API de QR externa para generar QR dinámico
         qrCodeImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(captureUrl)}&bgcolor=FFFFFF&color=000000&margin=4`;
@@ -213,13 +258,30 @@
                 <div class="message-overlay ${message ? '' : 'no-message'}">
                     ${message}
                 </div>
+                <button class="vote-btn" onclick="voteForPhoto('${photo.asset_id}')">❤️ <span id="votes-${photo.asset_id}">0</span></button>
             `;
             
             container.appendChild(slide);
             
+            // Load votes
+            let voteSpan = slide.querySelector(`#votes-${photo.asset_id}`);
+            let votes = parseInt(localStorage.getItem(`votes_${eventId}_${photo.asset_id}`) || '0');
+            voteSpan.textContent = votes;
+            
             setTimeout(() => {
                 slide.classList.add('visible');
             }, 500);
+        }
+        
+        function voteForPhoto(photoId) {
+            const key = `votes_${eventId}_${photoId}`;
+            let votes = parseInt(localStorage.getItem(key) || '0');
+            votes++;
+            localStorage.setItem(key, votes.toString());
+            document.getElementById(`votes-${photoId}`).textContent = votes;
+            // Disable button
+            event.target.disabled = true;
+            event.target.innerHTML = 'Votado ❤️';
         }
         
         function showNextPhotoInLoop() {
