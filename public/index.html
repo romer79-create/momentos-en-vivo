@@ -241,6 +241,14 @@
         <button id="snap">📸 Enviar Foto</button>
         <button id="switch-camera">🔄 Cambiar Cámara</button>
     </div>
+    
+    <div class="mirror-option" style="margin-top: 15px; text-align: center;">
+        <label style="color: white; font-size: 1rem;">
+            <input type="checkbox" id="mirror-checkbox" checked style="margin-right: 10px;">
+            Efecto espejo
+        </label>
+    </div>
+    
     <p id="status"></p>
 
     <script>
@@ -251,6 +259,7 @@
         const statusEl = document.getElementById('status');
         const messageInput = document.getElementById('message');
         const charCount = document.getElementById('char-count');
+        const mirrorCheckbox = document.getElementById('mirror-checkbox');
         const functionUrl = 'https://playful-parfait-6bfab1.netlify.app/.netlify/functions/upload';
 
         // Extraer eventId de la URL
@@ -340,6 +349,9 @@
                 canvas.height = video.videoHeight;
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.rotate(Math.PI); // 180 degrees
+                if (!mirrorCheckbox.checked) {
+                    ctx.scale(-1, 1);
+                }
                 ctx.drawImage(video, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
             } else {
                 // Portrait, rotate to landscape with mirror effect
@@ -347,6 +359,9 @@
                 canvas.height = video.videoWidth;
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.rotate(Math.PI / 2);
+                if (!mirrorCheckbox.checked) {
+                    ctx.scale(-1, 1);
+                }
                 ctx.drawImage(video, -video.videoWidth / 2, -video.videoHeight / 2, video.videoWidth, video.videoHeight);
             }
 
