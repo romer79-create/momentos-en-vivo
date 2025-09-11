@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Momentos en Vivo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@400;600;700&display=swap');
+        
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #ffd93d;
+            --accent-color: #6bcf7f;
+            --background-gradient: linear-gradient(135deg, #ff6b6b, #ffd93d, #6bcf7f, #4ecdc4, #45b7d1);
+            --text-color: #ffffff;
+            --text-secondary: #f8f9fa;
+            --primary-font: 'Fredoka One', cursive;
+            --secondary-font: 'Poppins', sans-serif;
+        }
+        
+        body { 
+            font-family: var(--secondary-font); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            background: var(--background-gradient);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            color: var(--text-color); 
+            text-align: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Confetti animation */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--primary-color);
+            animation: confetti-fall 3s linear infinite;
+        }
+        
+        .confetti:nth-child(1) { left: 10%; animation-delay: 0s; background: var(--secondary-color); }
+        .confetti:nth-child(2) { left: 20%; animation-delay: 0.5s; background: var(--accent-color); }
+        .confetti:nth-child(3) { left: 30%; animation-delay: 1s; background: #4ecdc4; }
+        .confetti:nth-child(4) { left: 40%; animation-delay: 1.5s; background: #45b7d1; }
+        .confetti:nth-child(5) { left: 50%; animation-delay: 2s; background: var(--primary-color); }
+        .confetti:nth-child(6) { left: 60%; animation-delay: 2.5s; background: #feca57; }
+        .confetti:nth-child(7) { left: 70%; animation-delay: 0.8s; background: #96ceb4; }
+        .confetti:nth-child(8) { left: 80%; animation-delay: 1.3s; background: var(--secondary-color); }
+        .confetti:nth-child(9) { left: 90%; animation-delay: 1.8s; background: var(--accent-color); }
+        
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        h1 { 
+            font-family: var(--primary-font); 
+            font-size: 2.8rem; 
+            margin: 20px 0; 
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            animation: bounce 2s ease-in-out infinite;
+            background: linear-gradient(45deg, var(--text-color), var(--secondary-color), var(--text-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        video { 
+            width: 90%; 
+            max-width: 400px; 
+            border-radius: 20px; 
+            border: 5px solid rgba(255,255,255,0.8);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        video:hover {
+            transform: scale(1.02);
+        }
+        
+        .message-container {
+            margin-top: 25px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            max-height: 120px;
+            padding: 15px;
+            border: 3px solid rgba(255,255,255,0.8);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.9);
+            color: #2c3e50;
+            font-family: var(--secondary-font);
+            font-size: 1rem;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        
+        textarea::placeholder {
+            color: rgba(44, 62, 80, 0.6);
+        }
+        
+        .char-counter {
+            position: absolute;
+            bottom: -25px;
+            right: 5px;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.8);
+            font-weight: 600;
+        }
+        
+        .button-group { 
+            margin-top: 50px; 
+            display: flex; 
+            gap: 20px; 
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        button { 
+            font-family: var(--secondary-font);
+            font-size: 1.3rem; 
+            padding: 18px 35px; 
+            cursor: pointer; 
+            border-radius: 50px; 
+            border: none; 
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        #snap { 
+            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color)); 
+            color: #2c3e50;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 8px 25px rgba(255,107,107,0.3); }
+            50% { box-shadow: 0 8px 35px rgba(255,107,107,0.6); }
+            100% { box-shadow: 0 8px 25px rgba(255,107,107,0.3); }
+        }
+        
+        #switch-camera { 
+            background: linear-gradient(135deg, #45b7d1, #96ceb4); 
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+        }
+        
+        button:active {
+            transform: translateY(-1px);
+        }
+        
+        #status { 
+            margin-top: 20px; 
+            font-size: 1.1rem; 
+            height: 25px;
+            font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: statusGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes statusGlow {
+            from { text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+            to { text-shadow: 2px 2px 15px rgba(255,255,255,0.5); }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 480px) {
+            h1 { font-size: 2.2rem; }
+            button { font-size: 1.1rem; padding: 15px 25px; }
+            .button-group { gap: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Confetti elements -->
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    
+    <h1>¡Captura tu Momento!</h1>
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+    
+    <div class="message-container">
+        <textarea id="message" placeholder="¡Escribe un mensaje divertido! (opcional)" maxlength="200"></textarea>
+        <div class="char-counter"><span id="char-count">0</span>/200</div>
+    </div>
+    
+    <div class="button-group">
+        <button id="snap">📸 Enviar Foto</button>
+        <button id="switch-camera">🔄 Cambiar Cámara</button>
+    </div>
+    <p id="status"></p>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const snapButton = document.getElementById('snap');
+        const switchCameraButton = document.getElementById('switch-camera');
+        const statusEl = document.getElementById('status');
+        const messageInput = document.getElementById('message');
+        const charCount = document.getElementById('char-count');
+        const functionUrl = 'https://playful-parfait-6bfab1.netlify.app/.netlify/functions/upload';
+
+        // Extraer eventId de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventId = urlParams.get('event') || 'DEFAULT';
+        console.log('EventId extraído de la URL:', eventId);
+
+        let currentStream; // Para guardar el stream de la cámara actual
+        let currentFacingMode = 'user'; // 'user' para frontal, 'environment' para trasera
+
+        // Contador de caracteres para el mensaje
+        messageInput.addEventListener('input', () => {
+            const count = messageInput.value.length;
+            charCount.textContent = count;
+            
+            // Cambiar color cuando se acerca al límite
+            if (count > 180) {
+                charCount.style.color = '#ff6b6b';
+            } else if (count > 150) {
+                charCount.style.color = '#feca57';
+            } else {
+                charCount.style.color = 'rgba(255,255,255,0.8)';
+            }
+        });
+
+        // Función para iniciar la cámara
+        async function startCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop()); // Detener cámara anterior
+            }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: currentFacingMode } 
+                });
+                video.srcObject = stream;
+                currentStream = stream;
+                statusEl.textContent = "";
+            } catch (err) {
+                console.error("Error de cámara:", err);
+                statusEl.textContent = "No se pudo acceder a la cámara.";
+            }
+        }
+
+        // Evento para cambiar de cámara
+        switchCameraButton.addEventListener('click', () => {
+            currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+            startCamera();
+        });
+
+        // Verificar límite de fotos por usuario (por evento)
+        function checkPhotoLimit() {
+            const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
+            return photoCount < 2;
+        }
+
+        function incrementPhotoCount() {
+            const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
+            localStorage.setItem(`photoCount_${eventId}`, (photoCount + 1).toString());
+            updatePhotoCounter();
+        }
+
+        function updatePhotoCounter() {
+            const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
+            const remaining = 2 - photoCount;
+            if (remaining <= 0) {
+                snapButton.disabled = true;
+                snapButton.textContent = "📸 Límite alcanzado";
+                snapButton.style.background = "linear-gradient(135deg, #6c757d, #495057)";
+                statusEl.textContent = `Has alcanzado el límite de 2 fotos para este evento`;
+            } else {
+                statusEl.textContent = `Te quedan ${remaining} foto${remaining === 1 ? '' : 's'} para este evento`;
+            }
+        }
+
+        // Evento para enviar foto con mensaje
+        snapButton.addEventListener('click', () => {
+            if (!checkPhotoLimit()) {
+                statusEl.textContent = "Has alcanzado el límite de 2 fotos por evento";
+                return;
+            }
+
+            statusEl.textContent = "Procesando...";
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob(blob => {
+                if (!blob) { statusEl.textContent = "Error al capturar la imagen."; return; }
+                statusEl.textContent = "Enviando...";
+                const formData = new FormData();
+                formData.append('photo', blob, 'foto_celular.jpg');
+                
+                // Agregar el eventId
+                formData.append('eventId', eventId);
+                console.log('--- DEBUG Frontend: EventId agregado al FormData:', eventId);
+                
+                // Agregar el mensaje si existe
+                const message = messageInput.value.trim();
+                console.log('--- DEBUG Frontend: Mensaje a enviar:', message);
+                if (message) {
+                    formData.append('message', message);
+                    console.log('--- DEBUG Frontend: Mensaje agregado al FormData');
+                } else {
+                    console.log('--- DEBUG Frontend: No hay mensaje para enviar');
+                }
+
+                // Debug: mostrar contenido del FormData
+                for (let [key, value] of formData.entries()) {
+                    console.log('--- DEBUG Frontend FormData:', key, value);
+                }
+
+                fetch(functionUrl, { method: 'POST', body: formData })
+                .then(response => {
+                    if (!response.ok) { throw new Error(`Error del servidor: ${response.status} ${response.statusText}`); }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data.message);
+                    incrementPhotoCount(); // Incrementar contador después del envío exitoso
+                    statusEl.textContent = "¡Gracias! Tu foto fue enviada 🎉";
+                    // Limpiar el mensaje después del envío exitoso
+                    messageInput.value = '';
+                    charCount.textContent = '0';
+                    charCount.style.color = 'rgba(255,255,255,0.8)';
+                    setTimeout(() => updatePhotoCounter(), 4000);
+                })
+                .catch(err => {
+                    console.error('Error al subir la foto:', err);
+                    statusEl.textContent = "Hubo un error al enviar. Intenta de nuevo.";
+                });
+            }, 'image/jpeg', 0.7); // Reducir calidad para comprimir más
+        });
+
+        // Iniciar la cámara al cargar la página
+        startCamera();
+        // Mostrar contador inicial
+        updatePhotoCounter();
+    </script>
+    
+    <!-- Cargar Theme Manager -->
+    <script src="theme-manager.js"></script>
+    
+    <script>
+        // Sistema de Compartir en Redes Sociales
+        class SocialShare {
+            constructor() {
+                this.photoUrl = null;
+                this.eventName = '';
+                this.eventId = '';
+            }
+            
+            // Inicializar con datos del evento
+            init(eventId) {
+                this.eventId = eventId;
+                const events = JSON.parse(localStorage.getItem('events') || '[]');
+                const event = events.find(e => e.id === eventId);
+                if (event) {
+                    this.eventName = event.name;
+                }
+                
+                // Extraer eventId de URL si no se proporciona
+                const urlParams = new URLSearchParams(window.location.search);
+                this.eventId = urlParams.get('event') || eventId;
+            }
+            
+            // Compartir en Facebook
+            shareToFacebook(photoUrl) {
+                const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(photoUrl)}&quote=${encodeURIComponent(`¡Foto del evento ${this.eventName}! 📸 #MomentosEnVivo #${this.eventId}`)}`;
+                this.openShareWindow(url, 'Facebook');
+            }
+            
+            // Compartir en Twitter
+            shareToTwitter(photoUrl) {
+                const text = `¡Nueva foto del evento ${this.eventName}! 📸 #MomentosEnVivo #${this.eventId}`;
+                const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(photoUrl)}`;
+                this.openShareWindow(url, 'Twitter');
+            }
+            
+            // Compartir en WhatsApp
+            shareToWhatsApp(photoUrl) {
+                const text = `¡Mira esta foto del evento ${this.eventName}! 📸 ${photoUrl} #MomentosEnVivo #${this.eventId}`;
+                const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                this.openShareWindow(url, 'WhatsApp');
+            }
+            
+            // Compartir en Instagram (abre Instagram app)
+            shareToInstagram(photoUrl) {
+                // Instagram no permite compartir URLs directamente, así que copiamos al portapapeles
+                const text = `¡Foto del evento ${this.eventName}! 📸 ${photoUrl} #MomentosEnVivo #${this.eventId}`;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: `Foto de ${this.eventName}`,
+                        text: text,
+                        url: photoUrl
+                    }).catch(() => {
+                        this.copyToClipboard(text);
+                    });
+                } else {
+                    this.copyToClipboard(text);
+                }
+                
+                // Abrir Instagram app
+                window.open('instagram://camera', '_blank');
+                alert('Texto copiado al portapapeles. Pégalo en Instagram!');
+            }
+            
+            // Compartir en LinkedIn
+            shareToLinkedIn(photoUrl) {
+                const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(photoUrl)}`;
+                this.openShareWindow(url, 'LinkedIn');
+            }
+            
+            // Abrir ventana de compartir
+            openShareWindow(url, platform) {
+                const width = 600;
+                const height = 400;
+                const left = (window.innerWidth - width) / 2;
+                const top = (window.innerHeight - height) / 2;
+                
+                window.open(url, `share-${platform}`, 
+                    `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+                );
+            }
+            
+            // Copiar al portapapeles
+            copyToClipboard(text) {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        console.log('Texto copiado al portapapeles');
+                    }).catch(err => {
+                        console.error('Error copiando:', err);
+                        this.fallbackCopyTextToClipboard(text);
+                    });
+                } else {
+                    this.fallbackCopyTextToClipboard(text);
+                }
+            }
+            
+            // Fallback para copiar
+            fallbackCopyTextToClipboard(text) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    console.log('Texto copiado (fallback)');
+                } catch (err) {
+                    console.error('Error en fallback copy:', err);
+                }
+                
+                document.body.removeChild(textArea);
+            }
+            
+            // Crear botones de compartir
+            createShareButtons(container, photoUrl) {
+                this.photoUrl = photoUrl;
+                
+                const buttonsHtml = `
+                    <div class="social-share-buttons" style="margin-top: 20px;">
+                        <button class="share-btn share-facebook" onclick="socialShare.shareToFacebook('${photoUrl}')">
+                            📘 Facebook
+                        </button>
+                        <button class="share-btn share-twitter" onclick="socialShare.shareToTwitter('${photoUrl}')">
+                            🐦 Twitter
+                        </button>
+                        <button class="share-btn share-instagram" onclick="socialShare.shareToInstagram('${photoUrl}')">
+                            📷 Instagram
+                        </button>
+                        <button class="share-btn share-whatsapp" onclick="socialShare.shareToWhatsApp('${photoUrl}')" style="background: #25d366; color: white;">
+                            💬 WhatsApp
+                        </button>
+                        <button class="share-btn" onclick="socialShare.shareToLinkedIn('${photoUrl}')" style="background: #0077b5; color: white;">
+                            💼 LinkedIn
+                        </button>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', buttonsHtml);
+            }
+        }
+        
+        // Instancia global de SocialShare
+        const socialShare = new SocialShare();
+        
+        // Inicializar compartir cuando se carga la página
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventId = urlParams.get('event');
+            if (eventId) {
+                socialShare.init(eventId);
+            }
+        });
+    </script>
+</body>
+</html> 
