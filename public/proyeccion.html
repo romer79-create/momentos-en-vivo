@@ -8,6 +8,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@400;600;700&display=swap');
         
         :root {
+            /* Modern Blue Theme (Default) */
             --primary-color: #3498db;
             --secondary-color: #2ecc71;
             --accent-color: #e74c3c;
@@ -16,6 +17,78 @@
             --text-secondary: #bdc3c7;
             --primary-font: 'Fredoka One', cursive;
             --secondary-font: 'Poppins', sans-serif;
+            --transition-duration: 1.5s;
+            --photo-scale: 1.05;
+        }
+
+        /* Romantic Pink Theme */
+        [data-theme="romantic-pink"] {
+            --primary-color: #e91e63;
+            --secondary-color: #f06292;
+            --accent-color: #ad1457;
+            --background-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            --text-color: #ffffff;
+            --text-secondary: #fce4ec;
+            --primary-font: 'Poppins', sans-serif;
+            --secondary-font: 'Poppins', sans-serif;
+            --transition-duration: 2s;
+            --photo-scale: 1.08;
+        }
+
+        /* Corporate Gray Theme */
+        [data-theme="corporate-gray"] {
+            --primary-color: #546e7a;
+            --secondary-color: #78909c;
+            --accent-color: #37474f;
+            --background-gradient: linear-gradient(135deg, #434343 0%, #000000 100%);
+            --text-color: #ffffff;
+            --text-secondary: #b0bec5;
+            --primary-font: 'Poppins', sans-serif;
+            --secondary-font: 'Poppins', sans-serif;
+            --transition-duration: 1.2s;
+            --photo-scale: 1.02;
+        }
+
+        /* Party Neon Theme */
+        [data-theme="party-neon"] {
+            --primary-color: #ff0080;
+            --secondary-color: #00ff80;
+            --accent-color: #8000ff;
+            --background-gradient: linear-gradient(135deg, #ff0080 0%, #8000ff 50%, #00ff80 100%);
+            --text-color: #ffffff;
+            --text-secondary: #ffffff;
+            --primary-font: 'Fredoka One', cursive;
+            --secondary-font: 'Poppins', sans-serif;
+            --transition-duration: 1.8s;
+            --photo-scale: 1.1;
+        }
+
+        /* Nature Green Theme */
+        [data-theme="nature-green"] {
+            --primary-color: #4caf50;
+            --secondary-color: #8bc34a;
+            --accent-color: #2e7d32;
+            --background-gradient: linear-gradient(135deg, #a8e6cf 0%, #dcedc8 50%, #ffd3b6 100%);
+            --text-color: #2e7d32;
+            --text-secondary: #4caf50;
+            --primary-font: 'Poppins', sans-serif;
+            --secondary-font: 'Poppins', sans-serif;
+            --transition-duration: 1.6s;
+            --photo-scale: 1.04;
+        }
+
+        /* Sunset Orange Theme */
+        [data-theme="sunset-orange"] {
+            --primary-color: #ff9800;
+            --secondary-color: #ff5722;
+            --accent-color: #e65100;
+            --background-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            --text-color: #ffffff;
+            --text-secondary: #ffe0b2;
+            --primary-font: 'Fredoka One', cursive;
+            --secondary-font: 'Poppins', sans-serif;
+            --transition-duration: 1.4s;
+            --photo-scale: 1.06;
         }
         
         body { 
@@ -38,8 +111,8 @@
         .photo-slide { 
             position: absolute; 
             opacity: 0; 
-            transform: scale(1.05); 
-            transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out; 
+            transform: scale(var(--photo-scale)); 
+            transition: opacity var(--transition-duration) ease-in-out, transform var(--transition-duration) ease-in-out; 
             width: 100vw;
             height: 100vh;
             display: flex;
@@ -198,18 +271,23 @@
         const qrCodeImg = document.getElementById('qr-code-img');
         const NETLIFY_URL = 'https://playful-parfait-6bfab1.netlify.app';
 
-        // Extraer eventId de la URL
+        // Extraer eventId y theme de la URL
         const urlParams = new URLSearchParams(window.location.search);
         const eventId = urlParams.get('event') || 'DEFAULT';
+        const theme = urlParams.get('theme') || 'modern-blue';
         console.log('EventId extraído de la URL (proyección):', eventId);
+        console.log('Tema extraído de la URL:', theme);
+
+        // Aplicar tema
+        document.documentElement.setAttribute('data-theme', theme);
 
         // Set upload button href
         document.getElementById('upload-btn').onclick = () => {
-            window.location.href = `index.html?event=${eventId}`;
+            window.location.href = `index.html?event=${eventId}&theme=${theme}`;
         };
 
         // Generar QR dinámicamente con la URL de la proyección (para votación)
-        const captureUrl = `${window.location.origin}/proyeccion.html?event=${eventId}`;
+        const captureUrl = `${window.location.origin}/proyeccion.html?event=${eventId}&theme=${theme}`;
         console.log('🎯 Generando QR para votación desde proyección:', captureUrl);
         
         // Usar API de QR externa para generar QR dinámico

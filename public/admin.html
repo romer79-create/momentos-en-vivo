@@ -305,6 +305,17 @@
                             <option value="otro">Otro</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label for="event-theme">Tema Visual</label>
+                        <select id="event-theme">
+                            <option value="modern-blue">Modern Blue (Predeterminado)</option>
+                            <option value="romantic-pink">Romantic Pink</option>
+                            <option value="corporate-gray">Corporate Gray</option>
+                            <option value="party-neon">Party Neon</option>
+                            <option value="nature-green">Nature Green</option>
+                            <option value="sunset-orange">Sunset Orange</option>
+                        </select>
+                    </div>
                     <button type="submit" class="primary-btn">🚀 Crear Evento</button>
                 </form>
 
@@ -375,8 +386,8 @@
 
             const eventName = document.getElementById('event-name').value;
             let eventId = document.getElementById('event-id').value.trim();
-
-            // Debug: mostrar el valor del campo
+            const eventType = document.getElementById('event-type').value;
+            const eventTheme = document.getElementById('event-theme').value;
             console.log('Valor del campo event-id:', `'${eventId}'`);
             console.log('Longitud del valor:', eventId.length);
             console.log('¿Es vacío?', eventId === '');
@@ -390,8 +401,6 @@
                 console.log('ℹ️ Usando ID manual:', eventId);
             }
 
-            const eventType = document.getElementById('event-type').value;
-
             // Validar que el ID no exista
             if (events.find(e => e.id === eventId)) {
                 showStatus('❌ Ya existe un evento con ese código', 'error');
@@ -402,11 +411,12 @@
                 id: eventId,
                 name: eventName,
                 type: eventType,
+                theme: eventTheme,
                 created: new Date().toISOString(),
                 urls: {
-                    capture: `${NETLIFY_URL}/index.html?event=${eventId}`,
-                    moderation: `${NETLIFY_URL}/moderador.html?event=${eventId}`,
-                    projection: `${NETLIFY_URL}/proyeccion.html?event=${eventId}`
+                    capture: `${NETLIFY_URL}/index.html?event=${eventId}&theme=${eventTheme}`,
+                    moderation: `${NETLIFY_URL}/moderador.html?event=${eventId}&theme=${eventTheme}`,
+                    projection: `${NETLIFY_URL}/proyeccion.html?event=${eventId}&theme=${eventTheme}`
                 }
             };
 
@@ -607,7 +617,7 @@ ${event.urls.projection}
             container.innerHTML = events.map(event => `
                 <div class="event-item">
 <div class="event-name">${event.name}</div>
-<div class="event-id">ID: ${event.id} | Tipo: ${event.type}</div>
+<div class="event-id">ID: ${event.id} | Tipo: ${event.type} | Tema: ${event.theme}</div>
 <div class="event-actions">
                         <button class="success-btn" onclick="viewEvent('${event.id}')">👁️ Ver</button>
                         <button class="info-btn" onclick="copyURLs(${JSON.stringify(event).replace(/"/g, '&quot;')})">📋 Copiar</button>
