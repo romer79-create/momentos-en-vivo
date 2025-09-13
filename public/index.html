@@ -289,9 +289,12 @@
     </div>
     
     <div class="button-group">
-        <button id="snap">📸 Enviar Foto</button>
+        <button id="snap">📸 Tomar Foto</button>
+        <button id="upload-photo">📁 Subir Foto</button>
         <button id="switch-camera">🔄 Cambiar Cámara</button>
     </div>
+    
+    <input type="file" accept="image/*" id="file-input" style="display:none">
     
     <div class="mirror-option" style="margin-top: 15px; text-align: center;">
         <label style="color: white; font-size: 1rem;">
@@ -339,6 +342,46 @@
         darkModeToggle.addEventListener('change', () => {
             document.body.classList.toggle('dark-mode');
             localStorage.setItem('darkMode', darkModeToggle.checked);
+        });
+
+        // Upload photo button
+        const uploadPhotoButton = document.getElementById('upload-photo');
+        const fileInput = document.getElementById('file-input');
+
+        uploadPhotoButton.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                statusEl.textContent = "Procesando...";
+                const formData = new FormData();
+                formData.append('photo', file, 'foto_subida.jpg');
+                formData.append('eventId', eventId);
+                const message = messageInput.value.trim();
+                if (message) {
+                    formData.append('message', message);
+                }
+                fetch(functionUrl, { method: 'POST', body: formData })
+                .then(response => {
+                    if (!response.ok) { throw new Error(`Error del servidor: ${response.status} ${response.statusText}`); }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data.message);
+                    incrementPhotoCount();
+                    showToast("¡Gracias! Tu foto fue enviada 🎉", 'success');
+                    messageInput.value = '';
+                    charCount.textContent = '0';
+                    charCount.style.color = 'rgba(255,255,255,0.8)';
+                    setTimeout(() => updatePhotoCounter(), 4000);
+                })
+                .catch(err => {
+                    console.error('Error al subir la foto:', err);
+                    showToast("Hubo un error al enviar. Intenta de nuevo.", 'error');
+                });
+            }
         });
 
         // Extraer eventId de la URL
