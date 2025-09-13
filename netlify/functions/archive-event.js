@@ -53,11 +53,15 @@ exports.handler = async (event, context) => {
         const filename = photo.public_id.split('/').pop();
         const newPublicId = `archived/${filename}`;
 
+        console.log(`📂 Moviendo foto: ${photo.public_id} -> ${newPublicId}`);
+
         // Mover la foto
         await cloudinary.uploader.rename(photo.public_id, newPublicId, { invalidate: true });
 
         // Eliminar todos los tags para que no sea accesible por las URLs del evento
         await cloudinary.uploader.remove_all_tags(newPublicId);
+
+        console.log(`✅ Foto movida exitosamente: ${newPublicId}`);
 
         return { success: true, filename };
       } catch (error) {

@@ -49,6 +49,16 @@ exports.handler = async (event, context) => {
     console.log(`🔍 Debug: ${momentosResult.resources.length} fotos en momentos-en-vivo`);
     console.log('🔍 Fotos en momentos-en-vivo:', momentosResult.resources.map(r => ({ public_id: r.public_id, tags: r.tags })));
 
+    // También buscar TODAS las fotos sin filtro de carpeta para debug
+    const allPhotosResult = await cloudinary.search
+      .expression('')
+      .max_results(20)
+      .sort_by('uploaded_at', 'desc')
+      .execute();
+
+    console.log(`🔍 Debug: Total de fotos en Cloudinary: ${allPhotosResult.resources.length}`);
+    console.log('🔍 Todas las fotos recientes:', allPhotosResult.resources.map(r => ({ public_id: r.public_id, folder: r.public_id.split('/')[0] })));
+
     // Procesar las fotos para incluir información adicional
     const archivedPhotos = result.resources.map(photo => ({
       public_id: photo.public_id,
