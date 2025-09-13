@@ -884,8 +884,27 @@ ${event.urls.projection}
                     <div style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 4px;">
                         <strong>Archivado:</strong> ${new Date(event.archivedAt).toLocaleString()}
                     </div>
-                    <div style="color: #27ae60; font-size: 0.9rem; font-weight: 600;">
+                    <div style="color: #27ae60; font-size: 0.9rem; font-weight: 600; margin-bottom: 10px;">
                         📸 ${event.photosArchived || 0} fotos archivadas
+                    </div>
+                    <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                        <button onclick="deleteArchivedEvent('${event.id}')" 
+                                style="
+                                    padding: 6px 12px;
+                                    background: linear-gradient(135deg, #e74c3c, #c0392b);
+                                    color: white;
+                                    border: none;
+                                    border-radius: 5px;
+                                    cursor: pointer;
+                                    font-size: 0.8rem;
+                                    font-weight: 600;
+                                    transition: all 0.2s ease;
+                                    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+                                "
+                                onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(231, 76, 60, 0.4)';"
+                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(231, 76, 60, 0.3)';">
+                            🗑️ Eliminar Definitivamente
+                        </button>
                     </div>
                 `;
                 listContainer.appendChild(eventEl);
@@ -899,6 +918,63 @@ ${event.urls.projection}
             const modal = document.getElementById('archived-events-modal');
             if (modal) {
                 modal.remove();
+            }
+        }
+
+        // Función para eliminar definitivamente un evento archivado
+        async function deleteArchivedEvent(eventId) {
+            // Confirmación doble para eliminación permanente
+            const eventName = eventId; // Podríamos buscar el nombre real si lo tuviéramos
+            const confirm1 = confirm(`⚠️ ¿Estás seguro de que quieres ELIMINAR DEFINITIVAMENTE el evento "${eventName}"?`);
+            if (!confirm1) return;
+
+            const confirm2 = confirm(`🚨 ¡ATENCIÓN! Esta acción NO se puede deshacer.\n\nSe eliminarán:\n• Todas las fotos del evento\n• Los datos del evento\n• Todo el historial relacionado\n\n¿Continuar con la eliminación?`);
+            if (!confirm2) return;
+
+            console.log('🗑️ Eliminando evento archivado:', eventId);
+
+            try {
+                showStatus('⏳ Eliminando evento y fotos...', 'info');
+
+                // Llamar a la función de eliminación
+                const NETLIFY_URL = 'https://playful-parfait-6bfab1.netlify.app';
+                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/delete-archived-event`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `eventId=${encodeURIComponent(eventId)}`
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    console.log('✅ Evento eliminado:', result);
+
+                    // Actualizar localStorage - remover el evento de archivedEvents
+                    const archivedEvents = JSON.parse(localStorage.getItem('archivedEvents') || '[]');
+                    const updatedArchivedEvents = archivedEvents.filter(event => event.id !== eventId);
+                    localStorage.setItem('archivedEvents', JSON.stringify(updatedArchivedEvents));
+
+                    // Cerrar el modal y mostrar mensaje de éxito
+                    closeArchivedModal();
+
+                    const deletedCount = result.deletedPhotos || 0;
+                    const errors = result.errors ? ` (${result.errors.length} errores)` : '';
+
+                    showStatus(`✅ Evento "${eventId}" eliminado permanentemente. ${deletedCount} fotos eliminadas${errors}`, 'success');
+
+                    // Log de auditoría
+                    console.log(`🗑️ Eliminación completada - Evento: ${eventId}, Fotos eliminadas: ${deletedCount}`);
+
+                } else {
+                    throw new Error(result.error || 'Error desconocido');
+                }
+
+            } catch (error) {
+                console.error('❌ Error eliminando evento:', error);
+                showStatus(`❌ Error: ${error.message}`, 'error');
+                alert(`❌ Error al eliminar el evento:\n${error.message}\n\nInténtalo de nuevo más tarde.`);
             }
         }
     </script>
