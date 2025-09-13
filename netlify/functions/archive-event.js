@@ -44,6 +44,7 @@ exports.handler = async (event, context) => {
       .execute();
 
     console.log(`Encontradas ${result.resources.length} fotos para archivar del evento ${eventId}`);
+    console.log('📋 Fotos encontradas:', result.resources.map(r => ({ public_id: r.public_id, tags: r.tags })));
 
     // 2. Mover cada foto a carpeta de archivados y eliminar tags
     const archivePromises = result.resources.map(async (photo) => {

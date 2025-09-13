@@ -38,6 +38,16 @@ exports.handler = async (event, context) => {
       .execute();
 
     console.log(`📸 Encontradas ${result.resources.length} fotos archivadas`);
+    console.log('📁 Recursos encontrados:', result.resources.map(r => r.public_id));
+
+    // También buscar en la carpeta momentos-en-vivo para debug
+    const momentosResult = await cloudinary.search
+      .expression('folder:momentos-en-vivo')
+      .max_results(10)
+      .execute();
+
+    console.log(`🔍 Debug: ${momentosResult.resources.length} fotos en momentos-en-vivo`);
+    console.log('🔍 Fotos en momentos-en-vivo:', momentosResult.resources.map(r => ({ public_id: r.public_id, tags: r.tags })));
 
     // Procesar las fotos para incluir información adicional
     const archivedPhotos = result.resources.map(photo => ({
