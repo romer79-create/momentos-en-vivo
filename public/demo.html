@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Gratuita - Momentos en Vivo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .demo-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-container::before {
+            content: '🎯 DEMO GRATUITA';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            font-size: 3rem;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        .logo i {
+            color: #ffd93d;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .features {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .features h3 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .features li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+            color: #555;
+        }
+
+        .features li::before {
+            content: '✅';
+            position: absolute;
+            left: 0;
+            color: #27ae60;
+        }
+
+        .limitations {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .limitations h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .limitations ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .limitations li {
+            margin-bottom: 5px;
+            padding-left: 15px;
+            position: relative;
+            color: #856404;
+            font-size: 0.9rem;
+        }
+
+        .limitations li::before {
+            content: '⚠️';
+            position: absolute;
+            left: 0;
+        }
+
+        .demo-form {
+            margin: 30px 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(255,107,107,0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .timer {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .timer h3 {
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .countdown {
+            font-size: 2rem;
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            color: #764ba2;
+        }
+
+        @media (max-width: 600px) {
+            .demo-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .btn {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="logo">
+            <i class="fas fa-camera"></i>
+        </div>
+        <h1>Demo Gratuita</h1>
+        <p class="subtitle">Prueba todas las funcionalidades de Momentos en Vivo por 3 días completamente gratis</p>
+
+        <div class="features">
+            <h3>🚀 Lo que puedes probar:</h3>
+            <ul>
+                <li>Crear un evento personalizado</li>
+                <li>Generar códigos QR automáticamente</li>
+                <li>Capturar fotos en tiempo real</li>
+                <li>Moderar fotos enviadas</li>
+                <li>Ver slideshow de fotos aprobadas</li>
+                <li>Todas las funcionalidades básicas</li>
+            </ul>
+        </div>
+
+        <div class="limitations">
+            <h4>⚠️ Limitaciones de la demo:</h4>
+            <ul>
+                <li>Máximo 2 fotos por evento</li>
+                <li>No se pueden descargar fotos</li>
+                <li>No hay personalización de colores/temas</li>
+                <li>Datos se eliminan automáticamente en 3 días</li>
+                <li>Funcionalidad limitada para testing</li>
+            </ul>
+        </div>
+
+        <div class="timer">
+            <h3>⏰ Tu demo expira en:</h3>
+            <div class="countdown" id="countdown">3 días 00:00:00</div>
+        </div>
+
+        <div class="demo-form">
+            <div class="form-group">
+                <label for="eventName">Nombre del Evento de Prueba</label>
+                <input type="text" id="eventName" placeholder="Ej: Demo Boda María y Juan" required>
+            </div>
+            <div class="form-group">
+                <label for="userEmail">Email (para recordatorios)</label>
+                <input type="email" id="userEmail" placeholder="tu@email.com" required>
+            </div>
+        </div>
+
+        <div>
+            <button class="btn btn-primary" onclick="startDemo()">
+                <i class="fas fa-play"></i>
+                Comenzar Demo
+            </button>
+            <button class="btn btn-secondary" onclick="goHome()">
+                <i class="fas fa-home"></i>
+                Volver al Inicio
+            </button>
+        </div>
+
+        <a href="home.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Página principal
+        </a>
+    </div>
+
+    <script>
+        // Contador regresivo de 3 días
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const demoStart = localStorage.getItem('demoStartTime');
+
+            if (demoStart) {
+                const startTime = parseInt(demoStart);
+                const expiryTime = startTime + (3 * 24 * 60 * 60 * 1000); // 3 días en ms
+                const timeLeft = expiryTime - now;
+
+                if (timeLeft <= 0) {
+                    document.getElementById('countdown').textContent = 'EXPIRADO';
+                    return;
+                }
+
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                document.getElementById('countdown').textContent =
+                    `${days} días ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // Iniciar contador
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // Función para comenzar demo
+        function startDemo() {
+            const eventName = document.getElementById('eventName').value.trim();
+            const userEmail = document.getElementById('userEmail').value.trim();
+
+            if (!eventName) {
+                alert('⚠️ Por favor ingresa un nombre para el evento de prueba');
+                return;
+            }
+
+            if (!userEmail || !userEmail.includes('@')) {
+                alert('⚠️ Por favor ingresa un email válido');
+                return;
+            }
+
+            // Generar ID único para demo
+            const demoId = 'DEMO_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+            // Guardar información de demo
+            localStorage.setItem('demoMode', 'true');
+            localStorage.setItem('demoId', demoId);
+            localStorage.setItem('demoEventName', eventName);
+            localStorage.setItem('demoUserEmail', userEmail);
+            localStorage.setItem('demoStartTime', Date.now().toString());
+
+            // Redirigir a la página de captura con modo demo
+            const captureUrl = `index.html?event=${demoId}&theme=demo-pink&demo=true`;
+            window.location.href = captureUrl;
+        }
+
+        // Función para volver al inicio
+        function goHome() {
+            window.location.href = 'home.html';
+        }
+
+        // Verificar si ya hay una demo activa
+        window.onload = function() {
+            const demoMode = localStorage.getItem('demoMode');
+            const demoStart = localStorage.getItem('demoStartTime');
+
+            if (demoMode === 'true' && demoStart) {
+                const startTime = parseInt(demoStart);
+                const now = Date.now();
+                const daysPassed = (now - startTime) / (1000 * 60 * 60 * 24);
+
+                if (daysPassed >= 3) {
+                    // Demo expirada, limpiar datos
+                    clearDemoData();
+                    alert('Tu demo ha expirado. Los datos han sido eliminados.');
+                } else {
+                    // Demo activa, mostrar información
+                    const eventName = localStorage.getItem('demoEventName') || 'Evento de Prueba';
+                    document.getElementById('eventName').value = eventName;
+                    document.getElementById('userEmail').value = localStorage.getItem('demoUserEmail') || '';
+
+                    // Cambiar botón a "Continuar Demo"
+                    const startBtn = document.querySelector('.btn-primary');
+                    startBtn.innerHTML = '<i class="fas fa-play"></i> Continuar Demo';
+                    startBtn.onclick = function() {
+                        const demoId = localStorage.getItem('demoId');
+                        if (demoId) {
+                            window.location.href = `index.html?event=${demoId}&theme=demo-pink&demo=true`;
+                        } else {
+                            startDemo();
+                        }
+                    };
+                }
+            }
+        };
+
+        // Función para limpiar datos de demo
+        function clearDemoData() {
+            const keysToRemove = [
+                'demoMode', 'demoId', 'demoEventName', 'demoUserEmail', 'demoStartTime'
+            ];
+
+            keysToRemove.forEach(key => {
+                localStorage.removeItem(key);
+            });
+
+            // También limpiar contadores de fotos para este demo
+            const demoId = localStorage.getItem('demoId');
+            if (demoId) {
+                localStorage.removeItem(`photoCount_${demoId}`);
+            }
+        }
+    </script>
+</body>
+</html>

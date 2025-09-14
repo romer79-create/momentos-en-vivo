@@ -565,10 +565,43 @@
 
             document.getElementById('event-result').style.display = 'block';
 
+            // Función para verificar si un evento es demo
+        function isDemoEvent(eventId) {
+            return eventId && eventId.startsWith('DEMO_');
+        }
+
+        // Función para mostrar información del evento
+        function showEventInfo(event) {
+            const isDemo = isDemoEvent(event.id);
+            const downloadBtn = document.getElementById('download-photos');
+
+            if (isDemo) {
+                downloadBtn.disabled = true;
+                downloadBtn.textContent = '🚫 No disponible en demo';
+                downloadBtn.style.background = 'linear-gradient(135deg, #95a5a6, #7f8c8d)';
+                downloadBtn.title = 'La descarga de fotos no está disponible en el modo demo';
+            } else {
+                downloadBtn.disabled = false;
+                downloadBtn.textContent = '📸 Descargar Fotos';
+                downloadBtn.style.background = '';
+                downloadBtn.title = '';
+            }
+
+            // Mostrar información adicional para demos
+            if (isDemo) {
+                showStatus('🎯 Evento de demostración - Funcionalidades limitadas activas', 'info');
+            }
+
             // Event listeners para botones
             document.getElementById('download-qr').onclick = () => downloadQR(event);
             document.getElementById('copy-urls').onclick = () => copyURLs(event);
-            document.getElementById('download-photos').onclick = () => downloadEventPhotos(event);
+            document.getElementById('download-photos').onclick = () => {
+                if (isDemo) {
+                    showStatus('🚫 La descarga de fotos no está disponible en el modo demo', 'warning');
+                    return;
+                }
+                downloadEventPhotos(event);
+            };
         }
 
         // Descargar fotos del evento

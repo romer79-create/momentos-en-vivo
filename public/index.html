@@ -72,17 +72,17 @@
             --transition-duration: 0.4s;
         }
 
-        /* Sunset Orange Theme */
-        [data-theme="sunset-orange"] {
-            --primary-color: #ff9800;
-            --secondary-color: #ff5722;
-            --accent-color: #e65100;
+        /* Demo Theme */
+        [data-theme="demo-pink"] {
+            --primary-color: #e91e63;
+            --secondary-color: #f06292;
+            --accent-color: #ad1457;
             --background-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
             --text-color: #ffffff;
-            --text-secondary: #ffe0b2;
-            --primary-font: 'Fredoka One', cursive;
+            --text-secondary: #fce4ec;
+            --primary-font: 'Poppins', sans-serif;
             --secondary-font: 'Poppins', sans-serif;
-            --transition-duration: 0.3s;
+            --transition-duration: 0.4s;
         }
         
         body { 
@@ -442,18 +442,115 @@
             }
         });
 
-        // Extraer eventId y theme de la URL
+        // Extraer eventId, theme y demo mode de la URL
         const urlParams = new URLSearchParams(window.location.search);
         const eventId = urlParams.get('event') || 'DEFAULT';
         const theme = urlParams.get('theme') || 'modern-blue';
+        const isDemoMode = urlParams.get('demo') === 'true';
         console.log('EventId extraído de la URL:', eventId);
         console.log('Tema extraído de la URL:', theme);
+        console.log('Modo demo:', isDemoMode);
 
-        // Aplicar tema
-        document.documentElement.setAttribute('data-theme', theme);
+        // Verificar si es un evento demo válido
+        if (isDemoMode && (!eventId || !eventId.startsWith('DEMO_'))) {
+            alert('⚠️ Esta página es solo para demos. Serás redirigido.');
+            window.location.href = 'demo.html';
+        }
 
-        let currentStream; // Para guardar el stream de la cámara actual
-        let currentFacingMode = 'user'; // 'user' para frontal, 'environment' para trasera
+        // Función para configurar modo demo
+        function setupDemoMode() {
+            console.log('🎯 Configurando modo demo...');
+
+            // Agregar banner de demo
+            const demoBanner = document.createElement('div');
+            demoBanner.id = 'demo-banner';
+            demoBanner.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: linear-gradient(135deg, #e91e63, #f06292);
+                color: white;
+                text-align: center;
+                padding: 8px 20px;
+                font-size: 0.9rem;
+                font-weight: bold;
+                z-index: 1000;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            `;
+            demoBanner.innerHTML = '🎯 MODO DEMO GRATUITO - 3 días restantes';
+            document.body.insertBefore(demoBanner, document.body.firstChild);
+
+            // Ajustar el margen superior del body para el banner
+            document.body.style.marginTop = '45px';
+
+            // Deshabilitar opciones de personalización
+            const mirrorOption = document.querySelector('.mirror-option');
+            if (mirrorOption) {
+                mirrorOption.style.display = 'none';
+            }
+
+            // Agregar marca de agua sutil
+            const watermark = document.createElement('div');
+            watermark.style.cssText = `
+                position: fixed;
+                bottom: 10px;
+                right: 10px;
+                color: rgba(233, 30, 99, 0.3);
+                font-size: 0.8rem;
+                font-weight: bold;
+                pointer-events: none;
+                z-index: 999;
+                transform: rotate(-15deg);
+            `;
+            watermark.textContent = 'DEMO';
+            document.body.appendChild(watermark);
+
+            // Agregar contador regresivo en el status
+            function updateDemoCountdown() {
+                const demoStart = localStorage.getItem('demoStartTime');
+                if (demoStart) {
+                    const startTime = parseInt(demoStart);
+                    const now = Date.now();
+                    const timeLeft = (3 * 24 * 60 * 60 * 1000) - (now - startTime);
+
+                    if (timeLeft <= 0) {
+                        // Demo expirada - redirigir
+                        alert('Tu demo ha expirado. Gracias por probar Momentos en Vivo.');
+                        clearDemoData();
+                        window.location.href = 'home.html';
+                        return;
+                    }
+
+                    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+                    const banner = document.getElementById('demo-banner');
+                    if (banner) {
+                        banner.textContent = `🎯 MODO DEMO - ${days} días ${hours} horas restantes`;
+                    }
+                }
+            }
+
+            // Actualizar contador cada minuto
+            updateDemoCountdown();
+            setInterval(updateDemoCountdown, 60000);
+
+            console.log('✅ Modo demo configurado');
+        }
+
+        // Función para limpiar datos de demo
+        function clearDemoData() {
+            const demoId = localStorage.getItem('demoId');
+            if (demoId) {
+                localStorage.removeItem(`photoCount_${demoId}`);
+            }
+            localStorage.removeItem('demoMode');
+            localStorage.removeItem('demoId');
+            localStorage.removeItem('demoEventName');
+            localStorage.removeItem('demoUserEmail');
+            localStorage.removeItem('demoStartTime');
+        }
 
         // Contador de caracteres para el mensaje
         messageInput.addEventListener('input', () => {
@@ -497,6 +594,13 @@
         // Verificar límite de fotos por usuario (por evento)
         function checkPhotoLimit() {
             const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
+
+            // Límite especial para demos: máximo 2 fotos
+            if (isDemoMode) {
+                return photoCount < 2;
+            }
+
+            // Límite normal: máximo 10 fotos
             return photoCount < 10;
         }
 
@@ -508,21 +612,45 @@
 
         function updatePhotoCounter() {
             const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
-            const remaining = 10 - photoCount;
-            if (remaining <= 0) {
-                snapButton.disabled = true;
-                snapButton.textContent = "📸 Límite alcanzado";
-                snapButton.style.background = "linear-gradient(135deg, #6c757d, #495057)";
-                showToast(`Has alcanzado el límite de 10 fotos para este evento`, 'error');
+
+            if (isDemoMode) {
+                const remaining = 2 - photoCount;
+                if (remaining <= 0) {
+                    snapButton.disabled = true;
+                    snapButton.textContent = "🎯 Demo Completa";
+                    snapButton.style.background = "linear-gradient(135deg, #e91e63, #f06292)";
+                    showToast(`¡Demo completada! Has enviado 2 fotos.`, 'success');
+                    statusEl.innerHTML = `
+                        <div style="text-align: center; background: rgba(233, 30, 99, 0.1); padding: 10px; border-radius: 10px; margin: 10px 0;">
+                            <strong>🎯 DEMO COMPLETADA</strong><br>
+                            <small>Haz probado todas las funcionalidades. ¿Te interesa el servicio completo?</small><br>
+                            <a href="home.html" style="color: #e91e63; text-decoration: underline; font-size: 0.9rem;">Ver planes completos →</a>
+                        </div>
+                    `;
+                } else {
+                    statusEl.textContent = `Demo: Te quedan ${remaining} foto${remaining === 1 ? '' : 's'} para probar`;
+                }
             } else {
-                statusEl.textContent = `Te quedan ${remaining} foto${remaining === 1 ? '' : 's'} para este evento`;
+                const remaining = 10 - photoCount;
+                if (remaining <= 0) {
+                    snapButton.disabled = true;
+                    snapButton.textContent = "📸 Límite alcanzado";
+                    snapButton.style.background = "linear-gradient(135deg, #6c757d, #495057)";
+                    showToast(`Has alcanzado el límite de 10 fotos para este evento`, 'error');
+                } else {
+                    statusEl.textContent = `Te quedan ${remaining} foto${remaining === 1 ? '' : 's'} para este evento`;
+                }
             }
         }
 
         // Evento para enviar foto con mensaje
         snapButton.addEventListener('click', () => {
             if (!checkPhotoLimit()) {
-                showToast("Has alcanzado el límite de 10 fotos por evento", 'error');
+                if (isDemoMode) {
+                    showToast("¡Demo completada! Has enviado tus 2 fotos de prueba.", 'success');
+                } else {
+                    showToast("Has alcanzado el límite de 10 fotos por evento", 'error');
+                }
                 return;
             }
 
