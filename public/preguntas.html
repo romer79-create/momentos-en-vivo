@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preguntas y Dudas - Masamune Code</title>
+    <meta name="description" content="Preguntas frecuentes y formulario de consultas - Masamune Code">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://i.imgur.com/HQVCZdN.png">
+    <link rel="shortcut icon" type="image/png" href="https://i.imgur.com/HQVCZdN.png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+            padding-top: 80px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo img {
+            height: 45px;
+            width: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .faq-question {
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 25px;
+            text-align: left;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .faq-question:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .faq-question:focus {
+            outline: none;
+        }
+
+        .faq-answer {
+            padding: 0 25px 25px;
+            display: none;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .faq-icon {
+            float: right;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Contact Form Section */
+        .contact-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .contact-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #c3e6cb;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .contact-form {
+                padding: 30px 20px;
+            }
+
+            .faq-question {
+                font-size: 1rem;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <a href="#" class="logo">
+                <img src="https://i.imgur.com/HQVCZdN.png" alt="Masamune Code" style="height: 45px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+            </a>
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Volver al Inicio
+            </a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>¿Tienes Preguntas?</h1>
+            <p>Estamos aquí para ayudarte. Encuentra respuestas a las preguntas más frecuentes o envíanos tu consulta.</p>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="container">
+            <div class="faq-container">
+                <h2 style="text-align: center; margin-bottom: 40px; color: #333; font-size: 2.5rem;">Preguntas Frecuentes</h2>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        ¿Cómo funciona el sistema de captura fotográfica?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Nuestro sistema permite a los invitados de tu evento capturar fotos en tiempo real usando sus dispositivos móviles. Las fotos se envían automáticamente a nuestro servidor y se muestran en una pantalla grande para que todos puedan verlas al instante.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        ¿Cuánto tiempo toma configurar el sistema?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>La configuración inicial toma aproximadamente 15-20 minutos. Esto incluye la conexión a internet, configuración del evento y pruebas del sistema. Durante el evento, solo necesitamos 5 minutos para iniciar la captura.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        ¿Qué tipo de eventos son ideales para este sistema?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Es perfecto para bodas, cumpleaños, eventos corporativos, graduaciones, fiestas familiares y cualquier celebración donde quieras capturar momentos espontáneos. Funciona mejor con 20-500 personas.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        ¿Necesito equipo especial?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Solo necesitas una pantalla grande (TV o proyector) y conexión a internet. Tus invitados usan sus propios smartphones o tablets. Nosotros nos encargamos del resto del equipamiento técnico.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        ¿Cómo se manejan las fotos inapropiadas?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Contamos con un panel de moderación en tiempo real donde revisamos cada foto antes de mostrarla. Solo las fotos apropiadas se proyectan en la pantalla grande, garantizando un contenido adecuado para tu evento.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        ¿Cuánto cuesta el servicio?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Nuestro plan incluye todo por $25.000 ARS: captura ilimitada, moderación, proyección, soporte técnico y descarga completa de fotos. El enlace del evento queda activo por 30 días.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        ¿Puedo personalizar el diseño?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Sí, podemos personalizar colores, logos y mensajes para que coincida con el tema de tu evento. También podemos agregar filtros temáticos y marcos personalizados para las fotos.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        ¿Qué pasa si hay problemas técnicos durante el evento?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Tenemos soporte técnico remoto durante todo el evento. Si surge algún problema, podemos solucionarlo rápidamente. También tenemos planes de contingencia para garantizar que tu evento siga fluyendo sin interrupciones.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form Section -->
+    <section class="contact-section">
+        <div class="container">
+            <div class="contact-form">
+                <h2>¿No encontraste tu respuesta?</h2>
+                <p style="text-align: center; margin-bottom: 30px; color: #666;">Envíanos tu pregunta y te responderemos lo antes posible.</p>
+
+                <form id="questionForm">
+                    <div class="form-group">
+                        <label for="name">Nombre *</label>
+                        <input type="text" id="name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Teléfono</label>
+                        <input type="tel" id="phone">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventType">Tipo de Evento</label>
+                        <select id="eventType">
+                            <option value="">Seleccionar...</option>
+                            <option value="boda">Boda</option>
+                            <option value="cumpleanos">Cumpleaños</option>
+                            <option value="corporativo">Evento Corporativo</option>
+                            <option value="graduacion">Graduación</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="question">Tu Pregunta *</label>
+                        <textarea id="question" placeholder="Cuéntanos tu duda o pregunta..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Enviar Pregunta</button>
+                </form>
+
+                <div id="successMessage" class="success-message">
+                    <i class="fas fa-check-circle" style="font-size: 1.5rem; margin-bottom: 10px;"></i>
+                    <h3>¡Pregunta enviada!</h3>
+                    <p>Te responderemos lo antes posible. Revisa tu email para nuestra respuesta.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 30px 0;
+        margin-top: 50px;
+        text-align: center;
+    ">
+        <div class="container">
+            <p>&copy; 2024 Masamune Code. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // FAQ Accordion
+        document.addEventListener('DOMContentLoaded', function() {
+            const faqQuestions = document.querySelectorAll('.faq-question');
+
+            faqQuestions.forEach(question => {
+                question.addEventListener('click', function() {
+                    const faqItem = this.parentElement;
+                    const answer = faqItem.querySelector('.faq-answer');
+
+                    // Toggle active class
+                    faqItem.classList.toggle('active');
+
+                    // Toggle answer visibility
+                    if (faqItem.classList.contains('active')) {
+                        answer.style.display = 'block';
+                    } else {
+                        answer.style.display = 'none';
+                    }
+                });
+            });
+
+            // Form submission
+            document.getElementById('questionForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const formData = {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    eventType: document.getElementById('eventType').value,
+                    question: document.getElementById('question').value,
+                    submittedAt: new Date().toISOString()
+                };
+
+                // Store in localStorage (for demo purposes)
+                const questions = JSON.parse(localStorage.getItem('questions') || '[]');
+                questions.push(formData);
+                localStorage.setItem('questions', JSON.stringify(questions));
+
+                // Show success message
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('questionForm').reset();
+
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 5000);
+
+                console.log('Nueva pregunta recibida:', formData);
+            });
+        });
+    </script>
+</body>
+</html>
