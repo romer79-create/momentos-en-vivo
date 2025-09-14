@@ -77,6 +77,22 @@
             gap: 5px;
         }
 
+        .user-info {
+            text-align: right;
+            color: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .user-email {
+            opacity: 0.8;
+            font-size: 0.8rem;
+        }
+
         /* Stats Cards */
         .stats-grid {
             display: grid;
@@ -325,9 +341,14 @@
                     <p>Panel de Cliente</p>
                 </div>
             </div>
-            <div class="client-badge">
-                <i class="fas fa-crown"></i>
-                CLIENTE PREMIUM
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+                <div class="client-badge">
+                    <i class="fas fa-crown"></i>
+                    CLIENTE PREMIUM
+                </div>
+                <div class="user-info" id="userInfo">
+                    <!-- Información del usuario se cargará aquí -->
+                </div>
             </div>
         </div>
 
@@ -415,52 +436,36 @@
 
             clientData = JSON.parse(registeredUser);
 
-            // Verificar si es cliente premium
-            if (!clientData.isPremium) {
-                // Usuario no es premium, redirigir al checkout
-                alert('Necesitas una cuenta premium para acceder al panel. Serás redirigido al checkout.');
-                window.location.href = 'checkout.html';
-                return;
-            }
+            // Mostrar información del usuario
+            const userInfoEl = document.getElementById('userInfo');
+            userInfoEl.innerHTML = `
+                <div class="user-name">${clientData.fullName}</div>
+                <div class="user-email">${clientData.email}</div>
+            `;
         }
 
         // Cargar eventos del cliente
         function loadEvents() {
-            const container = document.getElementById('eventsContainer');
+            const container = document.getElementById('events-list');
+            const userId = clientData.id;
 
-            // Simular eventos del cliente
-            const mockEvents = [
-                {
-                    id: 'EVENT_001',
-                    name: 'Boda Ana y Carlos',
-                    date: '2024-12-15T18:00',
-                    status: 'active',
-                    photos: 45,
-                    totalPhotos: 50,
-                    urls: {
-                        capture: `index.html?event=EVENT_001&theme=premium`,
-                        moderation: `moderador.html?event=EVENT_001`,
-                        projection: `proyeccion.html?event=EVENT_001`,
-                        admin: `admin.html`
-                    }
-                },
-                {
-                    id: 'EVENT_002',
-                    name: 'Cumpleaños Empresa XYZ',
-                    date: '2024-11-20T19:00',
-                    status: 'expired',
-                    photos: 30,
-                    totalPhotos: 30,
-                    urls: {
-                        capture: `index.html?event=EVENT_002&theme=premium`,
-                        moderation: `moderador.html?event=EVENT_002`,
-                        projection: `proyeccion.html?event=EVENT_002`,
-                        admin: `admin.html`
-                    }
-                }
-            ];
+            // Cargar eventos del usuario desde localStorage
+            const allEvents = JSON.parse(localStorage.getItem('premiumEvents') || '[]');
+            const userEvents = allEvents.filter(event => event.userId === userId);
 
-            const eventsHtml = mockEvents.map(event => `
+            if (userEvents.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-calendar-alt" style="font-size: 3rem; margin-bottom: 20px; color: #667eea;"></i>
+                        <p>Aún no has creado ningún evento.</p>
+                        <p>¡Crea tu primer evento premium!</p>
+                    </div>
+                `;
+                updateStats(userEvents);
+                return;
+            }
+
+            const eventsHtml = userEvents.map(event => `
                 <div class="event-card">
                     <div class="event-status ${event.status}">
                         ${event.status === 'active' ? 'ACTIVO' : 'FINALIZADO'}
@@ -471,7 +476,7 @@
                     </div>
                     <div class="event-info">
                         <p><strong>Fecha:</strong> ${new Date(event.date).toLocaleString()}</p>
-                        <p><strong>Fotos:</strong> ${event.photos}/${event.totalPhotos}</p>
+                        <p><strong>Fotos:</strong> ${event.photos || 0}/${event.totalPhotos || 'Ilimitado'}</p>
                         <p><strong>ID:</strong> ${event.id}</p>
                     </div>
                     <div class="event-actions">
@@ -492,12 +497,18 @@
             `).join('');
 
             container.innerHTML = `<div class="events-grid">${eventsHtml}</div>`;
+            updateStats(userEvents);
         }
 
         // Actualizar estadísticas
-        function updateStats() {
-            document.getElementById('totalEvents').textContent = '2';
-            document.getElementById('totalPhotos').textContent = '75';
+        function updateStats(events) {
+            const totalEvents = events.length;
+            const totalPhotos = events.reduce((acc, event) => acc + (event.photos || 0), 0);
+            const activeEvents = events.filter(event => event.status === 'active').length;
+
+            document.getElementById('totalEvents').textContent = totalEvents;
+            document.getElementById('totalPhotos').textContent = totalPhotos;
+            document.getElementById('activeEvents').textContent = activeEvents;
             document.getElementById('activeEvents').textContent = '1';
             document.getElementById('planType').textContent = 'Premium';
         }
@@ -529,16 +540,42 @@
                 return;
             }
 
-            // Aquí iría la lógica para crear el evento en el backend
+            // Generar ID único para el evento premium
+            const eventId = `PREMIUM_${clientData.id}_${Date.now()}`;
+
+            // Crear evento asociado al usuario
+            const newEvent = {
+                id: eventId,
+                name: eventName,
+                date: eventDate,
+                status: 'active',
+                photos: 0,
+                totalPhotos: null, // Ilimitado para premium
+                userId: clientData.id,
+                userName: clientData.fullName,
+                userEmail: clientData.email,
+                created: new Date().toISOString(),
+                urls: {
+                    capture: `index.html?event=${eventId}&theme=premium`,
+                    moderation: `moderador.html?event=${eventId}`,
+                    projection: `proyeccion.html?event=${eventId}`,
+                    admin: `cliente-panel.html`
+                }
+            };
+
+            // Guardar evento en localStorage
+            const allEvents = JSON.parse(localStorage.getItem('premiumEvents') || '[]');
+            allEvents.push(newEvent);
+            localStorage.setItem('premiumEvents', JSON.stringify(allEvents));
+
             alert(`Evento "${eventName}" creado exitosamente para ${new Date(eventDate).toLocaleString()}!`);
 
             // Limpiar formulario
             document.getElementById('eventName').value = '';
             document.getElementById('eventDate').value = '';
 
-            // Recargar eventos
+            // Recargar eventos y estadísticas
             loadEvents();
-            updateStats();
         }
     </script>
 </body>
