@@ -889,7 +889,7 @@ ${event.urls.projection}
                 console.log('📡 URL de Netlify:', NETLIFY_URL);
 
                 // 1. Archivar fotos en Cloudinary
-                const archiveUrl = `${NETLIFY_URL}/.netlify/functions/archive-event?eventId=${eventId}`;
+                const archiveUrl = `${API_BASE_URL}/archive-event?eventId=${eventId}`;
                 console.log('🔗 URL de archivado:', archiveUrl);
 
                 const archiveResponse = await fetch(archiveUrl);
