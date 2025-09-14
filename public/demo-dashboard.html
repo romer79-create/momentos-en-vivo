@@ -347,6 +347,31 @@
             margin-bottom: 20px;
             color: #e91e63;
         }
+
+        .upgrade-pricing {
+            text-align: center;
+            margin-top: 30px;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .upgrade-pricing h3 {
+            font-size: 2rem;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+
+        .upgrade-pricing span {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .upgrade-savings {
+            color: #ffd700;
+            font-weight: bold;
+            margin: 10px 0 20px 0;
+        }
     </style>
 </head>
 <body>
@@ -498,24 +523,24 @@
         <!-- Upgrade Section -->
         <div class="upgrade-section">
             <div class="upgrade-content">
-                <h3>¿Te Gustó la Demo? ¡Actualiza Ahora!</h3>
-                <p>Obtén acceso completo a todas las funcionalidades sin límites</p>
+                <h3>🎯 ¡Actualiza a Premium Ahora!</h3>
+                <p>Te quedan <strong id="daysLeft">--</strong> días de demo. ¿Por qué esperar? Obtén acceso completo inmediatamente.</p>
 
                 <div class="upgrade-features">
                     <div class="upgrade-feature">
                         <i class="fas fa-infinity"></i>
                         <h4>Fotos Ilimitadas</h4>
-                        <p>Todas las fotos que necesites</p>
+                        <p>Envía tantas fotos como necesites</p>
                     </div>
                     <div class="upgrade-feature">
                         <i class="fas fa-download"></i>
                         <h4>Descargas ZIP</h4>
-                        <p>Descarga todas tus fotos en un archivo comprimido</p>
+                        <p>Descarga todas tus fotos en un archivo</p>
                     </div>
                     <div class="upgrade-feature">
                         <i class="fas fa-palette"></i>
-                        <h4>Personalización Completa</h4>
-                        <p>Temas, colores y branding personalizado</p>
+                        <h4>Sin Marca de Agua</h4>
+                        <p>Fotos limpias y profesionales</p>
                     </div>
                     <div class="upgrade-feature">
                         <i class="fas fa-headset"></i>
@@ -524,9 +549,13 @@
                     </div>
                 </div>
 
-                <a href="home.html#services" class="btn btn-primary" style="font-size: 1.2rem; padding: 15px 30px;">
-                    <i class="fas fa-rocket"></i> Ver Planes Completos
-                </a>
+                <div class="upgrade-pricing">
+                    <h3>$29.990<span>/mes</span></h3>
+                    <p class="upgrade-savings">¡Ahorra tiempo y mejora tu evento!</p>
+                    <button class="btn btn-primary" onclick="upgradeToPremium()" style="font-size: 1.2rem; padding: 15px 30px;">
+                        <i class="fas fa-rocket"></i> Actualizar a Premium
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -554,6 +583,9 @@
 
                     document.getElementById('timeRemaining').textContent =
                         `${days}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+                    // Actualizar contador de días en sección de upgrade
+                    document.getElementById('daysLeft').textContent = days;
                 }
             }, 60000);
         };
@@ -800,10 +832,11 @@
             localStorage.removeItem('demoStartTime');
         }
 
-        // Función para renovar demo (por si el usuario quiere extender)
-        function extendDemo() {
-            // Aquí podría implementarse una renovación de demo
-            alert('La renovación de demo estará disponible próximamente. Contacta con soporte.');
+        // Función para actualizar a premium
+        function upgradeToPremium() {
+            if (confirm('🎯 ¿Quieres actualizar a Premium ahora?\n\n✅ Acceso inmediato a todas las funcionalidades\n✅ Fotos ilimitadas\n✅ Sin marca de agua\n✅ Soporte prioritario\n\n¿Continuar al checkout?')) {
+                window.location.href = 'checkout.html';
+            }
         }
     </script>
 </body>
