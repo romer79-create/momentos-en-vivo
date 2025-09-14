@@ -304,50 +304,71 @@
 
         function displayPhoto(photo) {
             if (!photo) return;
-            
+
             // Remover slide actual
             const currentSlide = container.querySelector('.photo-slide.visible');
             if (currentSlide) {
                 currentSlide.classList.remove('visible');
                 setTimeout(() => currentSlide.remove(), 1500);
             }
-            
+
             // Limpiar slides antiguos
             const allSlides = container.querySelectorAll('.photo-slide');
             if (allSlides.length > 5) {
                 allSlides[0].remove();
             }
-            
-            // Extraer mensaje de los tags de Cloudinary
-            let message = '';
-            if (photo.tags && Array.isArray(photo.tags)) {
-                const messageTag = photo.tags.find(tag => tag.startsWith('msg:'));
-                if (messageTag) {
-                    message = decodeURIComponent(messageTag.substring(4)); // Remover 'msg:' del inicio
+
+            // Determinar si es un objeto Cloudinary o un string (desarrollo local)
+            const isCloudinaryObject = typeof photo === 'object' && photo.secure_url;
+            const isLocalFilename = typeof photo === 'string';
+
+            let photoId, imageUrl, message = '', assetId = '';
+
+            if (isCloudinaryObject) {
+                // Formato Cloudinary (producción)
+                photoId = photo.public_id;
+                assetId = photo.asset_id || photo.public_id;
+                imageUrl = photo.secure_url;
+
+                // Extraer mensaje de los tags de Cloudinary
+                if (photo.tags && Array.isArray(photo.tags)) {
+                    const messageTag = photo.tags.find(tag => tag.startsWith('msg:'));
+                    if (messageTag) {
+                        message = decodeURIComponent(messageTag.substring(4)); // Remover 'msg:' del inicio
+                    }
                 }
+
+                console.log('--- DEBUG Proyección: Foto Cloudinary:', photo.public_id, 'Tags:', photo.tags, 'Mensaje extraído:', message);
+
+            } else if (isLocalFilename) {
+                // Formato local (desarrollo)
+                photoId = photo;
+                assetId = photo; // Usar filename como asset_id
+                imageUrl = `/approved/${photo}`;
+                message = 'Foto aprobada localmente';
+
+                console.log('--- DEBUG Proyección: Foto local:', photo);
             }
-            
-            console.log('--- DEBUG Proyección: Foto:', photo.public_id, 'Tags:', photo.tags, 'Mensaje extraído:', message);
-            
+
             // Crear nuevo slide
             const slide = document.createElement('div');
             slide.className = 'photo-slide';
-            slide.id = photo.asset_id;
+            slide.id = assetId;
             slide.innerHTML = `
-                <img src="${photo.secure_url}" alt="Foto aprobada">
+                <img src="${imageUrl}" alt="Foto aprobada">
                 <div class="message-overlay ${message ? '' : 'no-message'}">
                     ${message}
                 </div>
-                <button class="vote-btn" onclick="voteForPhoto('${photo.asset_id}')">❤️ <span id="votes-${photo.asset_id}">0</span></button>
+                <button class="vote-btn" onclick="voteForPhoto('${assetId}')">❤️ <span id="votes-${assetId}">0</span></button>
             `;
-            
+
             container.appendChild(slide);
-            
+
             // Load votes
-            let voteSpan = slide.querySelector(`#votes-${photo.asset_id}`);
-            let votes = parseInt(localStorage.getItem(`votes_${eventId}_${photo.asset_id}`) || '0');
+            let voteSpan = slide.querySelector(`#votes-${assetId}`);
+            let votes = parseInt(localStorage.getItem(`votes_${eventId}_${assetId}`) || '0');
             voteSpan.textContent = votes;
-            
+
             setTimeout(() => {
                 slide.classList.add('visible');
             }, 500);
@@ -380,8 +401,23 @@
                 });
                 if (!response.ok) return;
                 const newPhotos = await response.json();
-                const newPhoto = newPhotos.find(p => !knownPhotoIds.has(p.asset_id));
-                photos = newPhotos;
+
+                // Procesar fotos para manejar ambos formatos
+                const processedPhotos = newPhotos.map(photo => {
+                    if (typeof photo === 'string') {
+                        // Formato local: convertir string a objeto
+                        return {
+                            public_id: photo,
+                            asset_id: photo,
+                            secure_url: `/approved/${photo}`,
+                            tags: []
+                        };
+                    }
+                    return photo; // Ya es objeto Cloudinary
+                });
+
+                const newPhoto = processedPhotos.find(p => !knownPhotoIds.has(p.asset_id));
+                photos = processedPhotos;
                 photos.forEach(p => knownPhotoIds.add(p.asset_id));
                 placeholder.style.display = photos.length > 0 ? 'none' : 'block';
                 if (newPhoto) {

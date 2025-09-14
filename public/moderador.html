@@ -312,23 +312,24 @@
         // Aplicar tema
         document.documentElement.setAttribute('data-theme', theme);
 
-        async function handleAction(action, public_id, cardElement) {
+        async function handleAction(action, photoId, cardElement) {
             const url = isLocal ? `/${action}-photo` : `${NETLIFY_URL}/.netlify/functions/${action}-photo`;
+            const requestBody = isLocal
+                ? { filename: photoId, eventId: eventId }  // Para desarrollo local
+                : { public_id: photoId, eventId: eventId }; // Para producción Cloudinary
+
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'x-api-key': API_KEY,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ 
-                    public_id: public_id,
-                    eventId: eventId
-                })
+                body: JSON.stringify(requestBody)
             });
             if (response.ok) {
                 if (action === 'approve') {
                     // Mostrar botones de compartir después de aprobar
-                    showShareButtons(public_id, cardElement);
+                    showShareButtons(photoId, cardElement);
                 } else {
                     cardElement.remove();
                 }
@@ -338,7 +339,7 @@
         }
 
         // Función para mostrar botones de compartir
-        async function showShareButtons(public_id, cardElement) {
+        async function showShareButtons(photoId, cardElement) {
             try {
                 // Obtener la URL de la foto aprobada
                 const url = isLocal ? `/get-approved-photos?eventId=${eventId}` : `${NETLIFY_URL}/.netlify/functions/get-approved-photos?eventId=${eventId}`;
@@ -348,8 +349,24 @@
                     }
                 });
                 const photos = await response.json();
-                
-                const approvedPhoto = photos.find(photo => photo.public_id === public_id);
+
+                // Buscar la foto aprobada (manejar ambos formatos)
+                let approvedPhoto = null;
+                if (isLocal) {
+                    // En desarrollo local, buscar por filename
+                    approvedPhoto = photos.find(photo => photo === photoId);
+                    if (approvedPhoto) {
+                        // Convertir a formato objeto para compartir
+                        approvedPhoto = {
+                            secure_url: `/approved/${photoId}`,
+                            public_id: photoId
+                        };
+                    }
+                } else {
+                    // En producción, buscar por public_id
+                    approvedPhoto = photos.find(photo => photo.public_id === photoId);
+                }
+
                 if (!approvedPhoto) {
                     cardElement.remove();
                     return;
@@ -367,36 +384,36 @@
                 if (shareData.success) {
                     const shareSection = cardElement.querySelector('.share-section');
                     const shareButtons = cardElement.querySelector('.share-buttons');
-                    
+
                     shareButtons.innerHTML = `
-                        <button class="share-btn share-facebook" onclick="shareToPlatform('${shareData.shareUrls.facebook}', 'Facebook', '${public_id}')">
+                        <button class="share-btn share-facebook" onclick="shareToPlatform('${shareData.shareUrls.facebook}', 'Facebook', '${photoId}')">
                             📘 Facebook
                         </button>
-                        <button class="share-btn share-twitter" onclick="shareToPlatform('${shareData.shareUrls.twitter}', 'Twitter', '${public_id}')">
+                        <button class="share-btn share-twitter" onclick="shareToPlatform('${shareData.shareUrls.twitter}', 'Twitter', '${photoId}')">
                             🐦 Twitter
                         </button>
-                        <button class="share-btn share-instagram" onclick="shareToPlatform('${shareData.shareUrls.instagram}', 'Instagram', '${public_id}')">
+                        <button class="share-btn share-instagram" onclick="shareToPlatform('${shareData.shareUrls.instagram}', 'Instagram', '${photoId}')">
                             📷 Instagram
                         </button>
-                        <button class="share-btn share-whatsapp" onclick="shareToPlatform('${shareData.shareUrls.whatsapp}', 'WhatsApp', '${public_id}')">
+                        <button class="share-btn share-whatsapp" onclick="shareToPlatform('${shareData.shareUrls.whatsapp}', 'WhatsApp', '${photoId}')">
                             💬 WhatsApp
                         </button>
-                        <button class="share-btn share-linkedin" onclick="shareToPlatform('${shareData.shareUrls.linkedin}', 'LinkedIn', '${public_id}')">
+                        <button class="share-btn share-linkedin" onclick="shareToPlatform('${shareData.shareUrls.linkedin}', 'LinkedIn', '${photoId}')">
                             💼 LinkedIn
                         </button>
                         <button class="share-btn share-copy" onclick="copyToClipboard('${approvedPhoto.secure_url}')">
                             📋 Copiar
                         </button>
                     `;
-                    
+
                     shareSection.classList.add('show');
-                    
+
                     // Cambiar el texto del botón de aprobar
                     const approveBtn = cardElement.querySelector('.approve-btn');
                     approveBtn.textContent = '✅ Aprobada';
                     approveBtn.disabled = true;
                     approveBtn.style.background = '#95a5a6';
-                    
+
                     // Ocultar botón de rechazar
                     const rejectBtn = cardElement.querySelector('.reject-btn');
                     rejectBtn.style.display = 'none';
@@ -411,21 +428,23 @@
 
         // Función para compartir en plataforma específica
         function shareToPlatform(url, platform, photoId) {
-            // Registrar el compartir
-            const logUrl = isLocal ? `/social-share?action=log-share&platform=${platform}&photoId=${photoId}&eventId=${eventId}` : `${NETLIFY_URL}/.netlify/functions/social-share?action=log-share&platform=${platform}&photoId=${photoId}&eventId=${eventId}`;
-            fetch(logUrl, {
-                headers: {
-                    'x-api-key': API_KEY
-                }
-            });
-            
+            // Registrar el compartir (solo si no es local, ya que las funciones sociales pueden no estar disponibles)
+            if (!isLocal) {
+                const logUrl = `${NETLIFY_URL}/.netlify/functions/social-share?action=log-share&platform=${platform}&photoId=${photoId}&eventId=${eventId}`;
+                fetch(logUrl, {
+                    headers: {
+                        'x-api-key': API_KEY
+                    }
+                });
+            }
+
             // Abrir ventana de compartir
             const width = 600;
             const height = 400;
             const left = (window.innerWidth - width) / 2;
             const top = (window.innerHeight - height) / 2;
-            
-            window.open(url, `share-${platform}`, 
+
+            window.open(url, `share-${platform}`,
                 `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
             );
         }
@@ -483,23 +502,43 @@
             }
 
             photos.forEach(photo => {
-                // Extraer el mensaje de los tags de Cloudinary
-                let message = '';
-                if (photo.tags && Array.isArray(photo.tags)) {
-                    const messageTag = photo.tags.find(tag => tag.startsWith('msg:'));
-                    if (messageTag) {
-                        message = decodeURIComponent(messageTag.substring(4)); // Remover 'msg:' del inicio
+                // Determinar si es un objeto Cloudinary o un string (desarrollo local)
+                const isCloudinaryObject = typeof photo === 'object' && photo.secure_url;
+                const isLocalFilename = typeof photo === 'string';
+
+                let photoId, imageUrl, message = '', createdDate = '';
+
+                if (isCloudinaryObject) {
+                    // Formato Cloudinary (producción)
+                    photoId = photo.public_id;
+
+                    // Construir URL completa para la imagen
+                    imageUrl = isLocal ? `/uploads/${photo.public_id.split('/').pop()}` : photo.secure_url;
+
+                    // Extraer el mensaje de los tags de Cloudinary
+                    if (photo.tags && Array.isArray(photo.tags)) {
+                        const messageTag = photo.tags.find(tag => tag.startsWith('msg:'));
+                        if (messageTag) {
+                            message = decodeURIComponent(messageTag.substring(4)); // Remover 'msg:' del inicio
+                        }
                     }
+
+                    createdDate = new Date(photo.created_at).toLocaleString('es-ES');
+                    console.log('--- DEBUG Moderador: Foto Cloudinary:', photo.public_id, 'Tags:', photo.tags, 'Mensaje extraído:', message);
+
+                } else if (isLocalFilename) {
+                    // Formato local (desarrollo)
+                    photoId = photo; // El filename es el ID
+                    imageUrl = `/uploads/${photo}`;
+                    message = 'Foto subida localmente';
+                    createdDate = 'Desarrollo local';
+                    console.log('--- DEBUG Moderador: Foto local:', photo);
                 }
-                
-                console.log('--- DEBUG Moderador: Foto:', photo.public_id, 'Tags:', photo.tags, 'Mensaje extraído:', message);
-                
-                const createdDate = new Date(photo.created_at).toLocaleString('es-ES');
-                
+
                 const card = document.createElement('div');
                 card.className = 'photo-card';
                 card.innerHTML = `
-                    <img src="${photo.secure_url}" alt="Foto pendiente">
+                    <img src="${imageUrl}" alt="Foto pendiente">
                     <div class="photo-info">
                         <div class="message-text ${message ? '' : 'no-message'}">
                             ${message || 'Sin mensaje'}
@@ -512,15 +551,15 @@
                         <button class="approve-btn">✅ Aprobar</button>
                         <button class="reject-btn">❌ Rechazar</button>
                     </div>
-                    <div class="share-section" id="share-${photo.public_id}">
-                        <div class="share-buttons" id="share-buttons-${photo.public_id}">
+                    <div class="share-section" id="share-${photoId}">
+                        <div class="share-buttons" id="share-buttons-${photoId}">
                             <!-- Botones de compartir se agregarán aquí dinámicamente -->
                         </div>
                     </div>
                 `;
-                
-                card.querySelector('.approve-btn').addEventListener('click', () => handleAction('approve', photo.public_id, card));
-                card.querySelector('.reject-btn').addEventListener('click', () => handleAction('reject', photo.public_id, card));
+
+                card.querySelector('.approve-btn').addEventListener('click', () => handleAction('approve', photoId, card));
+                card.querySelector('.reject-btn').addEventListener('click', () => handleAction('reject', photoId, card));
 
                 pendingContainer.appendChild(card);
             });
