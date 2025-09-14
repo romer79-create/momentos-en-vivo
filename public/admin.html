@@ -544,6 +544,10 @@
                         script.textContent = result.downloadScript;
                         document.head.appendChild(script);
 
+                        // Almacenar las fotos en una variable global temporal
+                        window.currentDownloadPhotos = result.photos;
+                        window.currentDownloadEventId = event.id;
+
                         // Esperar un poco para que el script se cargue
                         setTimeout(() => {
                             // Crear modal de opciones de descarga
@@ -589,7 +593,7 @@
                                         Elige cómo quieres descargarlas:
                                     </div>
                                     <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                                        <button onclick="downloadAllPhotos(result.photos, '${event.id}'); closeDownloadModal();"
+                                        <button onclick="downloadAllPhotos(window.currentDownloadPhotos, window.currentDownloadEventId); closeDownloadModal();"
                                                 style="
                                                     padding: 12px 20px;
                                                     background: linear-gradient(135deg, #27ae60, #2ecc71);
@@ -647,9 +651,11 @@
 
                             document.body.appendChild(modal);
 
-                            // Limpiar el script temporal después de un tiempo
+                            // Limpiar el script temporal y variables globales después de un tiempo
                             setTimeout(() => {
                                 document.head.removeChild(script);
+                                delete window.currentDownloadPhotos;
+                                delete window.currentDownloadEventId;
                             }, 10000);
 
                         }, 100);
