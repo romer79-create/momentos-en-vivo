@@ -78,6 +78,10 @@ export default async function handler(req, res) {
 
     console.log('--- DEBUG: Número de partes encontradas:', parts.length);
     console.log('--- DEBUG: Primeros 200 caracteres del body:', bodyStr.substring(0, 200));
+    console.log('--- DEBUG: Partes encontradas (primeros 100 chars cada una):');
+    parts.forEach((part, index) => {
+      console.log(`--- DEBUG: Parte ${index + 1}:`, part.substring(0, 100) + '...');
+    });
 
     let formData = {};
     let fileBuffer = null;
@@ -85,23 +89,24 @@ export default async function handler(req, res) {
     let fileContentType = 'application/octet-stream';
 
     // Procesar cada parte
-    for (const part of parts) {
-      console.log('--- DEBUG: Procesando parte:', part.substring(0, 100) + '...');
+    for (let partIndex = 0; partIndex < parts.length; partIndex++) {
+      const part = parts[partIndex];
+      console.log(`--- DEBUG: === PROCESANDO PARTE ${partIndex + 1} ===`);
 
       // Dividir headers y contenido
       const doubleCRLF = '\r\n\r\n';
       const headerEndIndex = part.indexOf(doubleCRLF);
 
       if (headerEndIndex === -1) {
-        console.log('--- DEBUG: Parte sin headers válidos, saltando');
+        console.log(`--- DEBUG: Parte ${partIndex + 1}: Sin headers válidos, saltando`);
         continue;
       }
 
       const headersStr = part.substring(0, headerEndIndex);
       const content = part.substring(headerEndIndex + doubleCRLF.length, part.length - 2); // Quitar CRLF final
 
-      console.log('--- DEBUG: Headers encontrados:', headersStr.substring(0, 150));
-      console.log('--- DEBUG: Content length:', content.length);
+      console.log(`--- DEBUG: Parte ${partIndex + 1} - Headers encontrados:`, headersStr.substring(0, 150));
+      console.log(`--- DEBUG: Parte ${partIndex + 1} - Content length:`, content.length);
 
       // Parsear headers
       let fieldName = '';
@@ -109,16 +114,16 @@ export default async function handler(req, res) {
 
       for (const line of headersStr.split('\r\n')) {
         const trimmedLine = line.trim();
-        console.log('--- DEBUG: Procesando header line:', trimmedLine);
+        console.log(`--- DEBUG: Parte ${partIndex + 1} - Procesando header line:`, trimmedLine);
 
         if (trimmedLine.startsWith('Content-Disposition:')) {
-          console.log('--- DEBUG: Encontrado Content-Disposition');
+          console.log(`--- DEBUG: Parte ${partIndex + 1} - Encontrado Content-Disposition`);
 
           // Parsear name
           const nameMatch = trimmedLine.match(/name="([^"]+)"/);
           if (nameMatch) {
             fieldName = nameMatch[1];
-            console.log('--- DEBUG: Field name encontrado:', fieldName);
+            console.log(`--- DEBUG: Parte ${partIndex + 1} - Field name encontrado:`, fieldName);
           }
 
           // Parsear filename (si existe, es un archivo)
@@ -126,28 +131,28 @@ export default async function handler(req, res) {
           if (filenameMatch) {
             fileName = filenameMatch[1];
             isFile = true;
-            console.log('--- DEBUG: Filename encontrado:', fileName, '- Es archivo!');
+            console.log(`--- DEBUG: Parte ${partIndex + 1} - Filename encontrado:`, fileName, '- Es archivo!');
           }
         } else if (trimmedLine.startsWith('Content-Type:')) {
           fileContentType = trimmedLine.split(':')[1].trim();
-          console.log('--- DEBUG: Content-Type encontrado:', fileContentType);
+          console.log(`--- DEBUG: Parte ${partIndex + 1} - Content-Type encontrado:`, fileContentType);
         }
       }
 
-      console.log('--- DEBUG: Procesando campo final:', { fieldName, isFile, fileName, contentLength: content.length });
+      console.log(`--- DEBUG: Parte ${partIndex + 1} - Procesando campo final:`, { fieldName, isFile, fileName, contentLength: content.length });
 
       // Procesar según el tipo de campo
       if (isFile && fieldName === 'photo') {
         fileBuffer = Buffer.from(content, 'binary');
-        console.log('--- DEBUG: ARCHIVO ENCONTRADO:', fileName, fileContentType, fileBuffer.length, 'bytes');
-        console.log('--- DEBUG: Primeros 50 bytes del archivo:', content.substring(0, 50));
+        console.log(`--- DEBUG: ARCHIVO ENCONTRADO EN PARTE ${partIndex + 1}:`, fileName, fileContentType, fileBuffer.length, 'bytes');
+        console.log(`--- DEBUG: Primeros 50 bytes del archivo:`, content.substring(0, 50));
       } else if (fieldName && !isFile) {
         formData[fieldName] = content;
-        console.log('--- DEBUG: CAMPO DE TEXTO GUARDADO:', fieldName, '=', formData[fieldName]);
+        console.log(`--- DEBUG: CAMPO DE TEXTO GUARDADO EN PARTE ${partIndex + 1}:`, fieldName, '=', formData[fieldName]);
       } else if (fieldName && isFile) {
-        console.log('--- DEBUG: Campo con archivo encontrado pero no es photo:', fieldName);
+        console.log(`--- DEBUG: Campo con archivo encontrado en parte ${partIndex + 1} pero no es photo:`, fieldName);
       } else {
-        console.log('--- DEBUG: Campo sin name encontrado, ignorando');
+        console.log(`--- DEBUG: Campo sin name encontrado en parte ${partIndex + 1}, ignorando`);
       }
     }
 
