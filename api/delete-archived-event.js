@@ -22,13 +22,28 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Parsear el body (viene como string en Vercel)
-    const body = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
-    const params = new URLSearchParams(body);
-    const eventId = params.get('eventId');
+    // Parsear el body - simplificar el parsing
+    let eventId;
 
-    if (!eventId) {
-      return res.status(400).json({ error: 'Se requiere eventId' });
+    if (req.method === 'POST') {
+      if (req.body && typeof req.body === 'string') {
+        // Si viene como string, parsearlo
+        const params = new URLSearchParams(req.body);
+        eventId = params.get('eventId');
+      } else if (req.body && req.body.eventId) {
+        // Si viene como objeto
+        eventId = req.body.eventId;
+      } else if (req.query && req.query.eventId) {
+        // Si viene como query parameter
+        eventId = req.query.eventId;
+      }
+    }
+
+    console.log('📝 Body recibido:', req.body);
+    console.log('📝 EventId parseado:', eventId);
+
+    if (!eventId || eventId.trim() === '') {
+      return res.status(400).json({ error: 'Se requiere eventId (parámetro faltante)' });
     }
 
     console.log('🗑️ Eliminando evento archivado:', eventId);
