@@ -559,30 +559,43 @@
             // Verificar si la demo existe
             if (!demoData.eventId || !demoData.startTime) {
                 alert('No se encontró una sesión de demo activa. Serás redirigido.');
-                window.location.href = 'demo.html';
+                window.location.href = 'registro.html';
                 return;
             }
 
-            // Verificar expiración
-            const startTime = parseInt(demoData.startTime);
-            const now = Date.now();
-            const daysPassed = (now - startTime) / (1000 * 60 * 60 * 24);
-
-            if (daysPassed >= 3) {
-                alert('Tu demo ha expirado. Gracias por probar Momentos en Vivo.');
-                clearDemoData();
-                window.location.href = 'demo.html';
-                return;
-            }
-        }
-
-        // Actualizar estadísticas
-        function updateStats() {
             const startTime = parseInt(demoData.startTime);
             const now = Date.now();
             const timeLeft = (3 * 24 * 60 * 60 * 1000) - (now - startTime);
 
             if (timeLeft <= 0) {
+                // Demo expirada - marcar email como bloqueado
+                const blockedEmails = JSON.parse(localStorage.getItem('blockedEmails') || '[]');
+                if (!blockedEmails.includes(clientData.email)) {
+                    blockedEmails.push(clientData.email);
+                    localStorage.setItem('blockedEmails', JSON.stringify(blockedEmails));
+                }
+
+                // Marcar usuario como expirado
+                clientData.demoExpired = true;
+                localStorage.setItem('registeredUser', JSON.stringify(clientData));
+
+                // Actualizar lista de usuarios
+                const allUsers = JSON.parse(localStorage.getItem('demoUsers') || '[]');
+                const userIndex = allUsers.findIndex(user => user.id === clientData.id);
+                if (userIndex !== -1) {
+                    allUsers[userIndex] = clientData;
+                    localStorage.setItem('demoUsers', JSON.stringify(allUsers));
+                }
+
+                // Limpiar datos de la demo expirada
+                clearDemoData();
+
+                // Mostrar mensaje de expiración y redirigir
+                alert('Tu demo ha expirado. Tu email ahora está bloqueado para nuevas demos. Serás redirigido para ver opciones de upgrade.');
+                setTimeout(() => {
+                    window.location.href = 'registro.html';
+                }, 1000);
+
                 document.getElementById('timeRemaining').textContent = 'EXPIRADO';
                 return;
             }

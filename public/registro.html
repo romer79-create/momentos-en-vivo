@@ -344,19 +344,32 @@
                 return;
             }
 
-            // Verificar si el email ya está registrado
+            // Verificar si el email ya está registrado o bloqueado
             const existingUsers = JSON.parse(localStorage.getItem('demoUsers') || '[]');
+            const blockedEmails = JSON.parse(localStorage.getItem('blockedEmails') || '[]');
+
+            if (blockedEmails.includes(email)) {
+                showUpgradeOptions(email);
+                return;
+            }
+
             const emailExists = existingUsers.some(user => user.email === email);
 
             if (emailExists) {
-                showMessage('Este correo electrónico ya está registrado. Serás redirigido a tu demo existente.', 'success');
-                // Cargar datos del usuario existente
                 const existingUser = existingUsers.find(user => user.email === email);
-                localStorage.setItem('registeredUser', JSON.stringify(existingUser));
-                setTimeout(() => {
-                    window.location.href = 'demo.html';
-                }, 2000);
-                return;
+                if (existingUser.demoExpired) {
+                    // Email bloqueado por demo expirada
+                    showUpgradeOptions(email);
+                    return;
+                } else {
+                    // Usuario ya registrado con demo activa
+                    showMessage('Ya tienes una demo activa con este correo. Serás redirigido.', 'success');
+                    localStorage.setItem('registeredUser', JSON.stringify(existingUser));
+                    setTimeout(() => {
+                        window.location.href = 'demo-dashboard.html';
+                    }, 2000);
+                    return;
+                }
             }
 
             // Crear nuevo usuario
@@ -404,13 +417,80 @@
             window.location.href = 'home.html';
         }
 
-        // Funciones para mostrar términos y privacidad
-        function showTerms() {
-            alert('Términos y Condiciones:\n\n• La demo es gratuita y tiene una duración de 3 días\n• Solo puedes enviar 2 fotos por persona\n• El evento demo tiene un límite máximo de 10 fotos totales\n• Los datos se eliminan automáticamente al finalizar la demo\n• No se requiere tarjeta de crédito\n• Puedes cancelar en cualquier momento');
+        // Función para mostrar opciones de upgrade cuando email está bloqueado
+        function showUpgradeOptions(email) {
+            const registerContainer = document.querySelector('.register-container');
+
+            registerContainer.innerHTML = `
+                <div class="logo">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h1>Demo Ya Utilizada</h1>
+                <p class="subtitle">El correo <strong>${email}</strong> ya ha utilizado su demo gratuita de 3 días.</p>
+
+                <div class="benefits" style="background: #fff3cd; border: 2px solid #ffeaa7;">
+                    <h3 style="color: #856404;">🚫 Demo Agotada</h3>
+                    <ul>
+                        <li>Has completado tu período de prueba gratuito</li>
+                        <li>Solo una demo por correo electrónico</li>
+                        <li>No puedes crear más demos con este email</li>
+                        <li>¡Pero puedes actualizar a la versión completa!</li>
+                    </ul>
+                </div>
+
+                <div style="background: #d4edda; border: 2px solid #c3e6cb; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
+                    <h3 style="color: #155724; margin-bottom: 15px;">🎉 ¡Actualiza Ahora!</h3>
+                    <p style="color: #155724; margin-bottom: 20px;">Obtén acceso ilimitado a todas las funcionalidades premium</p>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                        <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <h4 style="color: #28a745; margin-bottom: 10px;">✓ Funcionalidades Ilimitadas</h4>
+                            <ul style="text-align: left; color: #666; font-size: 0.9rem;">
+                                <li>Fotos ilimitadas por evento</li>
+                                <li>Descargas ZIP completas</li>
+                                <li>Múltiples eventos simultáneos</li>
+                            </ul>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <h4 style="color: #28a745; margin-bottom: 10px;">✓ Soporte Premium</h4>
+                            <ul style="text-align: left; color: #666; font-size: 0.9rem;">
+                                <li>Asistencia técnica prioritaria</li>
+                                <li>Configuración personalizada</li>
+                                <li>Capacitación incluida</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 20px; border-radius: 10px;">
+                        <h3 style="margin-bottom: 10px;">Planes Desde $29.990/mes</h3>
+                        <p style="margin-bottom: 15px; opacity: 0.9;">Precios especiales para ex-usuarios de demo</p>
+                        <button class="btn btn-primary" style="background: white; color: #28a745; border: none;" onclick="contactSales()">
+                            <i class="fas fa-envelope"></i> Contactar Ventas
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <button class="btn btn-secondary" onclick="goHome()">
+                        <i class="fas fa-home"></i> Volver al Inicio
+                    </button>
+                    <button class="btn" style="background: #6c757d; color: white;" onclick="useDifferentEmail()">
+                        <i class="fas fa-envelope"></i> Usar Otro Email
+                    </button>
+                </div>
+            `;
         }
 
-        function showPrivacy() {
-            alert('Política de Privacidad:\n\n• Tus datos personales se utilizan únicamente para crear y gestionar tu demo\n• No compartimos tu información con terceros\n• Todos los datos de la demo se eliminan automáticamente después de 3 días\n• Puedes solicitar la eliminación de tus datos en cualquier momento');
+        // Función para contactar ventas
+        function contactSales() {
+            const subject = encodeURIComponent('Interés en Plan Premium - Usuario Demo Expirado');
+            const body = encodeURIComponent('Hola,\n\nMi demo gratuita ha expirado y estoy interesado en actualizar al plan premium.\n\nDatos de contacto:\n- Email: [tu email]\n- Empresa: [opcional]\n\nGracias.');
+            window.location.href = `mailto:ventas@momentosenvivo.com?subject=${subject}&body=${body}`;
+        }
+
+        // Función para usar email diferente
+        function useDifferentEmail() {
+            window.location.reload();
         }
     </script>
 </body>
