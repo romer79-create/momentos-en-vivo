@@ -604,9 +604,9 @@
             const userPhotoCount = parseInt(localStorage.getItem(`userPhotoCount_${eventId}_${userId}`) || '0');
             const totalEventPhotoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
 
-            // Límite especial para demos: máximo 2 fotos por usuario, máximo 20 total por evento
+            // Límite especial para demos: máximo 2 fotos por usuario, máximo 10 total por evento
             if (isDemoMode) {
-                return userPhotoCount < 2 && totalEventPhotoCount < 20;
+                return userPhotoCount < 2 && totalEventPhotoCount < 10;
             }
 
             // Límite normal: máximo 10 fotos por usuario
@@ -665,11 +665,11 @@
                     statusEl.innerHTML = `
                         <div style="text-align: center; background: rgba(108, 117, 125, 0.1); padding: 10px; border-radius: 10px; margin: 10px 0;">
                             <strong>🚫 EVENTO DEMO COMPLETO</strong><br>
-                            <small>Todos los cupos para fotos han sido utilizados.</small>
+                            <small>Todos los cupos para fotos han sido utilizados (10/10).</small>
                         </div>
                     `;
                 } else {
-                    statusEl.textContent = `Demo: Te quedan ${userRemaining} foto${userRemaining === 1 ? '' : 's'} (Total evento: ${totalEventPhotoCount}/20)`;
+                    statusEl.textContent = `Demo: Te quedan ${userRemaining} foto${userRemaining === 1 ? '' : 's'} (Total evento: ${totalEventPhotoCount}/10)`;
                 }
             } else {
                 const remaining = 10 - userPhotoCount;
@@ -694,8 +694,8 @@
 
                     if (userPhotoCount >= 2) {
                         showToast("Has alcanzado tus 2 fotos de prueba.", 'success');
-                    } else if (totalEventPhotoCount >= 20) {
-                        showToast("El evento demo está lleno. Inténtalo más tarde.", 'warning');
+                    } else if (totalEventPhotoCount >= 10) {
+                        showToast("El evento demo está lleno (10 fotos máximo). Inténtalo más tarde.", 'warning');
                     }
                 } else {
                     showToast("Has alcanzado el límite de 10 fotos para este evento", 'error');

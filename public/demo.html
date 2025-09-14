@@ -360,8 +360,11 @@
                 return;
             }
 
-            // Generar ID único para demo
-            const demoId = 'DEMO_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            // Obtener datos del usuario registrado
+            const registeredUser = JSON.parse(localStorage.getItem('registeredUser'));
+
+            // Generar ID único para demo basado en el usuario
+            const demoId = `DEMO_${registeredUser.id}_${Date.now()}`;
 
             // Guardar información de demo
             localStorage.setItem('demoMode', 'true');
@@ -370,7 +373,20 @@
             localStorage.setItem('demoUserEmail', userEmail);
             localStorage.setItem('demoStartTime', Date.now().toString());
 
-            // Redirigir al panel de control demo en lugar de directamente a captura
+            // Actualizar datos del usuario para marcar que creó demo
+            registeredUser.demoCreated = true;
+            registeredUser.demoId = demoId;
+            localStorage.setItem('registeredUser', JSON.stringify(registeredUser));
+
+            // Actualizar lista de usuarios
+            const allUsers = JSON.parse(localStorage.getItem('demoUsers') || '[]');
+            const userIndex = allUsers.findIndex(user => user.id === registeredUser.id);
+            if (userIndex !== -1) {
+                allUsers[userIndex] = registeredUser;
+                localStorage.setItem('demoUsers', JSON.stringify(allUsers));
+            }
+
+            // Redirigir al panel de control demo
             const dashboardUrl = `demo-dashboard.html`;
             window.location.href = dashboardUrl;
         }
@@ -382,8 +398,21 @@
 
         // Verificar si ya hay una demo activa
         window.onload = function() {
+            const registeredUser = localStorage.getItem('registeredUser');
+            if (!registeredUser) {
+                // Usuario no registrado, redirigir a registro
+                alert('Para acceder a la demo necesitas registrarte primero.');
+                window.location.href = 'registro.html';
+                return;
+            }
+
+            const user = JSON.parse(registeredUser);
             const demoMode = localStorage.getItem('demoMode');
             const demoStart = localStorage.getItem('demoStartTime');
+
+            // Pre-llenar campos con datos del usuario registrado
+            document.getElementById('eventName').value = `Demo de ${user.fullName}`;
+            document.getElementById('userEmail').value = user.email;
 
             if (demoMode === 'true' && demoStart) {
                 const startTime = parseInt(demoStart);
@@ -396,10 +425,6 @@
                     alert('Tu demo ha expirado. Los datos han sido eliminados.');
                 } else {
                     // Demo activa, mostrar información
-                    const eventName = localStorage.getItem('demoEventName') || 'Evento de Prueba';
-                    document.getElementById('eventName').value = eventName;
-                    document.getElementById('userEmail').value = localStorage.getItem('demoUserEmail') || '';
-
                     // Cambiar botón a "Continuar Demo"
                     const startBtn = document.querySelector('.btn-primary');
                     startBtn.innerHTML = '<i class="fas fa-play"></i> Continuar Demo';
