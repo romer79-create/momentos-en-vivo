@@ -25,68 +25,78 @@ export default async function handler(req, res) {
     console.log('--- DEBUG: Request headers:', req.headers);
     console.log('--- DEBUG: Content-Type:', req.headers['content-type']);
 
+    // Para Vercel, intentemos una aproximación más simple
     let file, message = '', eventId = 'DEFAULT';
 
-    // Manejar diferentes formatos de entrada
-    if (req.headers['content-type']?.includes('multipart/form-data')) {
-      // Parsear multipart form data
-      const boundary = req.headers['content-type'].split('boundary=')[1];
-      const parts = parseMultipart(req.body, boundary);
+    // Verificar si tenemos el body como Buffer (Vercel)
+    if (req.body && Buffer.isBuffer(req.body)) {
+      console.log('--- DEBUG: Body is Buffer, length:', req.body.length);
 
-      for (const part of parts) {
-        if (part.name === 'photo') {
-          file = {
-            data: part.data,
-            type: part.contentType,
-            name: part.filename
-          };
-        } else if (part.name === 'message') {
-          message = part.data.toString();
-        } else if (part.name === 'eventId') {
-          eventId = part.data.toString();
-        }
+      // Para este caso, vamos a devolver una respuesta temporal
+      // indicando que necesitamos las credenciales de Cloudinary
+      if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+        console.error('--- ERROR: Variables de entorno de Cloudinary no configuradas');
+        return res.status(500).json({
+          error: 'Variables de entorno de Cloudinary no configuradas',
+          details: 'Por favor configura CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET en Vercel'
+        });
       }
-    } else if (req.body && typeof req.body === 'object') {
-      // Si viene como JSON (para testing)
+
+      // Respuesta temporal mientras arreglamos el parsing
+      return res.status(200).json({
+        message: 'Upload endpoint recibido (parsing en desarrollo)',
+        received: true,
+        contentType: req.headers['content-type'],
+        bodySize: req.body.length
+      });
+    }
+
+    // Si viene como objeto (para testing)
+    if (req.body && typeof req.body === 'object') {
       file = req.body.photo;
       message = req.body.message || '';
       eventId = req.body.eventId || 'DEFAULT';
     }
 
-    console.log('--- DEBUG: Archivo procesado:', file ? file.name : 'null');
+    console.log('--- DEBUG: Archivo procesado:', file ? 'presente' : 'null');
     console.log('--- DEBUG: Mensaje procesado:', message);
     console.log('--- DEBUG: EventId procesado:', eventId);
 
-    if (!file || !file.data) {
-      throw new Error('No se recibió ningún archivo.');
+    if (!file) {
+      return res.status(400).json({ error: 'No se recibió ningún archivo.' });
     }
 
-    // Convertir el archivo a base64
-    const fileStr = `data:${file.type};base64,${file.data.toString('base64')}`;
+    // Para archivos base64 (desde testing)
+    if (typeof file === 'string' && file.startsWith('data:')) {
+      const uploadOptions = {
+        folder: 'momentos-en-vivo',
+        tags: [
+          `event_${eventId}`,
+          `pending_${eventId}`
+        ]
+      };
 
-    // Configurar opciones de subida con tags para evento, mensaje y estado
-    const tags = [
-      `event_${eventId}`,
-      `pending_${eventId}`
-    ];
+      if (message && message.trim()) {
+        uploadOptions.tags.push(`msg:${encodeURIComponent(message)}`);
+      }
 
-    if (message && message.trim()) {
-      tags.push(`msg:${encodeURIComponent(message)}`);
+      console.log('--- DEBUG: Subiendo a Cloudinary con opciones:', uploadOptions);
+      const uploadResult = await cloudinary.uploader.upload(file, uploadOptions);
+
+      console.log('--- DEBUG: Subida exitosa:', uploadResult.secure_url);
+
+      return res.status(200).json({
+        message: '¡Foto subida con éxito!',
+        imageUrl: uploadResult.secure_url
+      });
     }
 
-    const uploadOptions = {
-      folder: 'momentos-en-vivo',
-      tags: tags
-    };
-
-    console.log('--- DEBUG: Subiendo a Cloudinary con opciones:', uploadOptions);
-    const uploadResult = await cloudinary.uploader.upload(fileStr, uploadOptions);
-
-    console.log('--- DEBUG: Subida exitosa:', uploadResult.secure_url);
-
+    // Para archivos reales, devolver mensaje temporal
     return res.status(200).json({
-      message: '¡Foto subida con éxito!',
-      imageUrl: uploadResult.secure_url
+      message: 'Archivo recibido (procesamiento multipart en desarrollo)',
+      fileType: typeof file,
+      message: message,
+      eventId: eventId
     });
 
   } catch (error) {
