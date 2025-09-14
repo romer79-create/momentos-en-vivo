@@ -1,4 +1,6 @@
 import { IncomingForm } from 'formidable';
+
+// Force redeploy trigger - formidable implementation
 import { v2 as cloudinary } from 'cloudinary';
 
 // Usamos las variables de entorno que configuraste en Vercel
