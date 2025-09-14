@@ -36,89 +36,114 @@ export default async function handler(req, res) {
       });
     }
 
-    // Para Vercel, necesitamos manejar el body de manera diferente
+    // Para Vercel, necesitamos leer el stream crudo del request
+    const chunks = [];
+    const contentType = req.headers['content-type'] || '';
+
+    if (!contentType.includes('multipart/form-data')) {
+      return res.status(400).json({
+        error: 'Content-Type debe ser multipart/form-data',
+        received: contentType
+      });
+    }
+
+    // Leer el body como stream
+    for await (const chunk of req) {
+      chunks.push(chunk);
+    }
+
+    const bodyBuffer = Buffer.concat(chunks);
+    console.log('--- DEBUG: Body buffer size:', bodyBuffer.length);
+
+    if (bodyBuffer.length === 0) {
+      return res.status(400).json({
+        error: 'No se recibió ningún dato en el request body',
+        debug: {
+          contentType: req.headers['content-type'],
+          contentLength: req.headers['content-length']
+        }
+      });
+    }
+
+    // Parsear boundary
+    const boundaryMatch = contentType.match(/boundary=(.+)/);
+    if (!boundaryMatch) {
+      return res.status(400).json({
+        error: 'No se pudo encontrar boundary en Content-Type',
+        contentType: contentType
+      });
+    }
+
+    const boundary = boundaryMatch[1];
+    console.log('--- DEBUG: Boundary:', boundary);
+
+    // Convertir buffer a string y dividir por boundary
+    const bodyStr = bodyBuffer.toString();
+    const boundaryDelimiter = `--${boundary}`;
+    const parts = bodyStr.split(boundaryDelimiter).filter(part =>
+      part && part.trim() !== '' && part.trim() !== '--'
+    );
+
+    console.log('--- DEBUG: Número de partes encontradas:', parts.length);
+
     let formData = {};
     let fileBuffer = null;
     let fileName = '';
-    let contentType = '';
+    let fileContentType = '';
 
-    if (req.body && Buffer.isBuffer(req.body)) {
-      console.log('--- DEBUG: Body es Buffer, procesando multipart...');
+    // Procesar cada parte
+    for (const part of parts) {
+      const lines = part.split('\r\n');
+      let headers = {};
+      let contentStart = 0;
+      let isFile = false;
 
-      // Parsear boundary del Content-Type
-      const contentTypeHeader = req.headers['content-type'] || '';
-      const boundaryMatch = contentTypeHeader.match(/boundary=(.+)/);
-      const boundary = boundaryMatch ? boundaryMatch[1] : '';
+      // Parsear headers
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
 
-      if (!boundary) {
-        console.log('--- DEBUG: No boundary found, trying alternative parsing');
-        return res.status(200).json({
-          message: 'Request recibido - boundary not found',
-          contentType: contentTypeHeader,
-          bodySize: req.body.length
-        });
-      }
+        if (line === '') {
+          contentStart = i + 1;
+          break;
+        }
 
-      console.log('--- DEBUG: Boundary:', boundary);
-
-      // Dividir el body por boundary
-      const bodyStr = req.body.toString();
-      const parts = bodyStr.split(`--${boundary}`).filter(part => part && part.trim() !== '' && part.trim() !== '--');
-
-      console.log('--- DEBUG: Número de partes encontradas:', parts.length);
-
-      for (const part of parts) {
-        const lines = part.split('\r\n');
-        let headers = {};
-        let contentStart = 0;
-
-        // Parsear headers
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i].trim();
-          if (line === '') {
-            contentStart = i + 1;
-            break;
-          }
-
-          if (line.includes(': ')) {
-            const [key, value] = line.split(': ');
-            headers[key.toLowerCase()] = value;
-          } else if (line.includes('=')) {
-            // Content-Disposition parsing
-            const dispositionMatch = line.match(/Content-Disposition: form-data; (.+)/);
-            if (dispositionMatch) {
-              const params = dispositionMatch[1].split(';').map(p => p.trim());
-              for (const param of params) {
-                if (param.includes('name="')) {
-                  headers['field-name'] = param.match(/name="([^"]+)"/)[1];
-                } else if (param.includes('filename="')) {
-                  headers['filename'] = param.match(/filename="([^"]+)"/)[1];
-                }
+        // Content-Disposition header
+        if (line.startsWith('Content-Disposition:')) {
+          const dispositionMatch = line.match(/form-data; (.+)/);
+          if (dispositionMatch) {
+            const params = dispositionMatch[1].split(';').map(p => p.trim());
+            for (const param of params) {
+              if (param.startsWith('name="')) {
+                headers['field-name'] = param.match(/name="([^"]+)"/)[1];
+              } else if (param.startsWith('filename="')) {
+                headers['filename'] = param.match(/filename="([^"]+)"/)[1];
+                isFile = true;
               }
             }
           }
         }
 
-        // Extraer contenido
-        const content = lines.slice(contentStart).join('\r\n').trim();
-        const fieldName = headers['field-name'];
-
-        if (fieldName === 'photo' && headers['filename']) {
-          // Es un archivo
-          fileBuffer = Buffer.from(content, 'binary');
-          fileName = headers['filename'];
-          contentType = headers['content-type'] || 'application/octet-stream';
-          console.log('--- DEBUG: Archivo encontrado:', fileName, contentType, fileBuffer.length, 'bytes');
-        } else if (fieldName) {
-          // Es un campo de texto
-          formData[fieldName] = content;
-          console.log('--- DEBUG: Campo encontrado:', fieldName, '=', content);
+        // Content-Type header
+        else if (line.startsWith('Content-Type:')) {
+          headers['content-type'] = line.split(':')[1].trim();
         }
       }
-    } else if (req.body && typeof req.body === 'object') {
-      // Fallback para otros formatos
-      formData = req.body;
-      console.log('--- DEBUG: Usando fallback para body object');
+
+      // Extraer contenido
+      const content = lines.slice(contentStart).join('\r\n').trim();
+      const fieldName = headers['field-name'];
+
+      if (isFile && fieldName === 'photo') {
+        // Es un archivo
+        fileBuffer = Buffer.from(content, 'binary');
+        fileName = headers['filename'] || 'unknown.jpg';
+        fileContentType = headers['content-type'] || 'application/octet-stream';
+        console.log('--- DEBUG: Archivo encontrado:', fileName, fileContentType, fileBuffer.length, 'bytes');
+      } else if (fieldName) {
+        // Es un campo de texto
+        formData[fieldName] = content;
+        console.log('--- DEBUG: Campo encontrado:', fieldName, '=', content);
+      }
     }
 
     const eventId = formData.eventId || 'DEFAULT';
@@ -133,16 +158,15 @@ export default async function handler(req, res) {
       return res.status(400).json({
         error: 'No se recibió ningún archivo.',
         debug: {
-          bodyType: typeof req.body,
-          contentType: req.headers['content-type'],
-          hasBody: !!req.body,
-          bodySize: req.body ? req.body.length : 0
+          partsFound: parts.length,
+          boundary: boundary,
+          bodySize: bodyBuffer.length
         }
       });
     }
 
     // Convertir el archivo a base64
-    const fileStr = `data:${contentType};base64,${fileBuffer.toString('base64')}`;
+    const fileStr = `data:${fileContentType};base64,${fileBuffer.toString('base64')}`;
 
     // Configurar opciones de subida
     const uploadOptions = {
