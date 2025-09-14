@@ -593,7 +593,7 @@
                                         Elige cómo quieres descargarlas:
                                     </div>
                                     <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                                        <button onclick="downloadAllPhotos(window.currentDownloadPhotos, window.currentDownloadEventId); closeDownloadModal();"
+                                        <button onclick="downloadAllPhotosAsZip(window.currentDownloadPhotos, window.currentDownloadEventId); closeDownloadModal();"
                                                 style="
                                                     padding: 12px 20px;
                                                     background: linear-gradient(135deg, #27ae60, #2ecc71);
@@ -609,7 +609,7 @@
                                                 "
                                                 onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(39, 174, 96, 0.4)';"
                                                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(39, 174, 96, 0.3)';">
-                                            🚀 Descargar Todas (${result.photos.length})
+                                            📦 Descargar ZIP (${result.photos.length} fotos)
                                         </button>
                                         <button onclick="closeDownloadModal()"
                                                 style="

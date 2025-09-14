@@ -85,40 +85,93 @@ exports.handler = async (event, context) => {
       uploaded_at: photo.created_at
     }));
 
-    // Crear script de descarga automática para el navegador
+    // Crear script de descarga con ZIP del lado del cliente
     const downloadScript = `
-      // Función para descargar todas las fotos automáticamente
-      async function downloadAllPhotos(photos, eventId) {
-        console.log(\`🚀 Iniciando descarga de \${photos.length} fotos del evento \${eventId}\`);
+      // Función para descargar todas las fotos en ZIP
+      async function downloadAllPhotosAsZip(photos, eventId) {
+        console.log(\`🚀 Iniciando creación de ZIP con \${photos.length} fotos del evento \${eventId}\`);
 
-        for (let i = 0; i < photos.length; i++) {
-          const photo = photos[i];
-          try {
-            console.log(\`📥 Descargando foto \${i + 1}/${photos.length}: \${photo.filename}\`);
-
-            // Crear enlace de descarga
-            const link = document.createElement('a');
-            link.href = photo.download_url;
-            link.download = photo.filename;
-            link.style.display = 'none';
-
-            // Agregar al DOM y hacer clic
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            // Esperar entre descargas para evitar bloqueos del navegador
-            if (i < photos.length - 1) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-
-          } catch (error) {
-            console.error(\`❌ Error descargando \${photo.filename}:\`, error);
+        try {
+          // Cargar JSZip dinámicamente desde CDN
+          if (!window.JSZip) {
+            console.log('📦 Cargando JSZip...');
+            await loadJSZip();
           }
-        }
 
-        console.log('✅ Descarga completada');
-        alert(\`✅ \${photos.length} fotos descargadas exitosamente\`);
+          const zip = new JSZip();
+          const folder = zip.folder(\`fotos_evento_\${eventId}\`);
+
+          // Función para descargar imagen como buffer
+          const downloadImageBuffer = async (url) => {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(\`HTTP \${response.status}\`);
+            return await response.arrayBuffer();
+          };
+
+          // Descargar todas las imágenes y agregar al ZIP
+          const downloadPromises = photos.map(async (photo, index) => {
+            try {
+              console.log(\`📥 Descargando foto \${index + 1}/\${photos.length}: \${photo.filename}\`);
+              const imageBuffer = await downloadImageBuffer(photo.original_url);
+              folder.file(photo.filename, imageBuffer);
+              return { success: true, filename: photo.filename };
+            } catch (error) {
+              console.error(\`❌ Error descargando \${photo.filename}:\`, error);
+              return { success: false, filename: photo.filename, error: error.message };
+            }
+          });
+
+          // Esperar a que se descarguen todas las imágenes
+          const results = await Promise.all(downloadPromises);
+          const successCount = results.filter(r => r.success).length;
+
+          console.log(\`✅ \${successCount} fotos descargadas, generando ZIP...\`);
+
+          // Generar el archivo ZIP
+          const zipBlob = await zip.generateAsync({
+            type: 'blob',
+            compression: 'DEFLATE',
+            compressionOptions: { level: 6 }
+          });
+
+          // Crear enlace de descarga para el ZIP
+          const zipUrl = URL.createObjectURL(zipBlob);
+          const link = document.createElement('a');
+          link.href = zipUrl;
+          link.download = \`fotos_evento_\${eventId}_\${new Date().toISOString().split('T')[0]}.zip\`;
+          link.style.display = 'none';
+
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          // Limpiar URL del objeto
+          setTimeout(() => URL.revokeObjectURL(zipUrl), 1000);
+
+          console.log('✅ ZIP generado y descargado exitosamente');
+          alert(\`✅ ZIP creado exitosamente con \${successCount} fotos!\`);
+
+        } catch (error) {
+          console.error('❌ Error creando ZIP:', error);
+          alert(\`❌ Error creando ZIP: \${error.message}\`);
+        }
+      }
+
+      // Función para cargar JSZip dinámicamente
+      async function loadJSZip() {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+          script.onload = () => {
+            console.log('✅ JSZip cargado exitosamente');
+            resolve();
+          };
+          script.onerror = () => {
+            console.error('❌ Error cargando JSZip');
+            reject(new Error('No se pudo cargar JSZip'));
+          };
+          document.head.appendChild(script);
+        });
       }
 
       // Función para descargar foto individual
@@ -133,7 +186,7 @@ exports.handler = async (event, context) => {
       }
 
       // Exponer funciones globalmente
-      window.downloadAllPhotos = downloadAllPhotos;
+      window.downloadAllPhotosAsZip = downloadAllPhotosAsZip;
       window.downloadSinglePhoto = downloadSinglePhoto;
     `;
 
@@ -149,8 +202,8 @@ exports.handler = async (event, context) => {
         totalPhotos: photos.length,
         photos: photos,
         downloadScript: downloadScript,
-        message: `${photos.length} fotos listas para descargar`,
-        instructions: 'Usa downloadAllPhotos(photos, eventId) para descargar todas o downloadSinglePhoto(url, filename) para individual'
+        message: `${photos.length} fotos listas para descargar en ZIP`,
+        instructions: 'Usa downloadAllPhotosAsZip(photos, eventId) para descargar todas en ZIP o downloadSinglePhoto(url, filename) para individual'
       })
     };
 
