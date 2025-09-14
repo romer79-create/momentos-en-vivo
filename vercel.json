@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "netlify/functions/*.js": {
+      "runtime": "@vercel/node"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/.netlify/functions/:path*",
+      "destination": "/api/:path*"
+    }
+  ]
+}

@@ -1,4 +1,7 @@
 const cloudinary = require('cloudinary').v2;
+const JSZip = require('jszip');
+const https = require('https');
+const http = require('http');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -6,33 +9,42 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-export default async function handler(req, res) {
+exports.handler = async (event, context) => {
   // Configurar CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+  };
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: '' };
   }
 
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Método no permitido' });
+  if (event.httpMethod !== 'GET') {
+    return {
+      statusCode: 405,
+      headers,
+      body: JSON.stringify({ error: 'Método no permitido' })
+    };
   }
 
   try {
-    const { eventId } = req.query;
-    const finalEventId = eventId || 'DEFAULT';
+    const eventId = event.queryStringParameters?.eventId || 'DEFAULT';
 
-    if (!finalEventId || finalEventId === 'DEFAULT') {
-      return res.status(400).json({ error: 'EventId es requerido' });
+    if (!eventId || eventId === 'DEFAULT') {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'EventId es requerido' })
+      };
     }
 
-    console.log(`📸 Buscando fotos para descargar del evento: ${finalEventId}`);
+    console.log(`📸 Buscando fotos para descargar del evento: ${eventId}`);
 
     // Buscar fotos aprobadas del evento
     const result = await cloudinary.search
-      .expression(`folder:momentos-en-vivo AND tags:approved_${finalEventId}`)
+      .expression(`folder:momentos-en-vivo AND tags:approved_${eventId}`)
       .sort_by('created_at', 'desc')
       .max_results(500)
       .execute();
@@ -40,10 +52,14 @@ export default async function handler(req, res) {
     console.log(`✅ Encontradas ${result.resources.length} fotos aprobadas`);
 
     if (!result.resources || result.resources.length === 0) {
-      return res.status(404).json({
-        error: 'No se encontraron fotos aprobadas para este evento',
-        eventId: finalEventId
-      });
+      return {
+        statusCode: 404,
+        headers,
+        body: JSON.stringify({
+          error: 'No se encontraron fotos aprobadas para este evento',
+          eventId: eventId
+        })
+      };
     }
 
     // Crear lista de fotos con URLs de descarga directa
@@ -174,21 +190,32 @@ export default async function handler(req, res) {
       window.downloadSinglePhoto = downloadSinglePhoto;
     `;
 
-    return res.status(200).json({
-      success: true,
-      eventId: finalEventId,
-      totalPhotos: photos.length,
-      photos: photos,
-      downloadScript: downloadScript,
-      message: `${photos.length} fotos listas para descargar en ZIP`,
-      instructions: 'Usa downloadAllPhotosAsZip(photos, eventId) para descargar todas en ZIP o downloadSinglePhoto(url, filename) para individual'
-    });
+    return {
+      statusCode: 200,
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        success: true,
+        eventId: eventId,
+        totalPhotos: photos.length,
+        photos: photos,
+        downloadScript: downloadScript,
+        message: `${photos.length} fotos listas para descargar en ZIP`,
+        instructions: 'Usa downloadAllPhotosAsZip(photos, eventId) para descargar todas en ZIP o downloadSinglePhoto(url, filename) para individual'
+      })
+    };
 
   } catch (error) {
     console.error('❌ Error en download-event-photos:', error);
-    return res.status(500).json({
-      error: 'Error interno del servidor',
-      details: error.message
-    });
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
+        error: 'Error interno del servidor',
+        details: error.message
+      })
+    };
   }
-}
+};

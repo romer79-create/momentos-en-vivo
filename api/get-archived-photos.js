@@ -7,18 +7,24 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-export default async function handler(req, res) {
+exports.handler = async (event, context) => {
   // Configurar CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+  };
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: '' };
   }
 
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Método no permitido' });
+  if (event.httpMethod !== 'GET') {
+    return {
+      statusCode: 405,
+      headers,
+      body: JSON.stringify({ error: 'Método no permitido' })
+    };
   }
 
   try {
@@ -73,18 +79,26 @@ export default async function handler(req, res) {
       size_mb: (photo.bytes / (1024 * 1024)).toFixed(2)
     }));
 
-    return res.status(200).json({
-      success: true,
-      totalPhotos: archivedPhotos.length,
-      photos: archivedPhotos,
-      message: `${archivedPhotos.length} fotos archivadas encontradas`
-    });
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        success: true,
+        totalPhotos: archivedPhotos.length,
+        photos: archivedPhotos,
+        message: `${archivedPhotos.length} fotos archivadas encontradas`
+      })
+    };
 
   } catch (error) {
     console.error('❌ Error obteniendo fotos archivadas:', error);
-    return res.status(500).json({
-      error: 'Error interno del servidor',
-      details: error.message
-    });
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
+        error: 'Error interno del servidor',
+        details: error.message
+      })
+    };
   }
-}
+};
