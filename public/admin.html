@@ -279,6 +279,23 @@
         <div class="header">
             <h1>🎯 Panel de Administración Multi-Tenant</h1>
             <div class="subtitle">Gestiona eventos y genera QR codes automáticamente</div>
+            <div style="text-align: right; margin-top: 10px;">
+                <button onclick="logout()" style="
+                    padding: 8px 16px;
+                    background: linear-gradient(135deg, #e74c3c, #c0392b);
+                    color: white;
+                    border: none;
+                    border-radius: 20px;
+                    cursor: pointer;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    transition: all 0.3s ease;
+                "
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(231, 76, 60, 0.3)';"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                    🚪 Cerrar Sesión
+                </button>
+            </div>
         </div>
 
         <div class="main-content">
@@ -360,7 +377,48 @@
         <div id="status" class="status" style="display: none;"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>
+        // Verificar autenticación al cargar la página
+        function checkAuthentication() {
+            const isAuthenticated = localStorage.getItem('adminAuthenticated') === 'true';
+
+            if (!isAuthenticated) {
+                // Redirigir al login si no está autenticado
+                window.location.href = '/login.html';
+                return false;
+            }
+
+            // Verificar tiempo de sesión (24 horas)
+            const loginTime = new Date(localStorage.getItem('adminLoginTime'));
+            const now = new Date();
+            const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
+
+            if (hoursDiff > 24) {
+                // Sesión expirada
+                localStorage.removeItem('adminAuthenticated');
+                localStorage.removeItem('adminLoginTime');
+                window.location.href = '/login.html';
+                return false;
+            }
+
+            return true;
+        }
+
+        // Ejecutar verificación de autenticación
+        if (!checkAuthentication()) {
+            // Si no está autenticado, no continuar cargando la página
+            document.body.innerHTML = '<div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;"><div>Redirigiendo al login...</div></div>';
+        }
+
+        // Función para cerrar sesión
+        function logout() {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                localStorage.removeItem('adminAuthenticated');
+                localStorage.removeItem('adminLoginTime');
+                window.location.href = '/home.html';
+            }
+        }
+    </script>
     <script>
         // Verificar que QRCode esté disponible
         if (typeof QRCode === 'undefined') {
