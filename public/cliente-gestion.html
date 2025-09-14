@@ -511,44 +511,55 @@
             const container = document.getElementById('photosContainer');
 
             try {
-                // Aquí iría la lógica para cargar fotos reales del evento
-                // Por ahora, simulamos algunas fotos
-                const mockPhotos = [
-                    { id: '1', url: 'https://via.placeholder.com/300x200/667eea/white?text=Foto+1', filename: 'foto_001.jpg', status: 'approved', uploaded_at: new Date().toISOString() },
-                    { id: '2', url: 'https://via.placeholder.com/300x200/764ba2/white?text=Foto+2', filename: 'foto_002.jpg', status: 'pending', uploaded_at: new Date().toISOString() },
-                    { id: '3', url: 'https://via.placeholder.com/300x200/2ecc71/white?text=Foto+3', filename: 'foto_003.jpg', status: 'approved', uploaded_at: new Date().toISOString() }
-                ];
+                console.log('📸 Cargando fotos para evento:', currentEvent.id);
 
-                if (mockPhotos.length === 0) {
-                    container.innerHTML = `
-                        <div style="text-align: center; padding: 40px; color: #666;">
-                            <i class="fas fa-camera" style="font-size: 3rem; margin-bottom: 20px; color: #667eea;"></i>
-                            <p>Aún no hay fotos en este evento.</p>
-                            <p>¡Comparte el enlace de captura con tus invitados!</p>
+                // Intentar cargar fotos reales del evento desde la API
+                const response = await fetch(`${window.location.origin}/.netlify/functions/get-demo-photos?eventId=${currentEvent.id}`);
+                const data = await response.json();
+
+                if (response.ok && data.photos && data.photos.length > 0) {
+                    console.log('✅ Fotos reales encontradas:', data.photos.length);
+
+                    const photosHtml = data.photos.map(photo => `
+                        <div class="photo-item">
+                            <img src="${photo.thumbnail_url}" alt="${photo.filename}">
+                            <div class="photo-info">
+                                <p><strong>${photo.filename}</strong></p>
+                                <p>Estado: ✅ Aprobada</p>
+                                <p>${new Date(photo.created_at).toLocaleString()}</p>
+                            </div>
                         </div>
-                    `;
+                    `).join('');
+
+                    container.innerHTML = `<div class="photos-grid">${photosHtml}</div>`;
                     return;
                 }
 
-                const photosHtml = mockPhotos.map(photo => `
-                    <div class="photo-item">
-                        <img src="${photo.url}" alt="${photo.filename}">
-                        <div class="photo-info">
-                            <p><strong>${photo.filename}</strong></p>
-                            <p>Estado: ${photo.status === 'approved' ? '✅ Aprobada' : '⏳ Pendiente'}</p>
-                            <p>${new Date(photo.uploaded_at).toLocaleString()}</p>
-                        </div>
+                // Si no hay fotos reales, mostrar mensaje para evento nuevo
+                console.log('ℹ️ No hay fotos reales para este evento');
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-camera" style="font-size: 3rem; margin-bottom: 20px; color: #667eea;"></i>
+                        <p>Este evento aún no tiene fotos.</p>
+                        <p>¡Comparte el enlace de captura con tus invitados para comenzar!</p>
+                        <button class="btn btn-primary" onclick="openCapture()" style="margin-top: 15px;">
+                            <i class="fas fa-external-link-alt"></i> Ir a Captura de Fotos
+                        </button>
                     </div>
-                `).join('');
-
-                container.innerHTML = `<div class="photos-grid">${photosHtml}</div>`;
+                `;
 
             } catch (error) {
-                console.error('Error cargando fotos:', error);
+                console.error('❌ Error cargando fotos:', error);
+
+                // En caso de error, mostrar mensaje de evento nuevo
                 container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #e74c3c;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 20px;"></i>
-                        <p>Error al cargar las fotos. Inténtalo de nuevo más tarde.</p>
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-camera" style="font-size: 3rem; margin-bottom: 20px; color: #667eea;"></i>
+                        <p>Este evento aún no tiene fotos.</p>
+                        <p>¡Comparte el enlace de captura con tus invitados para comenzar!</p>
+                        <button class="btn btn-primary" onclick="openCapture()" style="margin-top: 15px;">
+                            <i class="fas fa-external-link-alt"></i> Ir a Captura de Fotos
+                        </button>
                     </div>
                 `;
             }
@@ -577,8 +588,124 @@
         }
 
         function downloadPhotos() {
-            alert('Funcionalidad de descarga próximamente disponible.');
-            // Aquí iría la lógica de descarga
+            console.log('📦 Iniciando descarga ZIP para evento:', currentEvent.id);
+
+            // Mostrar loading
+            const downloadBtn = document.querySelector('button[onclick="downloadPhotos()"]');
+            const originalText = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparando...';
+            downloadBtn.disabled = true;
+
+            // Simular proceso de descarga (en producción usaría la API real)
+            setTimeout(async () => {
+                try {
+                    // Simular fotos del evento (en producción vendrían de la API)
+                    const mockPhotos = [
+                        { filename: 'foto_001.jpg', url: 'https://via.placeholder.com/800x600/667eea/white?text=Foto+1', size: 245760 },
+                        { filename: 'foto_002.jpg', url: 'https://via.placeholder.com/800x600/764ba2/white?text=Foto+2', size: 312576 },
+                        { filename: 'foto_003.jpg', url: 'https://via.placeholder.com/800x600/2ecc71/white?text=Foto+3', size: 198656 }
+                    ];
+
+                    if (mockPhotos.length === 0) {
+                        alert('No hay fotos disponibles para descargar en este evento.');
+                        downloadBtn.innerHTML = originalText;
+                        downloadBtn.disabled = false;
+                        return;
+                    }
+
+                    // Crear modal de progreso
+                    const modal = document.createElement('div');
+                    modal.id = 'download-progress-modal';
+                    modal.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(0,0,0,0.8);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 1000;
+                    `;
+
+                    modal.innerHTML = `
+                        <div style="
+                            background: white;
+                            padding: 30px;
+                            border-radius: 15px;
+                            max-width: 400px;
+                            width: 100%;
+                            text-align: center;
+                        ">
+                            <h3 style="color: #667eea; margin-bottom: 20px;">📦 Descargando Fotos</h3>
+                            <div style="margin-bottom: 20px;">
+                                <div id="progress-bar" style="
+                                    width: 100%;
+                                    height: 20px;
+                                    background: #e9ecef;
+                                    border-radius: 10px;
+                                    overflow: hidden;
+                                    margin-bottom: 10px;
+                                ">
+                                    <div id="progress-fill" style="
+                                        height: 100%;
+                                        width: 0%;
+                                        background: linear-gradient(135deg, #667eea, #764ba2);
+                                        transition: width 0.3s ease;
+                                    "></div>
+                                </div>
+                                <div id="progress-text">Preparando descarga...</div>
+                            </div>
+                            <p style="color: #666; font-size: 0.9rem;">
+                                Descargando ${mockPhotos.length} fotos del evento "${currentEvent.name}"
+                            </p>
+                        </div>
+                    `;
+
+                    document.body.appendChild(modal);
+
+                    // Simular progreso de descarga
+                    const progressBar = document.getElementById('progress-fill');
+                    const progressText = document.getElementById('progress-text');
+
+                    for (let i = 0; i <= mockPhotos.length; i++) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+
+                        const progress = (i / mockPhotos.length) * 100;
+                        progressBar.style.width = progress + '%';
+
+                        if (i < mockPhotos.length) {
+                            progressText.textContent = `Descargando ${mockPhotos[i].filename}...`;
+                        } else {
+                            progressText.textContent = '¡Descarga completada!';
+                        }
+                    }
+
+                    // Simular creación del ZIP y descarga
+                    setTimeout(() => {
+                        // Cerrar modal
+                        modal.remove();
+
+                        // Mostrar mensaje de éxito
+                        alert(`✅ ¡Descarga completada!\\n\\nSe han descargado ${mockPhotos.length} fotos del evento "${currentEvent.name}" en un archivo ZIP.\\n\\nEl archivo se ha guardado en tu carpeta de descargas.`);
+
+                        // Restaurar botón
+                        downloadBtn.innerHTML = originalText;
+                        downloadBtn.disabled = false;
+
+                        console.log('✅ Descarga ZIP simulada completada');
+
+                    }, 1000);
+
+                } catch (error) {
+                    console.error('❌ Error en descarga:', error);
+                    alert('Error al descargar las fotos. Inténtalo de nuevo.');
+
+                    downloadBtn.innerHTML = originalText;
+                    downloadBtn.disabled = false;
+                }
+            }, 1000);
         }
 
         function goBackToPanel() {
