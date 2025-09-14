@@ -31,7 +31,7 @@ exports.handler = async (event, context) => {
 
   try {
     const eventId = event.queryStringParameters?.eventId || 'DEFAULT';
-    
+
     if (!eventId || eventId === 'DEFAULT') {
       return {
         statusCode: 400,
@@ -40,71 +40,102 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Obtener todas las fotos aprobadas del evento
+    console.log(`📸 Buscando fotos para descargar del evento: ${eventId}`);
+
+    // Buscar fotos aprobadas del evento
     const result = await cloudinary.search
-      .expression(`folder=momentos-en-vivo AND tags=approved_${eventId}`)
-      .sort_by([['created_at', 'desc']])
+      .expression(`folder:momentos-en-vivo AND tags:approved_${eventId}`)
+      .sort_by('created_at', 'desc')
       .max_results(500)
       .execute();
+
+    console.log(`✅ Encontradas ${result.resources.length} fotos aprobadas`);
 
     if (!result.resources || result.resources.length === 0) {
       return {
         statusCode: 404,
         headers,
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           error: 'No se encontraron fotos aprobadas para este evento',
-          eventId: eventId 
+          eventId: eventId
         })
       };
     }
 
-    // Crear ZIP con las fotos
-    const zip = new JSZip();
-    const folder = zip.folder(`fotos_evento_${eventId}`);
+    // Crear lista de fotos con URLs de descarga directa
+    const photos = result.resources.map((photo, index) => ({
+      id: photo.public_id,
+      filename: `foto_${index + 1}_${photo.public_id.split('/').pop()}.jpg`,
+      original_url: photo.secure_url,
+      download_url: cloudinary.url(photo.public_id, {
+        quality: 'auto',
+        fetch_format: 'auto',
+        flags: 'attachment'
+      }),
+      thumbnail_url: cloudinary.url(photo.public_id, {
+        width: 200,
+        height: 200,
+        crop: 'fill',
+        quality: 'auto'
+      }),
+      size: photo.bytes,
+      format: photo.format,
+      width: photo.width,
+      height: photo.height,
+      uploaded_at: photo.created_at
+    }));
 
-    // Función para descargar imagen usando Node.js nativo
-    const downloadImage = (url) => {
-      return new Promise((resolve, reject) => {
-        const protocol = url.startsWith('https:') ? https : http;
-        protocol.get(url, (response) => {
-          if (response.statusCode !== 200) {
-            reject(new Error(`HTTP ${response.statusCode}`));
-            return;
+    // Crear script de descarga automática para el navegador
+    const downloadScript = `
+      // Función para descargar todas las fotos automáticamente
+      async function downloadAllPhotos(photos, eventId) {
+        console.log(\`🚀 Iniciando descarga de \${photos.length} fotos del evento \${eventId}\`);
+
+        for (let i = 0; i < photos.length; i++) {
+          const photo = photos[i];
+          try {
+            console.log(\`📥 Descargando foto \${i + 1}/${photos.length}: \${photo.filename}\`);
+
+            // Crear enlace de descarga
+            const link = document.createElement('a');
+            link.href = photo.download_url;
+            link.download = photo.filename;
+            link.style.display = 'none';
+
+            // Agregar al DOM y hacer clic
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Esperar entre descargas para evitar bloqueos del navegador
+            if (i < photos.length - 1) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+
+          } catch (error) {
+            console.error(\`❌ Error descargando \${photo.filename}:\`, error);
           }
-          
-          const chunks = [];
-          response.on('data', (chunk) => chunks.push(chunk));
-          response.on('end', () => resolve(Buffer.concat(chunks)));
-          response.on('error', reject);
-        }).on('error', reject);
-      });
-    };
+        }
 
-    // Descargar cada imagen y agregarla al ZIP
-    const downloadPromises = result.resources.map(async (photo, index) => {
-      try {
-        const imageBuffer = await downloadImage(photo.secure_url);
-        const filename = `foto_${index + 1}_${photo.public_id.split('/').pop()}.jpg`;
-        folder.file(filename, imageBuffer);
-        return { success: true, filename };
-      } catch (error) {
-        console.error(`Error descargando foto ${photo.public_id}:`, error);
-        return { success: false, error: error.message };
+        console.log('✅ Descarga completada');
+        alert(\`✅ \${photos.length} fotos descargadas exitosamente\`);
       }
-    });
 
-    const downloadResults = await Promise.all(downloadPromises);
-    const successCount = downloadResults.filter(r => r.success).length;
+      // Función para descargar foto individual
+      function downloadSinglePhoto(url, filename) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
 
-    // Generar el ZIP
-    const zipBuffer = await zip.generateAsync({ 
-      type: 'nodebuffer',
-      compression: 'DEFLATE',
-      compressionOptions: { level: 6 }
-    });
-
-    // Convertir a base64 para enviar
-    const base64Zip = zipBuffer.toString('base64');
+      // Exponer funciones globalmente
+      window.downloadAllPhotos = downloadAllPhotos;
+      window.downloadSinglePhoto = downloadSinglePhoto;
+    `;
 
     return {
       statusCode: 200,
@@ -115,21 +146,22 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({
         success: true,
         eventId: eventId,
-        totalPhotos: result.resources.length,
-        downloadedPhotos: successCount,
-        zipData: base64Zip,
-        filename: `fotos_evento_${eventId}.zip`
+        totalPhotos: photos.length,
+        photos: photos,
+        downloadScript: downloadScript,
+        message: `${photos.length} fotos listas para descargar`,
+        instructions: 'Usa downloadAllPhotos(photos, eventId) para descargar todas o downloadSinglePhoto(url, filename) para individual'
       })
     };
 
   } catch (error) {
-    console.error('Error en download-event-photos:', error);
+    console.error('❌ Error en download-event-photos:', error);
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         error: 'Error interno del servidor',
-        details: error.message 
+        details: error.message
       })
     };
   }
