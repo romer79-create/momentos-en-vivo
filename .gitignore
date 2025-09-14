@@ -3,3 +3,5 @@
 .netlify
 # Environment variables
 .env
+
+.vercel

@@ -3,736 +3,822 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Momentos en Vivo - Captura Fotográfica para Eventos</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Momentos en Vivo</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@400;600;700&display=swap');
+        
+        :root {
+            /* Modern Blue Theme (Default) */
+            --primary-color: #ff6b6b;
+            --secondary-color: #ffd93d;
+            --accent-color: #6bcf7f;
+            --background-gradient: linear-gradient(135deg, #ff6b6b, #ffd93d, #6bcf7f, #4ecdc4, #45b7d1);
+            --text-color: #ffffff;
+            --text-secondary: #f8f9fa;
+            --primary-font: 'Fredoka One', cursive;
+            --secondary-font: 'Poppins', sans-serif;
+            --transition-duration: 0.3s;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: #f8f9fa;
+        /* Romantic Pink Theme */
+        [data-theme="romantic-pink"] {
+            --primary-color: #e91e63;
+            --secondary-color: #f06292;
+            --accent-color: #ad1457;
+            --background-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            --text-color: #ffffff;
+            --text-secondary: #fce4ec;
+            --primary-font: 'Poppins', sans-serif;
+            --secondary-font: 'Poppins', sans-serif;
+            --transition-duration: 0.4s;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
+        /* Corporate Gray Theme */
+        [data-theme="corporate-gray"] {
+            --primary-color: #546e7a;
+            --secondary-color: #78909c;
+            --accent-color: #37474f;
+            --background-gradient: linear-gradient(135deg, #434343 0%, #000000 100%);
+            --text-color: #ffffff;
+            --text-secondary: #b0bec5;
+            --primary-font: 'Poppins', sans-serif;
+            --secondary-font: 'Poppins', sans-serif;
+            --transition-duration: 0.2s;
         }
 
-        /* Header */
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem 0;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        /* Party Neon Theme */
+        [data-theme="party-neon"] {
+            --primary-color: #ff0080;
+            --secondary-color: #00ff80;
+            --accent-color: #8000ff;
+            --background-gradient: linear-gradient(135deg, #ff0080 0%, #8000ff 50%, #00ff80 100%);
+            --text-color: #ffffff;
+            --text-secondary: #ffffff;
+            --primary-font: 'Fredoka One', cursive;
+            --secondary-font: 'Poppins', sans-serif;
+            --transition-duration: 0.5s;
         }
 
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* Nature Green Theme */
+        [data-theme="nature-green"] {
+            --primary-color: #4caf50;
+            --secondary-color: #8bc34a;
+            --accent-color: #2e7d32;
+            --background-gradient: linear-gradient(135deg, #a8e6cf 0%, #dcedc8 50%, #ffd3b6 100%);
+            --text-color: #2e7d32;
+            --text-secondary: #4caf50;
+            --primary-font: 'Poppins', sans-serif;
+            --secondary-font: 'Poppins', sans-serif;
+            --transition-duration: 0.4s;
         }
 
-        .logo {
-            font-size: 2rem;
-            font-weight: bold;
-            color: white;
-            text-decoration: none;
+        /* Demo Theme */
+        [data-theme="demo-pink"] {
+            --primary-color: #e91e63;
+            --secondary-color: #f06292;
+            --accent-color: #ad1457;
+            --background-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            --text-color: #ffffff;
+            --text-secondary: #fce4ec;
+            --primary-font: 'Poppins', sans-serif;
+            --secondary-font: 'Poppins', sans-serif;
+            --transition-duration: 0.4s;
         }
-
-        .logo i {
-            margin-right: 10px;
-            color: #ffd700;
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 30px;
-        }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            padding: 8px 16px;
-            border-radius: 20px;
-        }
-
-        .nav-links a:hover {
-            background: rgba(255,255,255,0.2);
-            transform: translateY(-2px);
-        }
-
-        .admin-btn {
-            background: #ffd700;
-            color: #333 !important;
-            font-weight: bold;
-        }
-
-        .admin-btn:hover {
-            background: #ffed4e;
-            color: #333 !important;
-        }
-
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
-            background-size: cover;
-            background-position: center;
-            color: white;
-            padding: 100px 0;
+        
+        body { 
+            font-family: var(--secondary-font); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            background: var(--background-gradient);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            color: var(--text-color); 
             text-align: center;
+            position: relative;
+            overflow-x: hidden;
         }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-
-        .hero p {
-            font-size: 1.3rem;
-            margin-bottom: 2rem;
-            opacity: 0.9;
+        
+        /* Confetti animation */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--primary-color);
+            animation: confetti-fall 3s linear infinite;
         }
-
-        .hero .cta-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
+        
+        .confetti:nth-child(1) { left: 10%; animation-delay: 0s; background: var(--secondary-color); }
+        .confetti:nth-child(2) { left: 20%; animation-delay: 0.5s; background: var(--accent-color); }
+        .confetti:nth-child(3) { left: 30%; animation-delay: 1s; background: #4ecdc4; }
+        .confetti:nth-child(4) { left: 40%; animation-delay: 1.5s; background: #45b7d1; }
+        .confetti:nth-child(5) { left: 50%; animation-delay: 2s; background: var(--primary-color); }
+        .confetti:nth-child(6) { left: 60%; animation-delay: 2.5s; background: #feca57; }
+        .confetti:nth-child(7) { left: 70%; animation-delay: 0.8s; background: #96ceb4; }
+        .confetti:nth-child(8) { left: 80%; animation-delay: 1.3s; background: var(--secondary-color); }
+        .confetti:nth-child(9) { left: 90%; animation-delay: 1.8s; background: var(--accent-color); }
+        
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
         }
-
-        .btn {
-            padding: 15px 30px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-block;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        
+        h1 { 
+            font-family: var(--primary-font); 
+            font-size: 2.8rem; 
+            margin: 20px 0; 
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            animation: bounce 2s ease-in-out infinite;
+            background: linear-gradient(45deg, var(--text-color), var(--secondary-color), var(--text-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
         }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 25px rgba(0,0,0,0.3);
-        }
-
-        .btn-secondary {
-            background: white;
-            color: #333;
-            border: 2px solid white;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.9);
-            transform: translateY(-3px);
-        }
-
-        /* Features Section */
-        .features {
-            padding: 80px 0;
-            background: white;
-        }
-
-        .features h2 {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
-            color: #333;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 40px;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            text-align: center;
+        
+        video { 
+            width: 90%; 
+            max-width: 400px; 
+            border-radius: 20px; 
+            border: 5px solid rgba(255,255,255,0.8);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.1);
             transition: transform 0.3s ease;
         }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        
+        video:hover {
+            transform: scale(1.02);
         }
-
-        .feature-icon {
-            font-size: 3rem;
-            color: #667eea;
-            margin-bottom: 1rem;
-        }
-
-        .feature-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: #333;
-        }
-
-        .feature-card p {
-            color: #666;
-            line-height: 1.6;
-        }
-
-        /* Services Section */
-        .services {
-            padding: 80px 0;
-            background: #f8f9fa;
-        }
-
-        .services h2 {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
-            color: #333;
-        }
-
-        .service-plans {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-
-        .plan-card {
-            background: white;
-            padding: 40px 30px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .plan-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-        }
-
-        .plan-card.featured {
-            border: 3px solid #667eea;
-            transform: scale(1.05);
-        }
-
-        .plan-card.featured::before {
-            content: 'Más Popular';
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #667eea;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-
-        .plan-price {
-            font-size: 3rem;
-            font-weight: bold;
-            color: #667eea;
-            margin: 1rem 0;
-        }
-
-        .plan-price span {
-            font-size: 1rem;
-            color: #666;
-        }
-
-        .plan-features {
-            list-style: none;
-            margin: 2rem 0;
-            text-align: left;
-        }
-
-        .plan-features li {
-            margin-bottom: 0.5rem;
-            padding-left: 20px;
-            position: relative;
-        }
-
-        .plan-features li::before {
-            content: '✓';
-            position: absolute;
-            left: 0;
-            color: #27ae60;
-            font-weight: bold;
-        }
-
-        /* Contact Section */
-        .contact {
-            padding: 80px 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-align: center;
-        }
-
-        .contact h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .contact p {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-        }
-
-        .contact-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            margin-top: 3rem;
-        }
-
-        .contact-item {
-            background: rgba(255,255,255,0.1);
-            padding: 30px;
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-        }
-
-        .contact-item i {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: #ffd700;
-        }
-
-        .contact-item h3 {
-            margin-bottom: 0.5rem;
-        }
-
-        /* Footer */
-        footer {
-            background: #333;
-            color: white;
-            padding: 40px 0;
-            text-align: center;
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            margin-bottom: 2rem;
-        }
-
-        .footer-section h3 {
-            margin-bottom: 1rem;
-            color: #ffd700;
-        }
-
-        .footer-section ul {
-            list-style: none;
-        }
-
-        .footer-section ul li {
-            margin-bottom: 0.5rem;
-        }
-
-        .footer-section ul li a {
-            color: #ccc;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .footer-section ul li a:hover {
-            color: white;
-        }
-
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 2rem;
-        }
-
-        .social-links a {
-            color: white;
-            font-size: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .social-links a:hover {
-            color: #ffd700;
-            transform: translateY(-3px);
-        }
-
-        /* Modal de Login */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal-content {
-            background: white;
-            margin: 10% auto;
-            padding: 40px;
-            border-radius: 15px;
+        
+        .message-container {
+            margin-top: 25px;
             width: 90%;
             max-width: 400px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            animation: slideIn 0.3s ease;
+            position: relative;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .close {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 2rem;
-            cursor: pointer;
-            color: #666;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-group input {
+        
+        textarea {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            min-height: 80px;
+            max-height: 120px;
+            padding: 15px;
+            border: 3px solid rgba(255,255,255,0.8);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.9);
+            color: #2c3e50;
+            font-family: var(--secondary-font);
             font-size: 1rem;
-            transition: border-color 0.3s ease;
+            resize: vertical;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
+        
+        textarea::placeholder {
+            color: rgba(44, 62, 80, 0.6);
         }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .hero p {
-                font-size: 1.1rem;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            .hero .cta-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .features-grid, .service-plans, .contact-info {
-                grid-template-columns: 1fr;
-            }
+        
+        .char-counter {
+            position: absolute;
+            bottom: -25px;
+            right: 5px;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.8);
+            font-weight: 600;
+        }
+        
+        .button-group { 
+            margin-top: 50px; 
+            display: flex; 
+            gap: 20px; 
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        button { 
+            font-family: var(--secondary-font);
+            font-size: 1.3rem; 
+            padding: 18px 35px; 
+            cursor: pointer; 
+            border-radius: 50px; 
+            border: none; 
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        #snap { 
+            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color)); 
+            color: #2c3e50;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 8px 25px rgba(255,107,107,0.3); }
+            50% { box-shadow: 0 8px 35px rgba(255,107,107,0.6); }
+            100% { box-shadow: 0 8px 25px rgba(255,107,107,0.3); }
+        }
+        
+        #switch-camera { 
+            background: linear-gradient(135deg, #45b7d1, #96ceb4); 
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+        }
+        
+        button:active {
+            transform: translateY(-1px);
+        }
+        
+        #status { 
+            margin-top: 20px; 
+            font-size: 1.1rem; 
+            height: 25px;
+            font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: statusGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes statusGlow {
+            from { text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+            to { text-shadow: 2px 2px 15px rgba(255,255,255,0.5); }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 480px) {
+            h1 { font-size: 2.2rem; }
+            button { font-size: 1.1rem; padding: 15px 25px; }
+            .button-group { gap: 15px; }
+        }
+        
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .toast {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-weight: 600;
+            max-width: 300px;
+            word-wrap: break-word;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .toast-success {
+            background: var(--accent-color);
+        }
+        
+        .toast-error {
+            background: #e74c3c;
+        }
+        
+        .toast-info {
+            background: var(--secondary-color);
+            color: #2c3e50;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <nav class="container">
-            <a href="#" class="logo">
-                <i class="fas fa-camera"></i>
-                Momentos en Vivo
-            </a>
-            <ul class="nav-links">
-                <li><a href="#features">Características</a></li>
-                <li><a href="#services">Planes</a></li>
-                <li><a href="#contact">Contacto</a></li>
-                <li><a href="registro.html" style="background: linear-gradient(135deg, #e91e63, #f06292); color: white;">🎯 Demo Gratuita</a></li>
-                <li><a href="#" class="admin-btn" onclick="goToLogin()">Acceso Admin</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <h1>Captura los Momentos Más Importantes de tu Evento</h1>
-            <p>Sistema profesional de captura fotográfica en tiempo real para bodas, fiestas y eventos corporativos</p>
-            <div class="cta-buttons">
-                <a href="#services" class="btn btn-primary">Ver Planes</a>
-                <a href="#contact" class="btn btn-secondary">Contactar</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section id="features" class="features">
-        <div class="container">
-            <h2>¿Por qué elegir Momentos en Vivo?</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                    <h3>Captura en Tiempo Real</h3>
-                    <p>Fotos tomadas al instante por los invitados, sin interrupciones en el evento. Cada momento queda registrado automáticamente.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h3>Participación Activa</h3>
-                    <p>Involucra a todos tus invitados. Cada persona puede contribuir con sus fotos, creando un álbum colaborativo único.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <h3>Moderación Profesional</h3>
-                    <p>Sistema de aprobación automática y manual para mantener la calidad y el contenido apropiado en tu evento.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-cloud-download-alt"></i>
-                    </div>
-                    <h3>Descarga Instantánea</h3>
-                    <p>Recibe todas las fotos en un archivo ZIP comprimido al finalizar el evento. Sin complicaciones técnicas.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-mobile-alt"></i>
-                    </div>
-                    <h3>100% Móvil</h3>
-                    <p>Compatible con smartphones y tablets. Funciona en cualquier dispositivo con cámara y conexión a internet.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-cogs"></i>
-                    </div>
-                    <h3>Soporte Técnico</h3>
-                    <p>Asistencia técnica completa durante el evento. Nuestro equipo está disponible para resolver cualquier inconveniente.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Services Section -->
-    <section id="services" class="services">
-        <div class="container">
-            <h2>Planes y Precios</h2>
-            <div class="service-plans">
-                <div class="plan-card">
-                    <h3>Plan Básico</h3>
-                    <div class="plan-price">$99<span>/evento</span></div>
-                    <ul class="plan-features">
-                        <li>Hasta 50 invitados</li>
-                        <li>Captura ilimitada de fotos</li>
-                        <li>Moderación básica</li>
-                        <li>Descarga en ZIP</li>
-                        <li>Soporte por email</li>
-                    </ul>
-                    <a href="#contact" class="btn btn-primary">Contratar</a>
-                </div>
-                <div class="plan-card featured">
-                    <h3>Plan Profesional</h3>
-                    <div class="plan-price">$199<span>/evento</span></div>
-                    <ul class="plan-features">
-                        <li>Hasta 200 invitados</li>
-                        <li>Captura ilimitada de fotos</li>
-                        <li>Moderación avanzada</li>
-                        <li>Descarga en ZIP</li>
-                        <li>Soporte telefónico</li>
-                        <li>Personalización de marca</li>
-                        <li>Análisis de participación</li>
-                    </ul>
-                    <a href="#contact" class="btn btn-primary">Contratar</a>
-                </div>
-                <div class="plan-card">
-                    <h3>Plan Empresarial</h3>
-                    <div class="plan-price">$399<span>/evento</span></div>
-                    <ul class="plan-features">
-                        <li>Invitados ilimitados</li>
-                        <li>Captura ilimitada de fotos</li>
-                        <li>Moderación premium</li>
-                        <li>Descarga en ZIP</li>
-                        <li>Soporte 24/7</li>
-                        <li>Personalización completa</li>
-                        <li>API integration</li>
-                        <li>Reportes avanzados</li>
-                    </ul>
-                    <a href="#contact" class="btn btn-primary">Contratar</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-        <div class="container">
-            <h2>¿Listo para hacer inolvidable tu próximo evento?</h2>
-            <p>Contactanos hoy mismo y comienza a planificar la experiencia perfecta para tus invitados</p>
-
-            <div class="contact-info">
-                <div class="contact-item">
-                    <i class="fas fa-envelope"></i>
-                    <h3>Email</h3>
-                    <p>info@momentosenvivo.com</p>
-                </div>
-                <div class="contact-item">
-                    <i class="fas fa-phone"></i>
-                    <h3>Teléfono</h3>
-                    <p>+1 (555) 123-4567</p>
-                </div>
-                <div class="contact-item">
-                    <i class="fas fa-clock"></i>
-                    <h3>Horarios</h3>
-                    <p>Lunes a Viernes<br>9:00 AM - 6:00 PM</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Momentos en Vivo</h3>
-                    <p>Sistema profesional de captura fotográfica para eventos. Hacemos que cada momento cuente.</p>
-                </div>
-                <div class="footer-section">
-                    <h3>Enlaces Rápidos</h3>
-                    <ul>
-                        <li><a href="#features">Características</a></li>
-                        <li><a href="#services">Planes</a></li>
-                        <li><a href="#contact">Contacto</a></li>
-                        <li><a href="#" onclick="goToLogin()">Admin</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>Servicios</h3>
-                    <ul>
-                        <li><a href="#services">Bodas</a></li>
-                        <li><a href="#services">Cumpleaños</a></li>
-                        <li><a href="#services">Eventos Corporativos</a></li>
-                        <li><a href="#services">Graduaciones</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="social-links">
-                <a href="#"><i class="fab fa-facebook"></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
-                <a href="#"><i class="fab fa-twitter"></i></a>
-                <a href="#"><i class="fab fa-linkedin"></i></a>
-            </div>
-
-            <p>&copy; 2024 Momentos en Vivo. Todos los derechos reservados.</p>
-        </div>
-    </footer>
-
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close" onclick="closeLoginModal()">&times;</span>
-            <h2 style="text-align: center; margin-bottom: 30px; color: #333;">
-                <i class="fas fa-lock" style="color: #667eea; margin-right: 10px;"></i>
-                Acceso Administrativo
-            </h2>
-            <p style="text-align: center; color: #666; margin-bottom: 20px;">
-                Serás redirigido a la página de inicio de sesión.
-            </p>
-        </div>
+    <!-- Confetti elements -->
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    
+    <h1>¡Captura tu Momento!</h1>
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+    
+    <div class="message-container">
+        <textarea id="message" placeholder="¡Escribe un mensaje divertido! (opcional)" maxlength="200"></textarea>
+        <div class="char-counter"><span id="char-count">0</span>/200</div>
     </div>
+    
+    <div class="button-group">
+        <button id="snap">📸 Tomar Foto</button>
+        <button id="upload-photo">📁 Subir Foto</button>
+        <button id="switch-camera">🔄 Cambiar Cámara</button>
+    </div>
+    
+    <input type="file" accept="image/*" id="file-input" style="display:none">
+    
+    <div class="mirror-option" style="margin-top: 15px; text-align: center;">
+        <label style="color: white; font-size: 1rem;">
+            <input type="checkbox" id="mirror-checkbox" checked style="margin-right: 10px;">
+            Efecto espejo
+        </label>
+        <br>
+        <label style="color: white; font-size: 1rem; margin-top: 10px;">
+            <input type="checkbox" id="dark-mode-toggle" style="margin-right: 10px;">
+            Modo Oscuro
+        </label>
+    </div>
+    
+    <p id="status"></p>
 
     <script>
-        // Función para redirigir al login
-        function goToLogin() {
-            window.location.href = '/login.html';
-        }
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const snapButton = document.getElementById('snap');
+        const switchCameraButton = document.getElementById('switch-camera');
+        const statusEl = document.getElementById('status');
+        const messageInput = document.getElementById('message');
+        const charCount = document.getElementById('char-count');
+        const mirrorCheckbox = document.getElementById('mirror-checkbox');
+        const functionUrl = 'https://playful-parfait-6bfab1.netlify.app/.netlify/functions/upload';
 
-        // Funciones del modal de login (simplificadas)
-        function showLoginModal() {
-            goToLogin();
-        }
+        // Set initial mirror for video
+        video.style.transform = 'scaleX(-1)';
 
-        function closeLoginModal() {
-            // No longer needed
-        }
-
-        // Animación de scroll suave para los enlaces de navegación
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
+        // Event listener for mirror checkbox
+        mirrorCheckbox.addEventListener('change', () => {
+            video.style.transform = mirrorCheckbox.checked ? 'scaleX(-1)' : 'none';
         });
 
-        // Efecto de aparición gradual para las tarjetas
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
+        // Load dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.checked = true;
+        }
+
+        // Event listener for dark mode toggle
+        darkModeToggle.addEventListener('change', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', darkModeToggle.checked);
+        });
+
+        // Upload photo button
+        const uploadPhotoButton = document.getElementById('upload-photo');
+        const fileInput = document.getElementById('file-input');
+
+        uploadPhotoButton.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                statusEl.textContent = "Procesando...";
+                const formData = new FormData();
+                formData.append('photo', file, 'foto_subida.jpg');
+                formData.append('eventId', eventId);
+                const message = messageInput.value.trim();
+                if (message) {
+                    formData.append('message', message);
                 }
-            });
-        }, observerOptions);
+                fetch(functionUrl, { method: 'POST', body: formData })
+                .then(response => {
+                    if (!response.ok) { throw new Error(`Error del servidor: ${response.status} ${response.statusText}`); }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data.message);
+                    incrementPhotoCount();
+                    showToast("¡Gracias! Tu foto fue enviada 🎉", 'success');
+                    messageInput.value = '';
+                    charCount.textContent = '0';
+                    charCount.style.color = 'rgba(255,255,255,0.8)';
+                    setTimeout(() => updatePhotoCounter(), 4000);
+                })
+                .catch(err => {
+                    console.error('Error al subir la foto:', err);
+                    showToast("Hubo un error al enviar. Intenta de nuevo.", 'error');
+                });
+            }
+        });
 
-        // Aplicar animación a las tarjetas de características y planes
-        document.querySelectorAll('.feature-card, .plan-card').forEach(card => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(30px)';
-            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(card);
+        // Extraer eventId, theme y demo mode de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventId = urlParams.get('event') || 'DEFAULT';
+        const theme = urlParams.get('theme') || 'modern-blue';
+        const isDemoMode = urlParams.get('demo') === 'true';
+        console.log('EventId extraído de la URL:', eventId);
+        console.log('Tema extraído de la URL:', theme);
+        console.log('Modo demo:', isDemoMode);
+
+        // Verificar si es un evento demo válido
+        if (isDemoMode && (!eventId || !eventId.startsWith('DEMO_'))) {
+            alert('⚠️ Esta página es solo para demos. Serás redirigido.');
+            window.location.href = 'demo.html';
+        }
+
+        // Función para configurar modo demo
+        function setupDemoMode() {
+            console.log('🎯 Configurando modo demo...');
+
+            // Agregar banner de demo
+            const demoBanner = document.createElement('div');
+            demoBanner.id = 'demo-banner';
+            demoBanner.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: linear-gradient(135deg, #e91e63, #f06292);
+                color: white;
+                text-align: center;
+                padding: 8px 20px;
+                font-size: 0.9rem;
+                font-weight: bold;
+                z-index: 1000;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            `;
+            demoBanner.innerHTML = '🎯 MODO DEMO GRATUITO - 3 días restantes';
+            document.body.insertBefore(demoBanner, document.body.firstChild);
+
+            // Ajustar el margen superior del body para el banner
+            document.body.style.marginTop = '45px';
+
+            // Deshabilitar opciones de personalización
+            const mirrorOption = document.querySelector('.mirror-option');
+            if (mirrorOption) {
+                mirrorOption.style.display = 'none';
+            }
+
+            // Agregar marca de agua sutil
+            const watermark = document.createElement('div');
+            watermark.style.cssText = `
+                position: fixed;
+                bottom: 10px;
+                right: 10px;
+                color: rgba(233, 30, 99, 0.3);
+                font-size: 0.8rem;
+                font-weight: bold;
+                pointer-events: none;
+                z-index: 999;
+                transform: rotate(-15deg);
+            `;
+            watermark.textContent = 'DEMO';
+            document.body.appendChild(watermark);
+
+            // Agregar contador regresivo en el status
+            function updateDemoCountdown() {
+                const demoStart = localStorage.getItem('demoStartTime');
+                if (demoStart) {
+                    const startTime = parseInt(demoStart);
+                    const now = Date.now();
+                    const timeLeft = (3 * 24 * 60 * 60 * 1000) - (now - startTime);
+
+                    if (timeLeft <= 0) {
+                        // Demo expirada - redirigir
+                        alert('Tu demo ha expirado. Gracias por probar Momentos en Vivo.');
+                        clearDemoData();
+                        window.location.href = 'home.html';
+                        return;
+                    }
+
+                    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+                    const banner = document.getElementById('demo-banner');
+                    if (banner) {
+                        banner.textContent = `🎯 MODO DEMO - ${days} días ${hours} horas restantes`;
+                    }
+                }
+            }
+
+            // Actualizar contador cada minuto
+            updateDemoCountdown();
+            setInterval(updateDemoCountdown, 60000);
+
+            console.log('✅ Modo demo configurado');
+        }
+
+        // Función para limpiar datos de demo
+        function clearDemoData() {
+            const demoId = localStorage.getItem('demoId');
+            if (demoId) {
+                // Limpiar contador total del evento
+                localStorage.removeItem(`photoCount_${demoId}`);
+
+                // Limpiar contadores por usuario para este evento demo
+                // Nota: En un escenario real, mantendríamos un registro de todos los userIds
+                // pero por simplicidad, limpiamos los datos principales
+                const userId = getUserId();
+                localStorage.removeItem(`userPhotoCount_${demoId}_${userId}`);
+            }
+            localStorage.removeItem('demoMode');
+            localStorage.removeItem('demoId');
+            localStorage.removeItem('demoEventName');
+            localStorage.removeItem('demoUserEmail');
+            localStorage.removeItem('demoStartTime');
+        }
+
+        // Contador de caracteres para el mensaje
+        messageInput.addEventListener('input', () => {
+            const count = messageInput.value.length;
+            charCount.textContent = count;
+            
+            // Cambiar color cuando se acerca al límite
+            if (count > 180) {
+                charCount.style.color = '#ff6b6b';
+            } else if (count > 150) {
+                charCount.style.color = '#feca57';
+            } else {
+                charCount.style.color = 'rgba(255,255,255,0.8)';
+            }
+        });
+
+        // Función para iniciar la cámara
+        async function startCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop()); // Detener cámara anterior
+            }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: currentFacingMode } 
+                });
+                video.srcObject = stream;
+                currentStream = stream;
+                statusEl.textContent = "";
+            } catch (err) {
+                console.error("Error de cámara:", err);
+                statusEl.textContent = "No se pudo acceder a la cámara.";
+            }
+        }
+
+        // Evento para cambiar de cámara
+        switchCameraButton.addEventListener('click', () => {
+            currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+            startCamera();
+        });
+
+        // Verificar límite de fotos por usuario (por evento)
+        function checkPhotoLimit() {
+            const userId = getUserId();
+            const userPhotoCount = parseInt(localStorage.getItem(`userPhotoCount_${eventId}_${userId}`) || '0');
+            const totalEventPhotoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
+
+            // Límite especial para demos: máximo 2 fotos por usuario, máximo 10 total por evento
+            if (isDemoMode) {
+                return userPhotoCount < 2 && totalEventPhotoCount < 10;
+            }
+
+            // Límite normal: máximo 10 fotos por usuario
+            return userPhotoCount < 10;
+        }
+
+        // Generar o obtener ID único del usuario
+        function getUserId() {
+            let userId = localStorage.getItem('userId');
+            if (!userId) {
+                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('userId', userId);
+            }
+            return userId;
+        }
+
+        function incrementPhotoCount() {
+            const userId = getUserId();
+
+            // Incrementar contador total del evento
+            const totalPhotoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
+            localStorage.setItem(`photoCount_${eventId}`, (totalPhotoCount + 1).toString());
+
+            // Incrementar contador por usuario
+            const userPhotoCount = parseInt(localStorage.getItem(`userPhotoCount_${eventId}_${userId}`) || '0');
+            localStorage.setItem(`userPhotoCount_${eventId}_${userId}`, (userPhotoCount + 1).toString());
+
+            updatePhotoCounter();
+        }
+
+        function updatePhotoCounter() {
+            const userId = getUserId();
+            const userPhotoCount = parseInt(localStorage.getItem(`userPhotoCount_${eventId}_${userId}`) || '0');
+            const totalEventPhotoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
+
+            if (isDemoMode) {
+                const userRemaining = 2 - userPhotoCount;
+                const totalRemaining = 20 - totalEventPhotoCount;
+
+                if (userRemaining <= 0) {
+                    snapButton.disabled = true;
+                    snapButton.textContent = "🎯 Límite Personal Alcanzado";
+                    snapButton.style.background = "linear-gradient(135deg, #e91e63, #f06292)";
+                    showToast(`Has alcanzado tus 2 fotos de prueba.`, 'success');
+                    statusEl.innerHTML = `
+                        <div style="text-align: center; background: rgba(233, 30, 99, 0.1); padding: 10px; border-radius: 10px; margin: 10px 0;">
+                            <strong>🎯 LÍMITE PERSONAL COMPLETADO</strong><br>
+                            <small>Haz enviado tus 2 fotos de prueba. Comparte el enlace para que otros invitados también prueben.</small>
+                        </div>
+                    `;
+                } else if (totalRemaining <= 0) {
+                    snapButton.disabled = true;
+                    snapButton.textContent = "🚫 Evento Lleno";
+                    snapButton.style.background = "linear-gradient(135deg, #6c757d, #495057)";
+                    showToast(`El evento demo está lleno. Inténtalo más tarde.`, 'warning');
+                    statusEl.innerHTML = `
+                        <div style="text-align: center; background: rgba(108, 117, 125, 0.1); padding: 10px; border-radius: 10px; margin: 10px 0;">
+                            <strong>🚫 EVENTO DEMO COMPLETO</strong><br>
+                            <small>Todos los cupos para fotos han sido utilizados (10/10).</small>
+                        </div>
+                    `;
+                } else {
+                    statusEl.textContent = `Demo: Te quedan ${userRemaining} foto${userRemaining === 1 ? '' : 's'} (Total evento: ${totalEventPhotoCount}/10)`;
+                }
+            } else {
+                const remaining = 10 - userPhotoCount;
+                if (remaining <= 0) {
+                    snapButton.disabled = true;
+                    snapButton.textContent = "📸 Límite alcanzado";
+                    snapButton.style.background = "linear-gradient(135deg, #6c757d, #495057)";
+                    showToast(`Has alcanzado el límite de 10 fotos para este evento`, 'error');
+                } else {
+                    statusEl.textContent = `Te quedan ${remaining} foto${remaining === 1 ? '' : 's'} para este evento`;
+                }
+            }
+        }
+
+        // Evento para enviar foto con mensaje
+        snapButton.addEventListener('click', () => {
+            if (!checkPhotoLimit()) {
+                if (isDemoMode) {
+                    const userId = getUserId();
+                    const userPhotoCount = parseInt(localStorage.getItem(`userPhotoCount_${eventId}_${userId}`) || '0');
+                    const totalEventPhotoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
+
+                    if (userPhotoCount >= 2) {
+                        showToast("Has alcanzado tus 2 fotos de prueba.", 'success');
+                    } else if (totalEventPhotoCount >= 10) {
+                        showToast("El evento demo está lleno (10 fotos máximo). Inténtalo más tarde.", 'warning');
+                    }
+                } else {
+                    showToast("Has alcanzado el límite de 10 fotos para este evento", 'error');
+                }
+                return;
+            }
+
+            statusEl.textContent = "Preparándose... 3";
+            statusEl.style.fontSize = '2rem';
+            statusEl.style.fontWeight = 'bold';
+            statusEl.style.color = '#ffd93d';
+            setTimeout(() => {
+                statusEl.textContent = "Preparándose... 2";
+            }, 1000);
+            setTimeout(() => {
+                statusEl.textContent = "Preparándose... 1";
+            }, 2000);
+            setTimeout(() => {
+                statusEl.textContent = "Capturando...";
+                statusEl.style.fontSize = '';
+                statusEl.style.fontWeight = '';
+                statusEl.style.color = '';
+                const ctx = canvas.getContext('2d');
+                if (video.videoWidth > video.videoHeight) {
+                    // Landscape, make it vertical by rotating 90 degrees
+                    canvas.width = video.videoHeight;
+                    canvas.height = video.videoWidth;
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
+                    ctx.rotate(Math.PI / 2);
+                } else {
+                    // Portrait, keep vertical
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
+                }
+                if (!mirrorCheckbox.checked) {
+                    ctx.scale(-1, 1);
+                }
+                if (video.videoWidth > video.videoHeight) {
+                    ctx.drawImage(video, -video.videoWidth / 2, -video.videoHeight / 2, video.videoWidth, video.videoHeight);
+                } else {
+                    ctx.drawImage(video, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+                }
+                
+                canvas.toBlob(blob => {
+                    if (!blob) { 
+                        showToast("Error al capturar la imagen.", 'error'); 
+                        return; 
+                    }
+                    statusEl.textContent = "Enviando...";
+                    const formData = new FormData();
+                    formData.append('photo', blob, 'foto_celular.jpg');
+                    
+                    // Agregar el eventId
+                    formData.append('eventId', eventId);
+                    console.log('--- DEBUG Frontend: EventId agregado al FormData:', eventId);
+                    
+                    // Agregar el mensaje si existe
+                    const message = messageInput.value.trim();
+                    console.log('--- DEBUG Frontend: Mensaje a enviar:', message);
+                    if (message) {
+                        formData.append('message', message);
+                        console.log('--- DEBUG Frontend: Mensaje agregado al FormData');
+                    } else {
+                        console.log('--- DEBUG Frontend: No hay mensaje para enviar');
+                    }
+
+                    // Debug: mostrar contenido del FormData
+                    for (let [key, value] of formData.entries()) {
+                        console.log('--- DEBUG Frontend FormData:', key, value);
+                    }
+
+                    fetch(functionUrl, { method: 'POST', body: formData })
+                    .then(response => {
+                        if (!response.ok) { throw new Error(`Error del servidor: ${response.status} ${response.statusText}`); }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log(data.message);
+                        incrementPhotoCount(); // Incrementar contador después del envío exitoso
+                        showToast("¡Gracias! Tu foto fue enviada 🎉", 'success');
+                        // Limpiar el mensaje después del envío exitoso
+                        messageInput.value = '';
+                        charCount.textContent = '0';
+                        charCount.style.color = 'rgba(255,255,255,0.8)';
+                        setTimeout(() => updatePhotoCounter(), 4000);
+                    })
+                    .catch(err => {
+                        console.error('Error al subir la foto:', err);
+                        showToast("Hubo un error al enviar. Intenta de nuevo.", 'error');
+                    });
+                }, 'image/jpeg', 0.7); // Reducir calidad para comprimir más
+            }, 3000);
+        });
+
+        // Iniciar la cámara al cargar la página
+        startCamera();
+        // Mostrar contador inicial
+        updatePhotoCounter();
+    </script>
+    
+    <script>
+        // Sistema de Notificaciones Toast
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+            
+            // Mostrar con animación
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Ocultar y remover
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         });
     </script>
+    
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+    
 </body>
 </html>
