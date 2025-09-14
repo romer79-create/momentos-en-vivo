@@ -519,7 +519,7 @@
                 capture: `index.html?event=${eventId}&theme=premium`,
                 moderation: `moderador.html?event=${eventId}`,
                 projection: `proyeccion.html?event=${eventId}`,
-                admin: `admin.html`
+                admin: `cliente-gestion.html?eventId=${eventId}` // ← Cambiado a gestión premium
             };
 
             window.open(urls[type], '_blank');
