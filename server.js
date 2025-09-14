@@ -5,7 +5,7 @@ require('dotenv').config({ path: '.env.local' });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const API_KEY = process.env.API_KEY;
+const API_KEY = process.env.API_KEY || 'MiClaveSuperSecreta2024!@#';
 
 // Middleware de autenticación
 const authenticate = (req, res, next) => {
@@ -155,4 +155,5 @@ app.post('/reject-photo', authenticate, (req, res) => {
 // --- Arrancar el Servidor ---
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor escuchando en http://localhost:${PORT}`);
+    console.log(`API_KEY configurada: ${API_KEY ? 'SÍ' : 'NO'}`);
 });
