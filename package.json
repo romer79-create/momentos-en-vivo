@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "cloudinary": "^2.7.0",
+    "dotenv": "^17.2.2",
     "express": "^4.19.2",
     "formidable": "^3.5.4",
     "jszip": "^3.10.1",

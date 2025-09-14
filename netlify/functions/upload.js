@@ -10,17 +10,34 @@ cloudinary.config({
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
   'Access-Control-Allow-Methods': 'POST, OPTIONS'
+};
+
+// Función de autenticación
+const authenticate = (event) => {
+  const apiKey = event.headers['x-api-key'] || event.queryStringParameters?.apiKey;
+  const expectedApiKey = process.env.API_KEY;
+
+  if (!apiKey || apiKey !== expectedApiKey) {
+    return { statusCode: 401, headers, body: JSON.stringify({ message: 'API key inválida o faltante' }) };
+  }
+  return null; // Autenticación exitosa
 };
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers };
   }
-  
+
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers, body: 'Method Not Allowed' };
+  }
+
+  // Verificar autenticación
+  const authError = authenticate(event);
+  if (authError) {
+    return authError;
   }
 
   try {
@@ -30,6 +47,18 @@ exports.handler = async (event) => {
     const file = result.files[0];
 
     if (!file) { throw new Error('No se recibió ningún archivo.'); }
+
+    // Validar tipo de archivo
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(file.contentType)) {
+      throw new Error('Tipo de archivo no permitido. Solo se permiten imágenes (JPEG, PNG, GIF).');
+    }
+
+    // Validar tamaño del archivo (10MB máximo)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.content.length > maxSize) {
+      throw new Error('Archivo demasiado grande. El tamaño máximo permitido es 10MB.');
+    }
     
     // Extraer mensaje y event_id del FormData
     let message = '';

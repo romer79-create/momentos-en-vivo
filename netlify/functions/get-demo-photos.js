@@ -10,8 +10,19 @@ exports.handler = async (event, context) => {
   // Configurar CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+  };
+
+  // Función de autenticación
+  const authenticate = (event) => {
+    const apiKey = event.headers['x-api-key'] || event.queryStringParameters?.apiKey;
+    const expectedApiKey = process.env.API_KEY;
+
+    if (!apiKey || apiKey !== expectedApiKey) {
+      return { statusCode: 401, headers, body: JSON.stringify({ message: 'API key inválida o faltante' }) };
+    }
+    return null; // Autenticación exitosa
   };
 
   if (event.httpMethod === 'OPTIONS') {
@@ -24,6 +35,12 @@ exports.handler = async (event, context) => {
       headers,
       body: JSON.stringify({ error: 'Método no permitido. Use GET.' })
     };
+  }
+
+  // Verificar autenticación
+  const authError = authenticate(event);
+  if (authError) {
+    return authError;
   }
 
   try {
@@ -46,16 +63,12 @@ exports.handler = async (event, context) => {
       };
     }
 
-    console.log(`📸 Obteniendo fotos para demo del evento: ${eventId}`);
-
     // Buscar fotos del evento demo
     const result = await cloudinary.search
       .expression(`folder:momentos-en-vivo AND tags:approved_${eventId}`)
       .sort_by('created_at', 'desc')
       .max_results(10) // Limitado para demo
       .execute();
-
-    console.log(`✅ Encontradas ${result.resources.length} fotos para demo`);
 
     // Crear lista de fotos con información básica
     const photos = result.resources.map((photo, index) => ({
@@ -87,13 +100,12 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    console.error('❌ Error obteniendo fotos demo:', error);
+    console.error('Error obteniendo fotos demo:', error.message);
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
-        error: 'Error interno del servidor',
-        details: error.message
+        error: 'Error interno del servidor'
       })
     };
   }

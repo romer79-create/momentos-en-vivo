@@ -8,14 +8,30 @@ cloudinary.config({
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
+};
+
+// Función de autenticación
+const authenticate = (event) => {
+  const apiKey = event.headers['x-api-key'] || event.queryStringParameters?.apiKey;
+  const expectedApiKey = process.env.API_KEY;
+
+  if (!apiKey || apiKey !== expectedApiKey) {
+    return { statusCode: 401, headers, body: JSON.stringify({ message: 'API key inválida o faltante' }) };
+  }
+  return null; // Autenticación exitosa
 };
 
 exports.handler = async (event) => {
+  // Verificar autenticación
+  const authError = authenticate(event);
+  if (authError) {
+    return authError;
+  }
+
   try {
     // Extraer eventId de los parámetros de consulta
     const eventId = event.queryStringParameters?.eventId || 'DEFAULT';
-    console.log("EventId recibido para fotos aprobadas:", eventId);
 
     // Busca recursos que tengan la etiqueta "approved_${eventId}"
     const result = await cloudinary.search
@@ -24,15 +40,13 @@ exports.handler = async (event) => {
       .max_results(50) // Mostramos hasta 50 fotos aprobadas
       .execute();
 
-    console.log(`Fotos aprobadas encontradas para evento ${eventId}:`, result.resources.length);
-
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify(result.resources),
     };
   } catch (error) {
-    console.error("Error al obtener fotos aprobadas:", error);
-    return { statusCode: 500, headers, body: JSON.stringify(error) };
+    console.error("Error al obtener fotos aprobadas:", error.message);
+    return { statusCode: 500, headers, body: JSON.stringify({ message: 'Error interno del servidor' }) };
   }
 };

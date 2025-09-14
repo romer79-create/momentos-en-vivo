@@ -8,8 +8,19 @@ cloudinary.config({
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+};
+
+// Función de autenticación
+const authenticate = (event) => {
+  const apiKey = event.headers['x-api-key'] || event.queryStringParameters?.apiKey;
+  const expectedApiKey = process.env.API_KEY;
+
+  if (!apiKey || apiKey !== expectedApiKey) {
+    return { statusCode: 401, headers, body: JSON.stringify({ message: 'API key inválida o faltante' }) };
+  }
+  return null; // Autenticación exitosa
 };
 
 // Función para compartir en redes sociales
@@ -18,10 +29,14 @@ exports.handler = async (event) => {
     return { statusCode: 200, headers, body: '' };
   }
 
+  // Verificar autenticación
+  const authError = authenticate(event);
+  if (authError) {
+    return authError;
+  }
+
   try {
     const { action, photoUrl, eventId, platform } = event.queryStringParameters;
-
-    console.log('Solicitud de compartir:', { action, photoUrl, eventId, platform });
 
     // Obtener información del evento
     const events = JSON.parse(process.env.EVENTS_DATA || '[]');
@@ -56,12 +71,6 @@ exports.handler = async (event) => {
 
       case 'log-share':
         // Registrar que se compartió una foto
-        console.log(`Foto compartida en ${platform}:`, {
-          photoUrl,
-          eventId,
-          eventName: eventData.name,
-          timestamp: new Date().toISOString()
-        });
 
         responseData = {
           success: true,
@@ -84,7 +93,7 @@ exports.handler = async (event) => {
     };
 
   } catch (error) {
-    console.error('Error en social-share:', error);
+    console.error('Error en social-share:', error.message);
     return {
       statusCode: 500,
       headers,

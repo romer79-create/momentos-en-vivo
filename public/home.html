@@ -377,7 +377,8 @@
         const messageInput = document.getElementById('message');
         const charCount = document.getElementById('char-count');
         const mirrorCheckbox = document.getElementById('mirror-checkbox');
-        const functionUrl = 'https://momentos-en-vivo.vercel.app/api/upload';
+        const functionUrl = '/.netlify/functions/upload';
+        const API_KEY = 'MiClaveSuperSecreta2024!@#';
 
         // Variables para controlar la cámara
         let currentStream = null;
@@ -425,7 +426,13 @@
                 if (message) {
                     formData.append('message', message);
                 }
-                fetch(functionUrl, { method: 'POST', body: formData })
+                fetch(functionUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'x-api-key': API_KEY
+                    }
+                })
                 .then(response => {
                     if (!response.ok) { throw new Error(`Error del servidor: ${response.status} ${response.statusText}`); }
                     return response.json();
@@ -772,7 +779,13 @@
                         console.log('--- DEBUG Frontend FormData:', key, value);
                     }
 
-                    fetch(functionUrl, { method: 'POST', body: formData })
+                    fetch(functionUrl, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'x-api-key': API_KEY
+                        }
+                    })
                     .then(response => {
                         if (!response.ok) { throw new Error(`Error del servidor: ${response.status} ${response.statusText}`); }
                         return response.json();

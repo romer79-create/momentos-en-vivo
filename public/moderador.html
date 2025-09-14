@@ -297,8 +297,9 @@
         const pendingContainer = document.getElementById('pending-container');
         // IMPORTANTE: Configura la URL correcta para tu deployment en Vercel
         // Para desarrollo local: http://localhost:3000
-        // Para Vercel: reemplaza con tu URL de Vercel (ej: https://tu-proyecto.vercel.app)
-        const NETLIFY_URL = 'https://momentos-en-vivo.vercel.app';
+        // URL dinámica para funcionar tanto en desarrollo como en producción
+        const NETLIFY_URL = window.location.origin;
+        const API_KEY = 'MiClaveSuperSecreta2024!@#';
 
         // Extraer eventId y theme de la URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -313,6 +314,10 @@
         async function handleAction(action, public_id, cardElement) {
             const response = await fetch(`${NETLIFY_URL}/.netlify/functions/${action}-photo`, {
                 method: 'POST',
+                headers: {
+                    'x-api-key': API_KEY,
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({ 
                     public_id: public_id,
                     eventId: eventId
@@ -334,7 +339,11 @@
         async function showShareButtons(public_id, cardElement) {
             try {
                 // Obtener la URL de la foto aprobada
-                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-approved-photos?eventId=${eventId}`);
+                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-approved-photos?eventId=${eventId}`, {
+                    headers: {
+                        'x-api-key': API_KEY
+                    }
+                });
                 const photos = await response.json();
                 
                 const approvedPhoto = photos.find(photo => photo.public_id === public_id);
@@ -344,7 +353,11 @@
                 }
 
                 // Generar URLs de compartir
-                const shareResponse = await fetch(`${NETLIFY_URL}/.netlify/functions/social-share?action=generate-share-urls&photoUrl=${encodeURIComponent(approvedPhoto.secure_url)}&eventId=${eventId}`);
+                const shareResponse = await fetch(`${NETLIFY_URL}/.netlify/functions/social-share?action=generate-share-urls&photoUrl=${encodeURIComponent(approvedPhoto.secure_url)}&eventId=${eventId}`, {
+                    headers: {
+                        'x-api-key': API_KEY
+                    }
+                });
                 const shareData = await shareResponse.json();
 
                 if (shareData.success) {
@@ -395,7 +408,11 @@
         // Función para compartir en plataforma específica
         function shareToPlatform(url, platform, photoId) {
             // Registrar el compartir
-            fetch(`${NETLIFY_URL}/.netlify/functions/social-share?action=log-share&platform=${platform}&photoId=${photoId}&eventId=${eventId}`);
+            fetch(`${NETLIFY_URL}/.netlify/functions/social-share?action=log-share&platform=${platform}&photoId=${photoId}&eventId=${eventId}`, {
+                headers: {
+                    'x-api-key': API_KEY
+                }
+            });
             
             // Abrir ventana de compartir
             const width = 600;
@@ -445,7 +462,11 @@
         }
 
         async function loadPendingPhotos() {
-            const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-photos?eventId=${eventId}`);
+            const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-photos?eventId=${eventId}`, {
+                headers: {
+                    'x-api-key': API_KEY
+                }
+            });
             const photos = await response.json();
             
             pendingContainer.innerHTML = ''; // Limpia el contenedor

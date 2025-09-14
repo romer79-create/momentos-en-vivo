@@ -269,7 +269,8 @@
         const container = document.getElementById('projection-container');
         const placeholder = document.getElementById('placeholder');
         const qrCodeImg = document.getElementById('qr-code-img');
-        const NETLIFY_URL = 'https://playful-parfait-6bfab1.netlify.app';
+        const NETLIFY_URL = window.location.origin;
+        const API_KEY = 'MiClaveSuperSecreta2024!@#';
 
         // Extraer eventId y theme de la URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -370,7 +371,11 @@
 
         async function fetchApprovedPhotos() {
             try {
-                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-approved-photos?eventId=${eventId}`);
+                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-approved-photos?eventId=${eventId}`, {
+                    headers: {
+                        'x-api-key': API_KEY
+                    }
+                });
                 if (!response.ok) return;
                 const newPhotos = await response.json();
                 const newPhoto = newPhotos.find(p => !knownPhotoIds.has(p.asset_id));
