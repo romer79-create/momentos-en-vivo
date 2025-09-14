@@ -1207,15 +1207,14 @@
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
             button.disabled = true;
 
-            // Crear la preferencia de pago
+            // Crear la preferencia de pago usando MercadoPago SDK
             const preference = {
                 items: [{
                     title: 'Plan Todo Incluido - Momentos en Vivo',
                     description: 'Sistema completo de captura fotográfica para eventos',
                     quantity: 1,
                     currency_id: 'ARS',
-                    unit_price: 25000,
-                    picture_url: window.location.origin + '/path/to/image.jpg' // Opcional
+                    unit_price: 25000
                 }],
                 payer: {
                     name: 'Cliente',
@@ -1227,27 +1226,43 @@
                     pending: window.location.origin + '/pending.html'
                 },
                 auto_return: 'approved',
-                notification_url: window.location.origin + '/webhook', // Para webhooks
                 external_reference: 'EVENTO_' + Date.now()
             };
 
-            // En un entorno real, enviarías esta preferencia a tu backend
-            // Para demo, simularemos la creación
-            setTimeout(() => {
-                // Simular que se crea la preferencia
-                const preferenceId = 'PREF_' + Date.now();
+            // En un entorno de producción, enviarías esto a tu backend
+            // Para demo, usaremos el checkout básico de MercadoPago
+            try {
+                // Crear checkout usando el método directo de MercadoPago
+                const checkout = mp.checkout({
+                    preference: preference,
+                    autoOpen: true
+                });
 
-                // Redirigir a MercadoPago checkout
-                const checkoutUrl = `https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=${preferenceId}`;
-                window.open(checkoutUrl, '_blank');
+                // Restaurar botón después de abrir checkout
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }, 1000);
+
+            } catch (error) {
+                console.error('Error creando checkout:', error);
+
+                // Fallback: usar el checkout básico de MercadoPago
+                const amount = 25000;
+                const description = encodeURIComponent('Plan Todo Incluido - Momentos en Vivo');
+                const externalRef = 'EVENTO_' + Date.now();
+
+                // URL correcta para checkout básico de MercadoPago
+                const checkoutUrl = `https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=${externalRef}&public_key=${publicKey}&amount=${amount}&description=${description}`;
+
+                window.location.href = checkoutUrl;
 
                 // Restaurar botón
                 button.innerHTML = originalText;
                 button.disabled = false;
 
-                alert('¡Pago iniciado! Serás redirigido a MercadoPago para completar la transacción.');
-
-            }, 2000);
+                alert('Redirigiendo a MercadoPago para completar el pago...');
+            }
         }
 
         // Inicializar cuando se carga la página
