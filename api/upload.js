@@ -113,17 +113,20 @@ export default async function handler(req, res) {
 
         if (trimmedLine.startsWith('Content-Disposition:')) {
           console.log('--- DEBUG: Encontrado Content-Disposition');
+
+          // Parsear name
           const nameMatch = trimmedLine.match(/name="([^"]+)"/);
           if (nameMatch) {
             fieldName = nameMatch[1];
             console.log('--- DEBUG: Field name encontrado:', fieldName);
           }
 
+          // Parsear filename (si existe, es un archivo)
           const filenameMatch = trimmedLine.match(/filename="([^"]+)"/);
           if (filenameMatch) {
             fileName = filenameMatch[1];
             isFile = true;
-            console.log('--- DEBUG: Filename encontrado:', fileName);
+            console.log('--- DEBUG: Filename encontrado:', fileName, '- Es archivo!');
           }
         } else if (trimmedLine.startsWith('Content-Type:')) {
           fileContentType = trimmedLine.split(':')[1].trim();
@@ -133,12 +136,18 @@ export default async function handler(req, res) {
 
       console.log('--- DEBUG: Procesando campo final:', { fieldName, isFile, fileName, contentLength: content.length });
 
+      // Procesar según el tipo de campo
       if (isFile && fieldName === 'photo') {
         fileBuffer = Buffer.from(content, 'binary');
-        console.log('--- DEBUG: Archivo encontrado:', fileName, fileContentType, fileBuffer.length, 'bytes');
-      } else if (fieldName) {
+        console.log('--- DEBUG: ARCHIVO ENCONTRADO:', fileName, fileContentType, fileBuffer.length, 'bytes');
+        console.log('--- DEBUG: Primeros 50 bytes del archivo:', content.substring(0, 50));
+      } else if (fieldName && !isFile) {
         formData[fieldName] = content;
-        console.log('--- DEBUG: Campo guardado:', fieldName, '=', formData[fieldName]);
+        console.log('--- DEBUG: CAMPO DE TEXTO GUARDADO:', fieldName, '=', formData[fieldName]);
+      } else if (fieldName && isFile) {
+        console.log('--- DEBUG: Campo con archivo encontrado pero no es photo:', fieldName);
+      } else {
+        console.log('--- DEBUG: Campo sin name encontrado, ignorando');
       }
     }
 
