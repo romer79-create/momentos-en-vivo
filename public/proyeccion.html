@@ -269,7 +269,8 @@
         const container = document.getElementById('projection-container');
         const placeholder = document.getElementById('placeholder');
         const qrCodeImg = document.getElementById('qr-code-img');
-        const NETLIFY_URL = window.location.origin;
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const NETLIFY_URL = isLocal ? '' : window.location.origin;
         const API_KEY = 'MiClaveSuperSecreta2024!@#';
 
         // Extraer eventId y theme de la URL
@@ -371,7 +372,8 @@
 
         async function fetchApprovedPhotos() {
             try {
-                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-approved-photos?eventId=${eventId}`, {
+                const url = isLocal ? `/get-approved-photos?eventId=${eventId}` : `${NETLIFY_URL}/.netlify/functions/get-approved-photos?eventId=${eventId}`;
+                const response = await fetch(url, {
                     headers: {
                         'x-api-key': API_KEY
                     }

@@ -298,7 +298,8 @@
         // IMPORTANTE: Configura la URL correcta para tu deployment en Vercel
         // Para desarrollo local: http://localhost:3000
         // URL dinámica para funcionar tanto en desarrollo como en producción
-        const NETLIFY_URL = window.location.origin;
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const NETLIFY_URL = isLocal ? '' : window.location.origin;
         const API_KEY = 'MiClaveSuperSecreta2024!@#';
 
         // Extraer eventId y theme de la URL
@@ -312,7 +313,8 @@
         document.documentElement.setAttribute('data-theme', theme);
 
         async function handleAction(action, public_id, cardElement) {
-            const response = await fetch(`${NETLIFY_URL}/.netlify/functions/${action}-photo`, {
+            const url = isLocal ? `/${action}-photo` : `${NETLIFY_URL}/.netlify/functions/${action}-photo`;
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'x-api-key': API_KEY,
@@ -339,7 +341,8 @@
         async function showShareButtons(public_id, cardElement) {
             try {
                 // Obtener la URL de la foto aprobada
-                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-approved-photos?eventId=${eventId}`, {
+                const url = isLocal ? `/get-approved-photos?eventId=${eventId}` : `${NETLIFY_URL}/.netlify/functions/get-approved-photos?eventId=${eventId}`;
+                const response = await fetch(url, {
                     headers: {
                         'x-api-key': API_KEY
                     }
@@ -353,7 +356,8 @@
                 }
 
                 // Generar URLs de compartir
-                const shareResponse = await fetch(`${NETLIFY_URL}/.netlify/functions/social-share?action=generate-share-urls&photoUrl=${encodeURIComponent(approvedPhoto.secure_url)}&eventId=${eventId}`, {
+                const shareUrl = isLocal ? `/social-share?action=generate-share-urls&photoUrl=${encodeURIComponent(approvedPhoto.secure_url)}&eventId=${eventId}` : `${NETLIFY_URL}/.netlify/functions/social-share?action=generate-share-urls&photoUrl=${encodeURIComponent(approvedPhoto.secure_url)}&eventId=${eventId}`;
+                const shareResponse = await fetch(shareUrl, {
                     headers: {
                         'x-api-key': API_KEY
                     }
@@ -408,7 +412,8 @@
         // Función para compartir en plataforma específica
         function shareToPlatform(url, platform, photoId) {
             // Registrar el compartir
-            fetch(`${NETLIFY_URL}/.netlify/functions/social-share?action=log-share&platform=${platform}&photoId=${photoId}&eventId=${eventId}`, {
+            const logUrl = isLocal ? `/social-share?action=log-share&platform=${platform}&photoId=${photoId}&eventId=${eventId}` : `${NETLIFY_URL}/.netlify/functions/social-share?action=log-share&platform=${platform}&photoId=${photoId}&eventId=${eventId}`;
+            fetch(logUrl, {
                 headers: {
                     'x-api-key': API_KEY
                 }
@@ -462,7 +467,8 @@
         }
 
         async function loadPendingPhotos() {
-            const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-photos?eventId=${eventId}`, {
+            const url = isLocal ? `/get-photos?eventId=${eventId}` : `${NETLIFY_URL}/.netlify/functions/get-photos?eventId=${eventId}`;
+            const response = await fetch(url, {
                 headers: {
                     'x-api-key': API_KEY
                 }

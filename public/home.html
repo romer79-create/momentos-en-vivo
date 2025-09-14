@@ -377,7 +377,9 @@
         const messageInput = document.getElementById('message');
         const charCount = document.getElementById('char-count');
         const mirrorCheckbox = document.getElementById('mirror-checkbox');
-        const functionUrl = '/.netlify/functions/upload';
+        // Detectar si estamos en desarrollo local o producción
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const functionUrl = isLocal ? '/upload' : '/.netlify/functions/upload';
         const API_KEY = 'MiClaveSuperSecreta2024!@#';
 
         // Variables para controlar la cámara
