@@ -420,10 +420,30 @@
 
         // Cargar datos del cliente al iniciar
         window.onload = function() {
+            checkPremiumAuthentication();
             loadClientData();
             loadEvents();
             updateStats();
         };
+
+        // Verificar autenticación premium
+        function checkPremiumAuthentication() {
+            const registeredUser = JSON.parse(localStorage.getItem('registeredUser') || 'null');
+
+            if (!registeredUser) {
+                alert('No se encontró información de usuario. Serás redirigido al login.');
+                window.location.href = 'cliente-login.html';
+                return false;
+            }
+
+            if (!registeredUser.isPremium) {
+                alert('Esta cuenta no tiene acceso premium. Completa tu compra primero.');
+                window.location.href = 'registro.html';
+                return false;
+            }
+
+            return true;
+        }
 
         // Cargar datos del cliente
         function loadClientData() {
@@ -505,21 +525,63 @@
             const totalEvents = events.length;
             const totalPhotos = events.reduce((acc, event) => acc + (event.photos || 0), 0);
             const activeEvents = events.filter(event => event.status === 'active').length;
+            const eventLimit = clientData.eventLimit || 1;
 
-            document.getElementById('totalEvents').textContent = totalEvents;
+            document.getElementById('totalEvents').textContent = `${totalEvents}/${eventLimit}`;
             document.getElementById('totalPhotos').textContent = totalPhotos;
             document.getElementById('activeEvents').textContent = activeEvents;
-            document.getElementById('activeEvents').textContent = '1';
             document.getElementById('planType').textContent = 'Premium';
+
+            // Actualizar texto del formulario de creación
+            updateCreateFormText(totalEvents, eventLimit);
+        }
+
+        // Actualizar texto del formulario de creación
+        function updateCreateFormText(currentEvents, limit) {
+            const formContainer = document.querySelector('.new-event-form');
+            const existingStatus = formContainer.querySelector('.event-limit-status');
+
+            if (existingStatus) {
+                existingStatus.remove();
+            }
+
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'event-limit-status';
+            statusDiv.style = `
+                background: ${currentEvents >= limit ? '#fff3cd' : '#d4edda'};
+                border: 1px solid ${currentEvents >= limit ? '#ffeaa7' : '#c3e6cb'};
+                padding: 10px;
+                border-radius: 8px;
+                margin-bottom: 15px;
+                font-size: 0.9rem;
+                color: ${currentEvents >= limit ? '#856404' : '#155724'};
+            `;
+
+            if (currentEvents >= limit) {
+                statusDiv.innerHTML = `
+                    <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                    <strong>Límite alcanzado:</strong> ${currentEvents}/${limit} eventos<br>
+                    <small>Para crear más eventos necesitas un código de habilitación</small>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+                    <strong>Eventos disponibles:</strong> ${currentEvents}/${limit}<br>
+                    <small>Puedes crear ${limit - currentEvents} evento(s) más</small>
+                `;
+            }
+
+            const formTitle = formContainer.querySelector('h3');
+            formContainer.insertBefore(statusDiv, formTitle.nextSibling);
         }
 
         // Abrir evento en nueva pestaña
         function openEvent(eventId, type) {
             const urls = {
-                capture: `index.html?event=${eventId}&theme=premium`,
+                capture: `home.html?event=${eventId}&theme=premium`,
                 moderation: `moderador.html?event=${eventId}`,
                 projection: `proyeccion.html?event=${eventId}`,
-                admin: `cliente-gestion.html?eventId=${eventId}` // ← Cambiado a gestión premium
+                admin: `cliente-panel.html`
             };
 
             window.open(urls[type], '_blank');
@@ -540,8 +602,103 @@
                 return;
             }
 
+            // Verificar límite de eventos premium
+            const allEvents = JSON.parse(localStorage.getItem('premiumEvents') || '[]');
+            const userEvents = allEvents.filter(event => event.userId === clientData.id);
+
+            // Verificar límite base de 1 evento
+            if (userEvents.length >= (clientData.eventLimit || 1)) {
+                // Mostrar modal para código de evento adicional
+                showAdditionalEventModal(eventName, eventDate);
+                return;
+            }
+
+            // Crear evento normalmente
+            createEventForUser(eventName, eventDate, clientData.id);
+        }
+
+        // Mostrar modal para evento adicional
+        function showAdditionalEventModal(eventName, eventDate) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content" style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; margin: 50px auto; position: relative;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <i class="fas fa-lock" style="font-size: 3rem; color: #667eea; margin-bottom: 15px;"></i>
+                        <h3 style="color: #333; margin-bottom: 10px;">Límite de Eventos Alcanzado</h3>
+                        <p style="color: #666; line-height: 1.5;">
+                            Tu plan premium incluye 1 evento por suscripción.<br>
+                            Para crear eventos adicionales, necesitas un código de habilitación.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                            <i class="fas fa-key" style="margin-right: 8px;"></i>
+                            Código de Evento Adicional
+                        </label>
+                        <input type="text" id="eventCode" placeholder="Ingresa tu código de habilitación"
+                               style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                    </div>
+
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button onclick="closeModal()" class="btn" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                            Cancelar
+                        </button>
+                        <button onclick="validateEventCode('${eventName}', '${eventDate}')" class="btn" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                            <i class="fas fa-check"></i> Validar Código
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+        }
+
+        // Validar código de evento adicional
+        function validateEventCode(eventName, eventDate) {
+            const code = document.getElementById('eventCode').value.trim().toUpperCase();
+
+            // Lista de códigos válidos (en producción vendrían de una base de datos)
+            const validCodes = ['EVENTO2024', 'EXTRA2024', 'PLUS2024'];
+
+            if (!code) {
+                alert('Por favor ingresa un código de habilitación');
+                return;
+            }
+
+            if (!validCodes.includes(code)) {
+                alert('Código inválido. Verifica el código e intenta nuevamente.');
+                return;
+            }
+
+            // Código válido - incrementar límite de eventos
+            clientData.eventLimit = (clientData.eventLimit || 1) + 1;
+            clientData.usedCodes = clientData.usedCodes || [];
+            clientData.usedCodes.push(code);
+
+            // Actualizar usuario en localStorage
+            localStorage.setItem('registeredUser', JSON.stringify(clientData));
+
+            // Cerrar modal y crear evento
+            closeModal();
+            createEventForUser(eventName, eventDate, clientData.id);
+
+            alert('¡Código validado exitosamente! Has habilitado un evento adicional.');
+        }
+
+        // Cerrar modal
+        function closeModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Crear evento para usuario (función común)
+        function createEventForUser(eventName, eventDate, userId) {
             // Generar ID único para el evento premium
-            const eventId = `PREMIUM_${clientData.id}_${Date.now()}`;
+            const eventId = `PREMIUM_${userId}_${Date.now()}`;
 
             // Crear evento asociado al usuario
             const newEvent = {
@@ -551,12 +708,12 @@
                 status: 'active',
                 photos: 0,
                 totalPhotos: null, // Ilimitado para premium
-                userId: clientData.id,
+                userId: userId,
                 userName: clientData.fullName,
                 userEmail: clientData.email,
                 created: new Date().toISOString(),
                 urls: {
-                    capture: `index.html?event=${eventId}&theme=premium`,
+                    capture: `home.html?event=${eventId}&theme=premium`,
                     moderation: `moderador.html?event=${eventId}`,
                     projection: `proyeccion.html?event=${eventId}`,
                     admin: `cliente-panel.html`
