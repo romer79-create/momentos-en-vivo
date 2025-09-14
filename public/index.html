@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Momentos en Vivo - Captura Fotográfica para Eventos</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- MercadoPago SDK -->
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
     <style>
         * {
             margin: 0;
@@ -49,6 +51,65 @@
         .logo i {
             margin-right: 10px;
             color: #ffd700;
+        }
+
+        /* Mobile Navigation Menu */
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: 2px solid white;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-toggle:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Mobile Navigation Menu */
+        .nav-links.mobile-menu {
+            position: fixed;
+            top: 80px;
+            left: 0;
+            width: 100%;
+            height: calc(100vh - 80px);
+            background: rgba(102, 126, 234, 0.95);
+            backdrop-filter: blur(10px);
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding-top: 50px;
+            gap: 30px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .nav-links.mobile-menu.active {
+            transform: translateX(0);
+        }
+
+        .nav-links.mobile-menu li {
+            width: 80%;
+            text-align: center;
+        }
+
+        .nav-links.mobile-menu a {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .nav-links.mobile-menu a:hover {
+            background: rgba(255,255,255,0.2);
+            transform: none;
         }
 
         .nav-links {
@@ -449,16 +510,24 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .hero p {
-                font-size: 1.1rem;
+            .nav-toggle {
+                display: block;
             }
 
             .nav-links {
                 display: none;
+            }
+
+            .nav-links.mobile-menu {
+                display: flex;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
             }
 
             .hero .cta-buttons {
@@ -466,8 +535,84 @@
                 align-items: center;
             }
 
+            .hero .cta-buttons a {
+                width: 250px;
+                text-align: center;
+                margin-bottom: 15px;
+            }
+
             .features-grid, .service-plans, .contact-info {
                 grid-template-columns: 1fr;
+            }
+
+            .features-grid {
+                gap: 30px;
+            }
+
+            .feature-card {
+                padding: 25px;
+            }
+
+            .plan-card {
+                padding: 30px 20px;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 15px;
+                font-size: 1.1rem;
+                margin-bottom: 10px;
+            }
+
+            .contact-item {
+                padding: 25px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .social-links {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            .hero {
+                padding: 80px 0;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .hero p {
+                font-size: 0.95rem;
+            }
+
+            .features h2, .services h2, .contact h2 {
+                font-size: 2rem;
+            }
+
+            .feature-card h3 {
+                font-size: 1.3rem;
+            }
+
+            .plan-price {
+                font-size: 2.5rem;
+            }
+
+            .plan-card h3 {
+                font-size: 1.8rem;
+            }
+
+            .contact-item h3 {
+                font-size: 1.3rem;
             }
         }
     </style>
@@ -480,9 +625,14 @@
                 <i class="fas fa-camera"></i>
                 Momentos en Vivo
             </a>
-            <ul class="nav-links">
+            <button class="nav-toggle" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-links" id="navMenu">
+                <li><a href="#about">¿Quiénes Somos?</a></li>
                 <li><a href="#features">Características</a></li>
                 <li><a href="#services">Planes</a></li>
+                <li><a href="#faq">FAQ</a></li>
                 <li><a href="#contact">Contacto</a></li>
                 <li><a href="registro.html" style="background: linear-gradient(135deg, #e91e63, #f06292); color: white;">🎯 Demo Gratuita</a></li>
                 <li><a href="#" class="admin-btn" onclick="goToLogin()">Acceso Admin</a></li>
@@ -498,6 +648,32 @@
             <div class="cta-buttons">
                 <a href="#services" class="btn btn-primary">Ver Planes</a>
                 <a href="#contact" class="btn btn-secondary">Contactar</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about" class="features" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <div class="container">
+            <div style="max-width: 700px; margin: 0 auto; text-align: center;">
+                <h2 style="margin-bottom: 30px; font-size: 2.2rem;">¿Quiénes Somos?</h2>
+                <div style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
+                    <div style="font-size: 1.1rem; margin-bottom: 15px; opacity: 0.9;">
+                        <i class="fas fa-user-circle" style="font-size: 2.5rem; margin-bottom: 15px; color: #ffd700;"></i>
+                    </div>
+                    <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 20px; font-weight: 300;">
+                        Hola, soy <strong>Jorge Romero</strong>. Mi pasión por la tecnología y la búsqueda constante de nuevos desafíos son el motor detrás de este proyecto.
+                    </p>
+                    <p style="font-size: 1rem; line-height: 1.6; margin-bottom: 20px; font-style: italic;">
+                        La idea de "Momentos en Vivo" nació de la mejor manera: entre charlas con amigos y una chispa de curiosidad. Impulsado por sus sugerencias y una profunda investigación, me animé a transformar esa inspiración en una realidad tangible.
+                    </p>
+                    <p style="font-size: 1rem; line-height: 1.6; margin-bottom: 20px;">
+                        Este no es solo un software, es un proyecto personal construido desde cero con enorme esfuerzo y dedicación. Cada detalle ha sido pensado para ofrecer una experiencia única, interactiva y divertida en tus eventos.
+                    </p>
+                    <p style="font-size: 1rem; line-height: 1.6; margin-bottom: 0;">
+                        Espero que "Momentos en Vivo" sea el puntapié inicial de muchos otros proyectos innovadores a futuro, siempre con el objetivo de conectar a las personas a través de la tecnología. <strong>Gracias por ser parte de este comienzo.</strong>
+                    </p>
+                </div>
             </div>
         </div>
     </section>
@@ -556,48 +732,199 @@
     <!-- Services Section -->
     <section id="services" class="services">
         <div class="container">
-            <h2>Planes y Precios</h2>
+            <h2>Plan Único - Oferta de Lanzamiento</h2>
             <div class="service-plans">
-                <div class="plan-card">
-                    <h3>Plan Básico</h3>
-                    <div class="plan-price">$99<span>/evento</span></div>
+                <div class="plan-card featured" style="max-width: 600px; margin: 0 auto;">
+                    <div style="background: linear-gradient(135deg, #ff6b6b, #ee5a24); color: white; padding: 15px; border-radius: 15px 15px 0 0; margin: -40px -30px 30px -30px;">
+                        <h3 style="margin: 0; color: white; font-size: 1.5rem;">🎉 OFERTA DE LANZAMIENTO</h3>
+                        <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 0.9rem;">¡Solo por tiempo limitado!</p>
+                    </div>
+                    <h3 style="font-size: 2rem; margin-bottom: 10px;">Plan Todo Incluido</h3>
+                    <div class="plan-price">$25.000<span> ARS/evento</span></div>
+                    <div style="background: rgba(255,193,7,0.1); border: 2px solid #ffc107; border-radius: 10px; padding: 15px; margin: 20px 0;">
+                        <p style="color: #856404; font-weight: bold; margin: 0;">
+                            ⏰ <strong>OFERTA LIMITADA:</strong> Enlace activo por 30 días
+                        </p>
+                    </div>
                     <ul class="plan-features">
-                        <li>Hasta 50 invitados</li>
-                        <li>Captura ilimitada de fotos</li>
-                        <li>Moderación básica</li>
-                        <li>Descarga en ZIP</li>
-                        <li>Soporte por email</li>
+                        <li>✅ <strong>Invitados ilimitados</strong></li>
+                        <li>✅ <strong>Hasta 10 fotos por invitado</strong></li>
+                        <li>✅ Captura en tiempo real con smartphone</li>
+                        <li>✅ Moderación automática y manual</li>
+                        <li>✅ Pantalla de proyección automática</li>
+                        <li>✅ Código QR para participación fácil</li>
+                        <li>✅ Descarga completa en ZIP</li>
+                        <li>✅ Soporte técnico completo</li>
+                        <li>✅ Personalización de marca</li>
+                        <li>✅ Estadísticas del evento</li>
+                        <li>✅ Panel de administración completo</li>
+                        <li>✅ Almacenamiento en la nube</li>
                     </ul>
-                    <a href="#contact" class="btn btn-primary">Contratar</a>
+                    <a href="#contact" class="btn btn-primary" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);">
+                        <i class="fas fa-rocket"></i> ¡Aprovechar Oferta!
+                    </a>
+                    <div style="margin-top: 20px; text-align: center;">
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 15px;">O paga directamente:</p>
+                        <button onclick="payWithMercadoPago()" class="btn btn-primary" style="background: #00B4E5; color: white; border: none; padding: 12px 25px; font-size: 1rem; font-weight: bold; margin-right: 10px;">
+                            <i class="fab fa-mercado-pago"></i> Pagar con MercadoPago
+                        </button>
+                        <button onclick="payWithCard()" class="btn btn-primary" style="background: #28a745; color: white; border: none; padding: 12px 25px; font-size: 1rem; font-weight: bold;">
+                            <i class="fas fa-credit-card"></i> Tarjeta de Crédito
+                        </button>
+                    </div>
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.05); border-radius: 10px;">
+                        <p style="font-size: 0.9rem; color: #666; margin: 0; text-align: center;">
+                            <strong>💡 ¿Por qué elegir este plan?</strong><br>
+                            Todo lo que necesitas para un evento inolvidable, sin límites ni complicaciones
+                        </p>
+                    </div>
                 </div>
-                <div class="plan-card featured">
-                    <h3>Plan Profesional</h3>
-                    <div class="plan-price">$199<span>/evento</span></div>
-                    <ul class="plan-features">
-                        <li>Hasta 200 invitados</li>
-                        <li>Captura ilimitada de fotos</li>
-                        <li>Moderación avanzada</li>
-                        <li>Descarga en ZIP</li>
-                        <li>Soporte telefónico</li>
-                        <li>Personalización de marca</li>
-                        <li>Análisis de participación</li>
-                    </ul>
-                    <a href="#contact" class="btn btn-primary">Contratar</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="features" style="background: #f8f9fa;">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 50px; color: #333;">Preguntas Frecuentes</h2>
+            <div class="features-grid" style="max-width: 1000px; margin: 0 auto;">
+                <div class="faq-item" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Cómo funciona el sistema de captura de fotos?</h3>
+                    <p style="color: #666; line-height: 1.6;">Es muy simple: compartes el enlace único de tu evento con tus invitados. Cada persona puede tomar hasta 10 fotos usando su smartphone y enviarlas instantáneamente al sistema. Todas las fotos se moderan automáticamente y se proyectan en tiempo real.</p>
                 </div>
-                <div class="plan-card">
-                    <h3>Plan Empresarial</h3>
-                    <div class="plan-price">$399<span>/evento</span></div>
-                    <ul class="plan-features">
-                        <li>Invitados ilimitados</li>
-                        <li>Captura ilimitada de fotos</li>
-                        <li>Moderación premium</li>
-                        <li>Descarga en ZIP</li>
-                        <li>Soporte 24/7</li>
-                        <li>Personalización completa</li>
-                        <li>API integration</li>
-                        <li>Reportes avanzados</li>
-                    </ul>
-                    <a href="#contact" class="btn btn-primary">Contratar</a>
+
+                <div class="faq-item" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Cuánto tiempo toma configurar un evento?</h3>
+                    <p style="color: #666; line-height: 1.6;">La configuración toma solo 5-10 minutos. Solo necesitas elegir el nombre del evento, la fecha y compartir el enlace generado con tus invitados. El sistema se encarga del resto automáticamente.</p>
+                </div>
+
+                <div class="faq-item" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Qué necesito para usar el servicio?</h3>
+                    <p style="color: #666; line-height: 1.6;">Solo necesitas un dispositivo con conexión a internet para acceder al panel de administración. Tus invitados solo necesitan un smartphone con cámara. No se requieren instalaciones ni equipos especiales.</p>
+                </div>
+
+                <div class="faq-item" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Hay límite de invitados?</h3>
+                    <p style="color: #666; line-height: 1.6;">No, puedes invitar a tantas personas como quieras. El sistema es completamente escalable y puede manejar eventos de cualquier tamaño, desde pequeñas reuniones hasta grandes bodas o conferencias.</p>
+                </div>
+
+                <div class="faq-item" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Qué pasa si hay problemas técnicos durante el evento?</h3>
+                    <p style="color: #666; line-height: 1.6;">Contamos con soporte técnico completo durante todo el evento. Nuestro equipo está disponible para resolver cualquier inconveniente de inmediato. Además, el sistema tiene respaldo automático para garantizar que no se pierdan fotos.</p>
+                </div>
+
+                <div class="faq-item" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Puedo personalizar el aspecto del evento?</h3>
+                    <p style="color: #666; line-height: 1.6;">Sí, puedes elegir entre diferentes temas visuales y personalizar colores, logos y mensajes para que coincida con el estilo de tu evento. Todo esto está incluido en el precio.</p>
+                </div>
+
+                <div class="faq-item" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Cómo recibo las fotos al final del evento?</h3>
+                    <p style="color: #666; line-height: 1.6;">Al finalizar el evento, recibirás automáticamente un enlace para descargar todas las fotos aprobadas en un archivo ZIP comprimido. También puedes acceder a ellas desde tu panel de administración en cualquier momento.</p>
+                </div>
+
+                <div class="faq-item" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿El servicio funciona sin conexión a internet?</h3>
+                    <p style="color: #666; line-height: 1.6;">Se requiere conexión a internet para la captura y subida de fotos en tiempo real. Si hay problemas de conectividad, las fotos se almacenan localmente y se suben automáticamente cuando se restaura la conexión.</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px;">
+                <p style="color: #666; font-size: 1.1rem; margin-bottom: 20px;">¿Tienes más preguntas? ¡Contáctanos!</p>
+                <a href="#contact" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                    <i class="fas fa-envelope"></i> Hacer una Consulta
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="features">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 20px; color: #333;">Lo que dicen nuestros clientes</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 50px; font-size: 1.1rem;">
+                Próximamente aquí encontrarás los testimonios reales de nuestros clientes satisfechos
+            </p>
+            <div class="features-grid" style="max-width: 1200px; margin: 0 auto;">
+                <div class="feature-card" style="text-align: center; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #dee2e6; position: relative;">
+                    <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); background: #667eea; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
+                        <i class="fas fa-heart" style="font-size: 25px; color: white;"></i>
+                    </div>
+                    <div style="padding-top: 40px;">
+                        <div style="font-size: 3rem; margin-bottom: 15px; color: #667eea; opacity: 0.7;">💭</div>
+                        <p style="font-size: 1.2rem; line-height: 1.6; margin-bottom: 20px; font-style: italic; color: #666;">
+                            "Este comentario puede ser el tuyo"
+                        </p>
+                        <div style="border-top: 1px solid #dee2e6; padding-top: 15px;">
+                            <strong style="font-size: 1.1rem; color: #333;">Tu Testimonio</strong><br>
+                            <span style="opacity: 0.8; color: #666;">Próximamente</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-card" style="text-align: center; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #dee2e6; position: relative;">
+                    <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); background: #667eea; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
+                        <i class="fas fa-star" style="font-size: 25px; color: white;"></i>
+                    </div>
+                    <div style="padding-top: 40px;">
+                        <div style="font-size: 3rem; margin-bottom: 15px; color: #667eea; opacity: 0.7;">⭐</div>
+                        <p style="font-size: 1.2rem; line-height: 1.6; margin-bottom: 20px; font-style: italic; color: #666;">
+                            "Este comentario puede ser el tuyo"
+                        </p>
+                        <div style="border-top: 1px solid #dee2e6; padding-top: 15px;">
+                            <strong style="font-size: 1.1rem; color: #333;">Tu Testimonio</strong><br>
+                            <span style="opacity: 0.8; color: #666;">Próximamente</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-card" style="text-align: center; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #dee2e6; position: relative;">
+                    <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); background: #667eea; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
+                        <i class="fas fa-camera" style="font-size: 25px; color: white;"></i>
+                    </div>
+                    <div style="padding-top: 40px;">
+                        <div style="font-size: 3rem; margin-bottom: 15px; color: #667eea; opacity: 0.7;">📸</div>
+                        <p style="font-size: 1.2rem; line-height: 1.6; margin-bottom: 20px; font-style: italic; color: #666;">
+                            "Este comentario puede ser el tuyo"
+                        </p>
+                        <div style="border-top: 1px solid #dee2e6; padding-top: 15px;">
+                            <strong style="font-size: 1.1rem; color: #333;">Tu Testimonio</strong><br>
+                            <span style="opacity: 0.8; color: #666;">Próximamente</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div style="text-align: center; margin-top: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; padding: 30px; color: white;">
+                <h3 style="margin-bottom: 15px; font-size: 1.5rem;">¿Quieres ser el próximo en compartir tu experiencia?</h3>
+                <p style="margin-bottom: 25px; opacity: 0.9; font-size: 1.1rem;">
+                    Contrata nuestros servicios y tu testimonio podría aparecer aquí próximamente
+                </p>
+                <a href="#contact" class="btn btn-primary" style="background: white; color: #667eea; border: none; padding: 15px 30px;">
+                    <i class="fas fa-rocket"></i> ¡Comenzar Ahora!
+                </a>
+            </div>
+
+            <!-- Stats Section -->
+            <div style="background: #f8f9fa; border-radius: 20px; padding: 40px; margin-top: 40px; text-align: center;">
+                <h3 style="color: #333; margin-bottom: 30px;">Momentos en Vivo en Números</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; max-width: 800px; margin: 0 auto;">
+                    <div>
+                        <div style="font-size: 3rem; font-weight: bold; color: #667eea; margin-bottom: 10px;">0</div>
+                        <div style="color: #666; font-size: 1.1rem;">Eventos Realizados</div>
+                        <div style="color: #999; font-size: 0.9rem; margin-top: 5px;">¡El primero puede ser el tuyo!</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 3rem; font-weight: bold; color: #667eea; margin-bottom: 10px;">0</div>
+                        <div style="color: #666; font-size: 1.1rem;">Fotos Capturadas</div>
+                        <div style="color: #999; font-size: 0.9rem; margin-top: 5px;">Miles por venir</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 3rem; font-weight: bold; color: #667eea; margin-bottom: 10px;">100%</div>
+                        <div style="color: #666; font-size: 1.1rem;">Compromiso</div>
+                        <div style="color: #999; font-size: 0.9rem; margin-top: 5px;">Con la calidad</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -613,18 +940,63 @@
                 <div class="contact-item">
                     <i class="fas fa-envelope"></i>
                     <h3>Email</h3>
-                    <p>info@momentosenvivo.com</p>
+                    <p>romer79@gmail.com</p>
                 </div>
                 <div class="contact-item">
                     <i class="fas fa-phone"></i>
                     <h3>Teléfono</h3>
-                    <p>+1 (555) 123-4567</p>
+                    <p>Cel. 3764105310</p>
                 </div>
                 <div class="contact-item">
                     <i class="fas fa-clock"></i>
                     <h3>Horarios</h3>
-                    <p>Lunes a Viernes<br>9:00 AM - 6:00 PM</p>
+                    <p>Lunes a Viernes<br>8:00 a 18:00 hs</p>
                 </div>
+            </div>
+
+            <!-- Contact Form -->
+            <div style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 30px; margin-top: 40px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
+                <h3 style="color: white; text-align: center; margin-bottom: 25px; font-size: 1.8rem;">
+                    <i class="fas fa-paper-plane" style="margin-right: 10px;"></i>
+                    Solicitar Información
+                </h3>
+                <form id="contactForm" style="max-width: 600px; margin: 0 auto;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <input type="text" id="firstName" placeholder="Nombre" required style="width: 100%; padding: 12px; border: 2px solid rgba(255,255,255,0.3); border-radius: 8px; background: rgba(255,255,255,0.1); color: white; font-size: 1rem;">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="lastName" placeholder="Apellido" required style="width: 100%; padding: 12px; border: 2px solid rgba(255,255,255,0.3); border-radius: 8px; background: rgba(255,255,255,0.1); color: white; font-size: 1rem;">
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <input type="email" id="email" placeholder="Email" required style="width: 100%; padding: 12px; border: 2px solid rgba(255,255,255,0.3); border-radius: 8px; background: rgba(255,255,255,0.1); color: white; font-size: 1rem;">
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" id="phone" placeholder="Teléfono" style="width: 100%; padding: 12px; border: 2px solid rgba(255,255,255,0.3); border-radius: 8px; background: rgba(255,255,255,0.1); color: white; font-size: 1rem;">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <select id="eventType" required style="width: 100%; padding: 12px; border: 2px solid rgba(255,255,255,0.3); border-radius: 8px; background: rgba(255,255,255,0.1); color: white; font-size: 1rem;">
+                            <option value="" style="background: #667eea; color: white;">Tipo de Evento</option>
+                            <option value="boda" style="background: #667eea; color: white;">Boda</option>
+                            <option value="cumpleanos" style="background: #667eea; color: white;">Cumpleaños</option>
+                            <option value="corporativo" style="background: #667eea; color: white;">Evento Corporativo</option>
+                            <option value="graduacion" style="background: #667eea; color: white;">Graduación</option>
+                            <option value="otro" style="background: #667eea; color: white;">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 25px;">
+                        <textarea id="message" placeholder="Cuéntanos sobre tu evento (fecha aproximada, cantidad de invitados, etc.)" rows="4" style="width: 100%; padding: 12px; border: 2px solid rgba(255,255,255,0.3); border-radius: 8px; background: rgba(255,255,255,0.1); color: white; font-size: 1rem; resize: vertical;"></textarea>
+                    </div>
+                    <div style="text-align: center;">
+                        <button type="submit" class="btn btn-primary" style="background: white; color: #667eea; border: none; padding: 15px 40px; font-size: 1.1rem; font-weight: bold;">
+                            <i class="fas fa-paper-plane"></i> Enviar Consulta
+                        </button>
+                    </div>
+                </form>
+                <div id="formMessage" style="margin-top: 20px; text-align: center; display: none;"></div>
             </div>
         </div>
     </section>
@@ -688,6 +1060,25 @@
             window.location.href = '/login.html';
         }
 
+        // Función para alternar el menú móvil
+        function toggleMobileMenu() {
+            const navMenu = document.getElementById('navMenu');
+            navMenu.classList.toggle('active');
+        }
+
+        // Cerrar menú móvil al hacer clic en un enlace
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('#navMenu a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    const navMenu = document.getElementById('navMenu');
+                    if (navMenu.classList.contains('active')) {
+                        navMenu.classList.remove('active');
+                    }
+                });
+            });
+        });
+
         // Funciones del modal de login (simplificadas)
         function showLoginModal() {
             goToLogin();
@@ -733,6 +1124,164 @@
             card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
             observer.observe(card);
         });
+
+        // Manejar envío del formulario de contacto
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                eventType: document.getElementById('eventType').value,
+                message: document.getElementById('message').value,
+                submittedAt: new Date().toISOString()
+            };
+
+            // Guardar en localStorage para revisión manual
+            const leads = JSON.parse(localStorage.getItem('contactLeads') || '[]');
+            leads.push(formData);
+            localStorage.setItem('contactLeads', JSON.stringify(leads));
+
+            // Mostrar mensaje de éxito
+            const formMessage = document.getElementById('formMessage');
+            formMessage.innerHTML = `
+                <div style="background: rgba(46, 204, 113, 0.2); border: 1px solid #2ecc71; border-radius: 10px; padding: 15px; margin-top: 20px;">
+                    <h4 style="color: #27ae60; margin: 0 0 10px 0;">
+                        <i class="fas fa-check-circle"></i> ¡Consulta enviada exitosamente!
+                    </h4>
+                    <p style="color: #27ae60; margin: 0; font-size: 0.9rem;">
+                        Gracias por tu interés en Momentos en Vivo. Te contactaremos pronto para coordinar los detalles de tu evento.
+                    </p>
+                </div>
+            `;
+            formMessage.style.display = 'block';
+
+            // Limpiar formulario
+            document.getElementById('contactForm').reset();
+
+            // Ocultar mensaje después de 5 segundos
+            setTimeout(() => {
+                formMessage.style.display = 'none';
+            }, 5000);
+
+            console.log('📝 Nueva consulta de lead:', formData);
+        });
+
+        // MercadoPago Integration
+        let mp;
+
+        // Inicializar MercadoPago
+        function initMercadoPago() {
+            // Aquí iría tu public key de MercadoPago
+            const publicKey = 'APP_USR-45428da7-9fde-4d39-91d3-83b373320239'; // Tu key real de MercadoPago
+            mp = new MercadoPago(publicKey, {
+                locale: 'es-AR'
+            });
+        }
+
+        // Función para pagar con MercadoPago
+        function payWithMercadoPago() {
+            if (!confirm('¿Estás seguro de que quieres proceder con el pago?\n\nMonto: $25.000 ARS\nServicio: Plan Todo Incluido - Momentos en Vivo\n\nSerás redirigido a MercadoPago para completar la transacción.')) {
+                return;
+            }
+
+            createCheckoutPreference();
+        }
+
+        // Función para pagar con tarjeta
+        function payWithCard() {
+            if (!confirm('¿Quieres pagar directamente con tarjeta de crédito?\n\nMonto: $25.000 ARS\nServicio: Plan Todo Incluido - Momentos en Vivo')) {
+                return;
+            }
+
+            createCheckoutPreference();
+        }
+
+        // Crear preferencia de pago
+        function createCheckoutPreference() {
+            // Mostrar loading
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+            button.disabled = true;
+
+            // Crear la preferencia de pago
+            const preference = {
+                items: [{
+                    title: 'Plan Todo Incluido - Momentos en Vivo',
+                    description: 'Sistema completo de captura fotográfica para eventos',
+                    quantity: 1,
+                    currency_id: 'ARS',
+                    unit_price: 25000,
+                    picture_url: window.location.origin + '/path/to/image.jpg' // Opcional
+                }],
+                payer: {
+                    name: 'Cliente',
+                    email: 'cliente@email.com'
+                },
+                back_urls: {
+                    success: window.location.origin + '/success.html',
+                    failure: window.location.origin + '/failure.html',
+                    pending: window.location.origin + '/pending.html'
+                },
+                auto_return: 'approved',
+                notification_url: window.location.origin + '/webhook', // Para webhooks
+                external_reference: 'EVENTO_' + Date.now()
+            };
+
+            // En un entorno real, enviarías esta preferencia a tu backend
+            // Para demo, simularemos la creación
+            setTimeout(() => {
+                // Simular que se crea la preferencia
+                const preferenceId = 'PREF_' + Date.now();
+
+                // Redirigir a MercadoPago checkout
+                const checkoutUrl = `https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=${preferenceId}`;
+                window.open(checkoutUrl, '_blank');
+
+                // Restaurar botón
+                button.innerHTML = originalText;
+                button.disabled = false;
+
+                alert('¡Pago iniciado! Serás redirigido a MercadoPago para completar la transacción.');
+
+            }, 2000);
+        }
+
+        // Inicializar cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            initMercadoPago();
+        });
     </script>
+
+    <!-- Footer con información del creador -->
+    <footer style="
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 30px 0;
+        margin-top: 50px;
+        text-align: center;
+    ">
+        <div class="container">
+            <div style="margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; font-size: 1.5rem; color: #3498db;">📱 Contacto</h3>
+                <p style="margin: 5px 0; font-size: 1.1rem;">
+                    <i class="fas fa-envelope" style="margin-right: 10px;"></i>
+                    <strong>romer79@gmail.com</strong>
+                </p>
+                <p style="margin: 5px 0; font-size: 1.1rem;">
+                    <i class="fas fa-phone" style="margin-right: 10px;"></i>
+                    <strong>Cel. 3764105310</strong>
+                </p>
+            </div>
+            <div style="border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px;">
+                <p style="font-size: 0.9rem; opacity: 0.8; margin: 0;">
+                    © 2025 Página creada íntegramente por Romero Jorge Daniel
+                </p>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
