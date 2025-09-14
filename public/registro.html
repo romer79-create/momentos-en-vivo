@@ -464,8 +464,8 @@
                     <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 20px; border-radius: 10px;">
                         <h3 style="margin-bottom: 10px;">Planes Desde $29.990/mes</h3>
                         <p style="margin-bottom: 15px; opacity: 0.9;">Precios especiales para ex-usuarios de demo</p>
-                        <button class="btn btn-primary" style="background: white; color: #28a745; border: none;" onclick="contactSales()">
-                            <i class="fas fa-envelope"></i> Contactar Ventas
+                        <button class="btn btn-primary" style="background: white; color: #28a745; border: none;" onclick="goToCheckout()">
+                            <i class="fas fa-credit-card"></i> Actualizar Ahora
                         </button>
                     </div>
                 </div>
@@ -481,7 +481,12 @@
             `;
         }
 
-        // Función para contactar ventas
+        // Función para ir al checkout
+        function goToCheckout() {
+            window.location.href = 'checkout.html';
+        }
+
+        // Función para contactar ventas (mantenida por si acaso)
         function contactSales() {
             const subject = encodeURIComponent('Interés en Plan Premium - Usuario Demo Expirado');
             const body = encodeURIComponent('Hola,\n\nMi demo gratuita ha expirado y estoy interesado en actualizar al plan premium.\n\nDatos de contacto:\n- Email: [tu email]\n- Empresa: [opcional]\n\nGracias.');

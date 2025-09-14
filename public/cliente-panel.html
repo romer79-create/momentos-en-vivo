@@ -408,19 +408,19 @@
         function loadClientData() {
             const registeredUser = localStorage.getItem('registeredUser');
             if (!registeredUser) {
-                alert('No se encontró información de cliente. Serás redirigido.');
+                alert('No se encontró información de cliente. Serás redirigido al registro.');
                 window.location.href = 'registro.html';
                 return;
             }
 
             clientData = JSON.parse(registeredUser);
 
-            // Verificar si es cliente premium (simulado)
+            // Verificar si es cliente premium
             if (!clientData.isPremium) {
-                clientData.isPremium = true; // Simular upgrade
-                clientData.planType = 'Premium';
-                clientData.upgradeDate = new Date().toISOString();
-                localStorage.setItem('registeredUser', JSON.stringify(clientData));
+                // Usuario no es premium, redirigir al checkout
+                alert('Necesitas una cuenta premium para acceder al panel. Serás redirigido al checkout.');
+                window.location.href = 'checkout.html';
+                return;
             }
         }
 

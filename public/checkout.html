@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Momentos en Vivo Premium</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .checkout-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .checkout-content {
+            padding: 40px;
+        }
+
+        .plan-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #667eea;
+            position: relative;
+        }
+
+        .plan-badge {
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .plan-title {
+            font-size: 1.8rem;
+            color: #667eea;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .plan-price {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #28a745;
+            margin: 15px 0;
+        }
+
+        .plan-price span {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .plan-features {
+            list-style: none;
+            padding: 0;
+        }
+
+        .plan-features li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .plan-features li:last-child {
+            border-bottom: none;
+        }
+
+        .plan-features i {
+            color: #28a745;
+            width: 16px;
+        }
+
+        .payment-form {
+            margin-top: 30px;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .form-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .payment-method {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .payment-method:hover,
+        .payment-method.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .payment-method i {
+            font-size: 2rem;
+            color: #667eea;
+        }
+
+        .payment-method span {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .terms {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+
+        .terms label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .terms input[type="checkbox"] {
+            margin-top: 2px;
+        }
+
+        .checkout-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading i {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #155724;
+        }
+
+        .success-message i {
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .success-message h2 {
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .checkout-container {
+                margin: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .checkout-actions {
+                flex-direction: column;
+            }
+
+            .payment-methods {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="checkout-container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-crown"></i> Actualizar a Premium</h1>
+            <p>Accede a todas las funcionalidades sin límites</p>
+        </div>
+
+        <!-- Checkout Content -->
+        <div class="checkout-content">
+            <!-- Plan Details -->
+            <div class="plan-card">
+                <div class="plan-badge">MÁS POPULAR</div>
+                <div class="plan-title">
+                    <i class="fas fa-star"></i>
+                    Plan Premium Completo
+                </div>
+                <div class="plan-price">$29.990<span>/mes</span></div>
+                <ul class="plan-features">
+                    <li><i class="fas fa-check"></i> Fotos ilimitadas por evento</li>
+                    <li><i class="fas fa-check"></i> Descargas ZIP completas</li>
+                    <li><i class="fas fa-check"></i> Múltiples eventos simultáneos</li>
+                    <li><i class="fas fa-check"></i> Personalización completa</li>
+                    <li><i class="fas fa-check"></i> Soporte técnico prioritario</li>
+                    <li><i class="fas fa-check"></i> Sin marca de agua</li>
+                </ul>
+            </div>
+
+            <!-- Payment Form -->
+            <form class="payment-form" id="paymentForm">
+                <!-- Billing Information -->
+                <div class="form-section">
+                    <h3><i class="fas fa-user"></i> Información de Facturación</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">Nombre</label>
+                            <input type="text" id="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Apellido</label>
+                            <input type="text" id="lastName" required>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="email">Correo Electrónico</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="company">Empresa (Opcional)</label>
+                        <input type="text" id="company">
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="form-section">
+                    <h3><i class="fas fa-credit-card"></i> Método de Pago</h3>
+                    <div class="payment-methods">
+                        <div class="payment-method selected" data-method="card">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Tarjeta</span>
+                        </div>
+                        <div class="payment-method" data-method="paypal">
+                            <i class="fab fa-paypal"></i>
+                            <span>PayPal</span>
+                        </div>
+                        <div class="payment-method" data-method="transfer">
+                            <i class="fas fa-university"></i>
+                            <span>Transferencia</span>
+                        </div>
+                    </div>
+
+                    <!-- Card Details -->
+                    <div id="cardDetails" style="margin-top: 20px;">
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="cardNumber">Número de Tarjeta</label>
+                                <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expiryDate">Fecha de Expiración</label>
+                                <input type="text" id="expiryDate" placeholder="MM/AA" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cvv">CVV</label>
+                                <input type="text" id="cvv" placeholder="123" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="terms">
+                    <label>
+                        <input type="checkbox" id="terms" required>
+                        <span>Acepto los <a href="#" onclick="showTerms()">términos y condiciones</a>, la <a href="#" onclick="showPrivacy()">política de privacidad</a> y autorizo el cargo mensual automático de $29.990.</span>
+                    </label>
+                </div>
+
+                <!-- Checkout Actions -->
+                <div class="checkout-actions">
+                    <button type="button" class="btn btn-secondary" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-lock"></i> Pagar $29.990
+                    </button>
+                </div>
+            </form>
+
+            <!-- Loading State -->
+            <div class="loading" id="loadingState">
+                <i class="fas fa-spinner"></i>
+                <h3>Procesando Pago...</h3>
+                <p>Por favor espera mientras verificamos tu información</p>
+            </div>
+
+            <!-- Success Message -->
+            <div class="success-message" id="successMessage">
+                <i class="fas fa-check-circle"></i>
+                <h2>¡Pago Exitoso!</h2>
+                <p>Tu cuenta premium ha sido activada.</p>
+                <p>Redirigiendo al panel de cliente...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedPaymentMethod = 'card';
+
+        // Payment method selection
+        document.querySelectorAll('.payment-method').forEach(method => {
+            method.addEventListener('click', function() {
+                document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedPaymentMethod = this.dataset.method;
+            });
+        });
+
+        // Form submission
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (!document.getElementById('terms').checked) {
+                alert('Debes aceptar los términos y condiciones');
+                return;
+            }
+
+            // Show loading state
+            document.querySelector('.checkout-content').style.display = 'none';
+            document.getElementById('loadingState').style.display = 'block';
+
+            // Simulate payment processing
+            setTimeout(() => {
+                processPayment();
+            }, 3000);
+        });
+
+        // Process payment simulation
+        function processPayment() {
+            // Simulate payment success
+            const paymentSuccess = true; // Always success for demo
+
+            if (paymentSuccess) {
+                // Update user status to premium
+                activatePremiumAccount();
+
+                // Show success message
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+
+                // Redirect after success
+                setTimeout(() => {
+                    window.location.href = 'cliente-panel.html';
+                }, 3000);
+            } else {
+                // Payment failed
+                document.getElementById('loadingState').style.display = 'none';
+                document.querySelector('.checkout-content').style.display = 'block';
+                alert('Error en el pago. Por favor intenta nuevamente.');
+            }
+        }
+
+        // Activate premium account
+        function activatePremiumAccount() {
+            // Get current user
+            const registeredUser = JSON.parse(localStorage.getItem('registeredUser'));
+            if (!registeredUser) {
+                alert('Error: No se encontró información de usuario');
+                return;
+            }
+
+            // Update user to premium
+            registeredUser.isPremium = true;
+            registeredUser.planType = 'Premium';
+            registeredUser.upgradeDate = new Date().toISOString();
+            registeredUser.subscriptionStatus = 'active';
+            registeredUser.monthlyFee = 29990;
+
+            // Remove from blocked emails if was blocked
+            const blockedEmails = JSON.parse(localStorage.getItem('blockedEmails') || '[]');
+            const emailIndex = blockedEmails.indexOf(registeredUser.email);
+            if (emailIndex !== -1) {
+                blockedEmails.splice(emailIndex, 1);
+                localStorage.setItem('blockedEmails', JSON.stringify(blockedEmails));
+            }
+
+            // Update user in all users list
+            const allUsers = JSON.parse(localStorage.getItem('demoUsers') || '[]');
+            const userIndex = allUsers.findIndex(user => user.id === registeredUser.id);
+            if (userIndex !== -1) {
+                allUsers[userIndex] = registeredUser;
+                localStorage.setItem('demoUsers', JSON.stringify(allUsers));
+            }
+
+            // Save updated user
+            localStorage.setItem('registeredUser', JSON.stringify(registeredUser));
+
+            console.log('✅ Cuenta premium activada para:', registeredUser.email);
+        }
+
+        // Navigation functions
+        function goBack() {
+            window.location.href = 'registro.html';
+        }
+
+        function showTerms() {
+            alert('Términos y Condiciones:\n\n• Servicio mensual con cargo automático\n• Cancelación en cualquier momento\n• Soporte técnico incluido\n• Datos seguros y encriptados\n• Servicio sujeto a disponibilidad');
+        }
+
+        function showPrivacy() {
+            alert('Política de Privacidad:\n\n• Datos utilizados únicamente para gestión de cuenta\n• Información de pago procesada de forma segura\n• No compartimos datos con terceros\n• Derecho de acceso y eliminación de datos');
+        }
+
+        // Auto-fill user information
+        window.onload = function() {
+            const registeredUser = localStorage.getItem('registeredUser');
+            if (registeredUser) {
+                const user = JSON.parse(registeredUser);
+                document.getElementById('email').value = user.email;
+
+                // Split full name if available
+                if (user.fullName) {
+                    const nameParts = user.fullName.split(' ');
+                    if (nameParts.length >= 2) {
+                        document.getElementById('firstName').value = nameParts[0];
+                        document.getElementById('lastName').value = nameParts.slice(1).join(' ');
+                    } else {
+                        document.getElementById('firstName').value = user.fullName;
+                    }
+                }
+
+                if (user.company) {
+                    document.getElementById('company').value = user.company;
+                }
+            }
+        };
+    </script>
+</body>
+</html>
