@@ -25,7 +25,7 @@ export default async function handler(req, res) {
     console.log('--- DEBUG: Request method:', req.method);
     console.log('--- DEBUG: Content-Type:', req.headers['content-type']);
     console.log('--- DEBUG: Body type:', typeof req.body);
-    console.log('--- DEBUG: Body keys:', req.body ? Object.keys(req.body) : 'null');
+    console.log('--- DEBUG: Body size:', req.body ? req.body.length : 'null');
 
     // Verificar variables de entorno
     if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
@@ -36,84 +36,136 @@ export default async function handler(req, res) {
       });
     }
 
-    let file, message = '', eventId = 'DEFAULT';
+    // Para Vercel, necesitamos manejar el body de manera diferente
+    let formData = {};
+    let fileBuffer = null;
+    let fileName = '';
+    let contentType = '';
 
-    // Intentar diferentes métodos de parsing según lo que llegue
-    if (req.body && typeof req.body === 'object') {
-      // Método 1: Si viene como objeto con campos directos
-      file = req.body.photo || req.body.file;
-      message = req.body.message || '';
-      eventId = req.body.eventId || 'DEFAULT';
+    if (req.body && Buffer.isBuffer(req.body)) {
+      console.log('--- DEBUG: Body es Buffer, procesando multipart...');
 
-      console.log('--- DEBUG: Método 1 - Archivo desde req.body:', file ? 'presente' : 'null');
+      // Parsear boundary del Content-Type
+      const contentTypeHeader = req.headers['content-type'] || '';
+      const boundaryMatch = contentTypeHeader.match(/boundary=(.+)/);
+      const boundary = boundaryMatch ? boundaryMatch[1] : '';
+
+      if (!boundary) {
+        console.log('--- DEBUG: No boundary found, trying alternative parsing');
+        return res.status(200).json({
+          message: 'Request recibido - boundary not found',
+          contentType: contentTypeHeader,
+          bodySize: req.body.length
+        });
+      }
+
+      console.log('--- DEBUG: Boundary:', boundary);
+
+      // Dividir el body por boundary
+      const bodyStr = req.body.toString();
+      const parts = bodyStr.split(`--${boundary}`).filter(part => part && part.trim() !== '' && part.trim() !== '--');
+
+      console.log('--- DEBUG: Número de partes encontradas:', parts.length);
+
+      for (const part of parts) {
+        const lines = part.split('\r\n');
+        let headers = {};
+        let contentStart = 0;
+
+        // Parsear headers
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (line === '') {
+            contentStart = i + 1;
+            break;
+          }
+
+          if (line.includes(': ')) {
+            const [key, value] = line.split(': ');
+            headers[key.toLowerCase()] = value;
+          } else if (line.includes('=')) {
+            // Content-Disposition parsing
+            const dispositionMatch = line.match(/Content-Disposition: form-data; (.+)/);
+            if (dispositionMatch) {
+              const params = dispositionMatch[1].split(';').map(p => p.trim());
+              for (const param of params) {
+                if (param.includes('name="')) {
+                  headers['field-name'] = param.match(/name="([^"]+)"/)[1];
+                } else if (param.includes('filename="')) {
+                  headers['filename'] = param.match(/filename="([^"]+)"/)[1];
+                }
+              }
+            }
+          }
+        }
+
+        // Extraer contenido
+        const content = lines.slice(contentStart).join('\r\n').trim();
+        const fieldName = headers['field-name'];
+
+        if (fieldName === 'photo' && headers['filename']) {
+          // Es un archivo
+          fileBuffer = Buffer.from(content, 'binary');
+          fileName = headers['filename'];
+          contentType = headers['content-type'] || 'application/octet-stream';
+          console.log('--- DEBUG: Archivo encontrado:', fileName, contentType, fileBuffer.length, 'bytes');
+        } else if (fieldName) {
+          // Es un campo de texto
+          formData[fieldName] = content;
+          console.log('--- DEBUG: Campo encontrado:', fieldName, '=', content);
+        }
+      }
+    } else if (req.body && typeof req.body === 'object') {
+      // Fallback para otros formatos
+      formData = req.body;
+      console.log('--- DEBUG: Usando fallback para body object');
     }
 
-    // Si no tenemos archivo, intentar con FormData (aunque Vercel lo maneja diferente)
-    if (!file && req.body && Buffer.isBuffer(req.body)) {
-      console.log('--- DEBUG: Body es Buffer, intentando parsear como multipart');
+    const eventId = formData.eventId || 'DEFAULT';
+    const message = formData.message || '';
 
-      // Para desarrollo temporal, devolver info sobre lo que llega
-      return res.status(200).json({
-        message: 'Request recibido - debugging multipart',
-        contentType: req.headers['content-type'],
-        bodySize: req.body.length,
-        hasBuffer: Buffer.isBuffer(req.body),
-        cloudinaryConfigured: !!(process.env.CLOUDINARY_CLOUD_NAME)
-      });
-    }
+    console.log('--- DEBUG: Final - Archivo:', fileBuffer ? 'presente' : 'null');
+    console.log('--- DEBUG: Final - EventId:', eventId);
+    console.log('--- DEBUG: Final - Message:', message);
 
-    console.log('--- DEBUG: Archivo final:', file ? 'presente' : 'null');
-    console.log('--- DEBUG: Mensaje:', message);
-    console.log('--- DEBUG: EventId:', eventId);
-
-    if (!file) {
+    if (!fileBuffer) {
       console.log('--- ERROR: No se recibió archivo');
       return res.status(400).json({
         error: 'No se recibió ningún archivo.',
         debug: {
           bodyType: typeof req.body,
           contentType: req.headers['content-type'],
-          hasBody: !!req.body
+          hasBody: !!req.body,
+          bodySize: req.body ? req.body.length : 0
         }
       });
     }
 
-    // Para archivos base64 (desde testing directo)
-    if (typeof file === 'string' && file.startsWith('data:')) {
-      console.log('--- DEBUG: Procesando archivo base64');
+    // Convertir el archivo a base64
+    const fileStr = `data:${contentType};base64,${fileBuffer.toString('base64')}`;
 
-      const uploadOptions = {
-        folder: 'momentos-en-vivo',
-        tags: [
-          `event_${eventId}`,
-          `pending_${eventId}`
-        ]
-      };
+    // Configurar opciones de subida
+    const uploadOptions = {
+      folder: 'momentos-en-vivo',
+      tags: [
+        `event_${eventId}`,
+        `pending_${eventId}`
+      ]
+    };
 
-      if (message && message.trim()) {
-        uploadOptions.tags.push(`msg:${encodeURIComponent(message)}`);
-      }
-
-      console.log('--- DEBUG: Subiendo a Cloudinary...');
-      const uploadResult = await cloudinary.uploader.upload(file, uploadOptions);
-
-      console.log('--- DEBUG: Subida exitosa:', uploadResult.secure_url);
-
-      return res.status(200).json({
-        message: '¡Foto subida con éxito!',
-        imageUrl: uploadResult.secure_url,
-        eventId: eventId
-      });
+    if (message && message.trim()) {
+      uploadOptions.tags.push(`msg:${encodeURIComponent(message)}`);
     }
 
-    // Para archivos reales (cuando el parsing multipart funcione)
-    console.log('--- DEBUG: Archivo no es base64, tipo:', typeof file);
+    console.log('--- DEBUG: Subiendo a Cloudinary...');
+    const uploadResult = await cloudinary.uploader.upload(fileStr, uploadOptions);
+
+    console.log('--- DEBUG: Subida exitosa:', uploadResult.secure_url);
+
     return res.status(200).json({
-      message: 'Archivo recibido (tipo no base64)',
-      fileType: typeof file,
-      message: message,
-      eventId: eventId,
-      cloudinaryReady: !!(process.env.CLOUDINARY_CLOUD_NAME)
+      message: '¡Foto subida con éxito!',
+      imageUrl: uploadResult.secure_url,
+      eventId: eventId
     });
 
   } catch (error) {
