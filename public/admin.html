@@ -361,16 +361,21 @@
                 </div>
             </div>
 
-            <!-- Sección: Eventos Existentes -->
+            <!-- Sección: Gestionar Usuarios -->
             <div class="section">
-                <h2>📋 Eventos Activos</h2>
-                <div class="events-list" id="events-list">
-                    <!-- Los eventos se cargarán aquí -->
+                <h2>👥 Gestión de Usuarios</h2>
+                <p style="color: #666; margin-bottom: 20px;">Administra usuarios premium registrados en el sistema</p>
+                <div class="form-group">
+                    <button class="danger-btn" onclick="clearPremiumUsers()">
+                        <i class="fas fa-trash-alt"></i> Limpiar Todos los Usuarios Premium
+                    </button>
+                    <button class="warning-btn" onclick="viewPremiumUsers()">
+                        <i class="fas fa-eye"></i> Ver Usuarios Premium
+                    </button>
                 </div>
-                <button class="warning-btn" id="refresh-events">🔄 Actualizar Lista</button>
-                <button class="info-btn" onclick="showArchivedEvents()">📦 Eventos Archivados</button>
-                <button class="secondary-btn" onclick="showArchivedPhotos()">🖼️ Fotos Archivadas</button>
-                <button class="secondary-btn" onclick="testNetlifyConnection()">🧪 Probar Conexión</button>
+                <div id="user-management-result" style="display: none;">
+                    <!-- Resultados de gestión de usuarios -->
+                </div>
             </div>
         </div>
 
@@ -1549,6 +1554,108 @@ ${event.urls.projection}
                 console.error('❌ Error eliminando evento:', error);
                 showStatus(`❌ Error: ${error.message}`, 'error');
                 alert(`❌ Error al eliminar el evento:\n${error.message}\n\nInténtalo de nuevo más tarde.`);
+            }
+        }
+
+        // Función para limpiar todos los usuarios premium
+        function clearPremiumUsers() {
+            if (!confirm('¿Estás seguro de que quieres eliminar TODOS los usuarios premium?\n\nEsta acción:\n• Eliminará todos los usuarios registrados\n• Borrará todos sus eventos\n• Limpiará el localStorage de usuarios\n• No se puede deshacer\n\nSolo el administrador permanecerá activo.')) {
+                return;
+            }
+
+            try {
+                // Limpiar usuarios premium
+                localStorage.removeItem('registeredUser');
+                localStorage.removeItem('premiumEvents');
+                localStorage.removeItem('demoUsers');
+                localStorage.removeItem('blockedEmails');
+
+                // También limpiar cualquier otro dato relacionado con usuarios
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && (key.includes('user') || key.includes('premium') || key.includes('demo'))) {
+                        keysToRemove.push(key);
+                    }
+                }
+
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+
+                // Mostrar resultado
+                const resultDiv = document.getElementById('user-management-result');
+                resultDiv.innerHTML = `
+                    <div class="status success">
+                        <h3>✅ Usuarios Premium Eliminados</h3>
+                        <p>Se han eliminado exitosamente todos los usuarios premium del sistema.</p>
+                        <ul>
+                            <li>✅ Usuarios registrados eliminados</li>
+                            <li>✅ Eventos premium eliminados</li>
+                            <li>✅ Datos de demo limpiados</li>
+                            <li>✅ Emails bloqueados limpiados</li>
+                            <li>✅ Administrador mantenido activo</li>
+                        </ul>
+                    </div>
+                `;
+                resultDiv.style.display = 'block';
+
+                showStatus('✅ Todos los usuarios premium han sido eliminados', 'success');
+
+            } catch (error) {
+                console.error('Error limpiando usuarios:', error);
+                showStatus('❌ Error al limpiar usuarios premium', 'error');
+            }
+        }
+
+        // Función para ver usuarios premium actuales
+        function viewPremiumUsers() {
+            try {
+                const registeredUser = localStorage.getItem('registeredUser');
+                const premiumEvents = JSON.parse(localStorage.getItem('premiumEvents') || '[]');
+                const demoUsers = JSON.parse(localStorage.getItem('demoUsers') || '[]');
+                const blockedEmails = JSON.parse(localStorage.getItem('blockedEmails') || '[]');
+
+                const resultDiv = document.getElementById('user-management-result');
+                resultDiv.innerHTML = `
+                    <div class="status info">
+                        <h3>👥 Estado Actual de Usuarios</h3>
+                        <div style="text-align: left; margin-top: 15px;">
+                            <h4>Usuario Registrado Actual:</h4>
+                            ${registeredUser ? `
+                                <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px; margin: 10px 0;">
+                                    <strong>${JSON.parse(registeredUser).fullName}</strong> (${JSON.parse(registeredUser).email})<br>
+                                    <small>ID: ${JSON.parse(registeredUser).id}</small><br>
+                                    <small>Premium: ${JSON.parse(registeredUser).isPremium ? '✅ Sí' : '❌ No'}</small>
+                                </div>
+                            ` : '<p>❌ Ningún usuario registrado actualmente</p>'}
+
+                            <h4>Eventos Premium: ${premiumEvents.length}</h4>
+                            ${premiumEvents.length > 0 ? premiumEvents.map(event => `
+                                <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 3px; margin: 5px 0;">
+                                    <strong>${event.name}</strong> - ${event.userName} (${event.id})
+                                </div>
+                            `).join('') : '<p>❌ No hay eventos premium</p>'}
+
+                            <h4>Usuarios de Demo: ${demoUsers.length}</h4>
+                            ${demoUsers.length > 0 ? demoUsers.map(user => `
+                                <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 3px; margin: 5px 0;">
+                                    <strong>${user.fullName}</strong> (${user.email})
+                                </div>
+                            `).join('') : '<p>❌ No hay usuarios de demo</p>'}
+
+                            <h4>Emails Bloqueados: ${blockedEmails.length}</h4>
+                            ${blockedEmails.length > 0 ? blockedEmails.map(email => `
+                                <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 3px; margin: 5px 0;">
+                                    ${email}
+                                </div>
+                            `).join('') : '<p>❌ No hay emails bloqueados</p>'}
+                        </div>
+                    </div>
+                `;
+                resultDiv.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error obteniendo usuarios:', error);
+                showStatus('❌ Error al obtener información de usuarios', 'error');
             }
         }
     </script>
