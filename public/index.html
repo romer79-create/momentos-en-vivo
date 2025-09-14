@@ -543,7 +543,14 @@
         function clearDemoData() {
             const demoId = localStorage.getItem('demoId');
             if (demoId) {
+                // Limpiar contador total del evento
                 localStorage.removeItem(`photoCount_${demoId}`);
+
+                // Limpiar contadores por usuario para este evento demo
+                // Nota: En un escenario real, mantendríamos un registro de todos los userIds
+                // pero por simplicidad, limpiamos los datos principales
+                const userId = getUserId();
+                localStorage.removeItem(`userPhotoCount_${demoId}_${userId}`);
             }
             localStorage.removeItem('demoMode');
             localStorage.removeItem('demoId');
@@ -593,45 +600,79 @@
 
         // Verificar límite de fotos por usuario (por evento)
         function checkPhotoLimit() {
-            const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
+            const userId = getUserId();
+            const userPhotoCount = parseInt(localStorage.getItem(`userPhotoCount_${eventId}_${userId}`) || '0');
+            const totalEventPhotoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
 
-            // Límite especial para demos: máximo 2 fotos
+            // Límite especial para demos: máximo 2 fotos por usuario, máximo 20 total por evento
             if (isDemoMode) {
-                return photoCount < 2;
+                return userPhotoCount < 2 && totalEventPhotoCount < 20;
             }
 
-            // Límite normal: máximo 10 fotos
-            return photoCount < 10;
+            // Límite normal: máximo 10 fotos por usuario
+            return userPhotoCount < 10;
+        }
+
+        // Generar o obtener ID único del usuario
+        function getUserId() {
+            let userId = localStorage.getItem('userId');
+            if (!userId) {
+                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('userId', userId);
+            }
+            return userId;
         }
 
         function incrementPhotoCount() {
-            const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
-            localStorage.setItem(`photoCount_${eventId}`, (photoCount + 1).toString());
+            const userId = getUserId();
+
+            // Incrementar contador total del evento
+            const totalPhotoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
+            localStorage.setItem(`photoCount_${eventId}`, (totalPhotoCount + 1).toString());
+
+            // Incrementar contador por usuario
+            const userPhotoCount = parseInt(localStorage.getItem(`userPhotoCount_${eventId}_${userId}`) || '0');
+            localStorage.setItem(`userPhotoCount_${eventId}_${userId}`, (userPhotoCount + 1).toString());
+
             updatePhotoCounter();
         }
 
         function updatePhotoCounter() {
-            const photoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
+            const userId = getUserId();
+            const userPhotoCount = parseInt(localStorage.getItem(`userPhotoCount_${eventId}_${userId}`) || '0');
+            const totalEventPhotoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
 
             if (isDemoMode) {
-                const remaining = 2 - photoCount;
-                if (remaining <= 0) {
+                const userRemaining = 2 - userPhotoCount;
+                const totalRemaining = 20 - totalEventPhotoCount;
+
+                if (userRemaining <= 0) {
                     snapButton.disabled = true;
-                    snapButton.textContent = "🎯 Demo Completa";
+                    snapButton.textContent = "🎯 Límite Personal Alcanzado";
                     snapButton.style.background = "linear-gradient(135deg, #e91e63, #f06292)";
-                    showToast(`¡Demo completada! Has enviado 2 fotos.`, 'success');
+                    showToast(`Has alcanzado tus 2 fotos de prueba.`, 'success');
                     statusEl.innerHTML = `
                         <div style="text-align: center; background: rgba(233, 30, 99, 0.1); padding: 10px; border-radius: 10px; margin: 10px 0;">
-                            <strong>🎯 DEMO COMPLETADA</strong><br>
-                            <small>Haz probado todas las funcionalidades. ¿Te interesa el servicio completo?</small><br>
-                            <a href="home.html" style="color: #e91e63; text-decoration: underline; font-size: 0.9rem;">Ver planes completos →</a>
+                            <strong>🎯 LÍMITE PERSONAL COMPLETADO</strong><br>
+                            <small>Haz enviado tus 2 fotos de prueba. Comparte el enlace para que otros invitados también prueben.</small>
+                        </div>
+                    `;
+                } else if (totalRemaining <= 0) {
+                    snapButton.disabled = true;
+                    snapButton.textContent = "🚫 Evento Lleno";
+                    snapButton.style.background = "linear-gradient(135deg, #6c757d, #495057)";
+                    showToast(`El evento demo está lleno. Inténtalo más tarde.`, 'warning');
+                    statusEl.innerHTML = `
+                        <div style="text-align: center; background: rgba(108, 117, 125, 0.1); padding: 10px; border-radius: 10px; margin: 10px 0;">
+                            <strong>🚫 EVENTO DEMO COMPLETO</strong><br>
+                            <small>Todos los cupos para fotos han sido utilizados.</small>
                         </div>
                     `;
                 } else {
-                    statusEl.textContent = `Demo: Te quedan ${remaining} foto${remaining === 1 ? '' : 's'} para probar`;
+                    statusEl.textContent = `Demo: Te quedan ${userRemaining} foto${userRemaining === 1 ? '' : 's'} (Total evento: ${totalEventPhotoCount}/20)`;
                 }
             } else {
-                const remaining = 10 - photoCount;
+                const remaining = 10 - userPhotoCount;
                 if (remaining <= 0) {
                     snapButton.disabled = true;
                     snapButton.textContent = "📸 Límite alcanzado";
@@ -647,9 +688,17 @@
         snapButton.addEventListener('click', () => {
             if (!checkPhotoLimit()) {
                 if (isDemoMode) {
-                    showToast("¡Demo completada! Has enviado tus 2 fotos de prueba.", 'success');
+                    const userId = getUserId();
+                    const userPhotoCount = parseInt(localStorage.getItem(`userPhotoCount_${eventId}_${userId}`) || '0');
+                    const totalEventPhotoCount = parseInt(localStorage.getItem(`photoCount_${eventId}`) || '0');
+
+                    if (userPhotoCount >= 2) {
+                        showToast("Has alcanzado tus 2 fotos de prueba.", 'success');
+                    } else if (totalEventPhotoCount >= 20) {
+                        showToast("El evento demo está lleno. Inténtalo más tarde.", 'warning');
+                    }
                 } else {
-                    showToast("Has alcanzado el límite de 10 fotos por evento", 'error');
+                    showToast("Has alcanzado el límite de 10 fotos para este evento", 'error');
                 }
                 return;
             }
