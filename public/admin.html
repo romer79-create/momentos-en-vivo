@@ -505,9 +505,41 @@
 
         // Mostrar resultado del evento creado
         async function showEventResult(event) {
-            document.getElementById('capture-url').textContent = event.urls.capture;
-            document.getElementById('moderation-url').textContent = event.urls.moderation;
-            document.getElementById('projection-url').textContent = event.urls.projection;
+            console.log('🎯 Mostrando resultado del evento:', event);
+            console.log('🔗 URLs del evento:', event.urls);
+
+            // Verificar que los elementos del DOM existen
+            const captureEl = document.getElementById('capture-url');
+            const moderationEl = document.getElementById('moderation-url');
+            const projectionEl = document.getElementById('projection-url');
+
+            console.log('📍 Elementos del DOM encontrados:', {
+                capture: captureEl,
+                moderation: moderationEl,
+                projection: projectionEl
+            });
+
+            // Asignar URLs a los elementos
+            if (captureEl) {
+                captureEl.textContent = event.urls.capture;
+                console.log('✅ URL de captura asignada:', event.urls.capture);
+            } else {
+                console.error('❌ Elemento capture-url no encontrado');
+            }
+
+            if (moderationEl) {
+                moderationEl.textContent = event.urls.moderation;
+                console.log('✅ URL de moderación asignada:', event.urls.moderation);
+            } else {
+                console.error('❌ Elemento moderation-url no encontrado');
+            }
+
+            if (projectionEl) {
+                projectionEl.textContent = event.urls.projection;
+                console.log('✅ URL de proyección asignada:', event.urls.projection);
+            } else {
+                console.error('❌ Elemento projection-url no encontrado');
+            }
 
             // Debug: mostrar las URLs que se están generando
             console.log('🔗 URLs del evento:', {
@@ -564,8 +596,9 @@
             console.log('🚀 Generando QR para URL:', qrUrl);
 
             document.getElementById('event-result').style.display = 'block';
+        }
 
-            // Función para verificar si un evento es demo
+        // Función para verificar si un evento es demo
         function isDemoEvent(eventId) {
             return eventId && eventId.startsWith('DEMO_');
         }

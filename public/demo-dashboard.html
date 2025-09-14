@@ -537,12 +537,25 @@
         // Cargar datos de la demo al iniciar
         window.onload = function() {
             loadDemoData();
-            updateStats();
             generateUrls();
             loadPhotos();
 
             // Actualizar contador cada minuto
-            setInterval(updateStats, 60000);
+            setInterval(() => {
+                // Solo actualizar el contador de tiempo restante
+                const startTime = parseInt(demoData.startTime);
+                const now = Date.now();
+                const timeLeft = (3 * 24 * 60 * 60 * 1000) - (now - startTime);
+
+                if (timeLeft > 0) {
+                    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+
+                    document.getElementById('timeRemaining').textContent =
+                        `${days}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                }
+            }, 60000);
         };
 
         // Cargar datos de la demo desde localStorage
@@ -570,20 +583,21 @@
             if (timeLeft <= 0) {
                 // Demo expirada - marcar email como bloqueado
                 const blockedEmails = JSON.parse(localStorage.getItem('blockedEmails') || '[]');
-                if (!blockedEmails.includes(clientData.email)) {
-                    blockedEmails.push(clientData.email);
+                if (!blockedEmails.includes(demoData.userEmail)) {
+                    blockedEmails.push(demoData.userEmail);
                     localStorage.setItem('blockedEmails', JSON.stringify(blockedEmails));
                 }
 
                 // Marcar usuario como expirado
-                clientData.demoExpired = true;
-                localStorage.setItem('registeredUser', JSON.stringify(clientData));
+                const registeredUser = JSON.parse(localStorage.getItem('registeredUser') || '{}');
+                registeredUser.demoExpired = true;
+                localStorage.setItem('registeredUser', JSON.stringify(registeredUser));
 
                 // Actualizar lista de usuarios
                 const allUsers = JSON.parse(localStorage.getItem('demoUsers') || '[]');
-                const userIndex = allUsers.findIndex(user => user.id === clientData.id);
+                const userIndex = allUsers.findIndex(user => user.id === demoData.userId);
                 if (userIndex !== -1) {
-                    allUsers[userIndex] = clientData;
+                    allUsers[userIndex] = registeredUser;
                     localStorage.setItem('demoUsers', JSON.stringify(allUsers));
                 }
 
@@ -612,13 +626,69 @@
 
         // Generar URLs para el evento demo
         function generateUrls() {
+            console.log('🔗 Generando URLs para demo...');
+            console.log('📊 Datos del demo:', demoData);
+
             const baseUrl = window.location.origin;
             const eventId = demoData.eventId;
 
-            document.getElementById('captureUrl').value = `${baseUrl}/index.html?event=${eventId}&theme=demo-pink&demo=true`;
-            document.getElementById('moderationUrl').value = `${baseUrl}/moderador.html?event=${eventId}`;
-            document.getElementById('projectionUrl').value = `${baseUrl}/proyeccion.html?event=${eventId}`;
-            document.getElementById('adminUrl').value = `${baseUrl}/admin.html`;
+            console.log('🌐 Base URL:', baseUrl);
+            console.log('🎫 Event ID:', eventId);
+
+            // Verificar que los elementos del DOM existen
+            const captureEl = document.getElementById('captureUrl');
+            const moderationEl = document.getElementById('moderationUrl');
+            const projectionEl = document.getElementById('projectionUrl');
+            const adminEl = document.getElementById('adminUrl');
+
+            console.log('📍 Elementos del DOM encontrados:', {
+                capture: captureEl,
+                moderation: moderationEl,
+                projection: projectionEl,
+                admin: adminEl
+            });
+
+            // Generar URLs
+            const captureUrl = `${baseUrl}/index.html?event=${eventId}&theme=demo-pink&demo=true`;
+            const moderationUrl = `${baseUrl}/moderador.html?event=${eventId}`;
+            const projectionUrl = `${baseUrl}/proyeccion.html?event=${eventId}`;
+            const adminUrl = `${baseUrl}/admin.html`;
+
+            console.log('🔗 URLs generadas:', {
+                capture: captureUrl,
+                moderation: moderationUrl,
+                projection: projectionUrl,
+                admin: adminUrl
+            });
+
+            // Asignar URLs a los elementos
+            if (captureEl) {
+                captureEl.value = captureUrl;
+                console.log('✅ URL de captura asignada');
+            } else {
+                console.error('❌ Elemento captureUrl no encontrado');
+            }
+
+            if (moderationEl) {
+                moderationEl.value = moderationUrl;
+                console.log('✅ URL de moderación asignada');
+            } else {
+                console.error('❌ Elemento moderationUrl no encontrado');
+            }
+
+            if (projectionEl) {
+                projectionEl.value = projectionUrl;
+                console.log('✅ URL de proyección asignada');
+            } else {
+                console.error('❌ Elemento projectionUrl no encontrado');
+            }
+
+            if (adminEl) {
+                adminEl.value = adminUrl;
+                console.log('✅ URL de admin asignada');
+            } else {
+                console.error('❌ Elemento adminUrl no encontrado');
+            }
         }
 
         // Cargar fotos del evento demo
