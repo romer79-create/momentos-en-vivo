@@ -566,12 +566,48 @@
         }
 
         // Actualizar estadísticas
-        function updateStats() {
-            // Aquí iría la lógica para obtener estadísticas reales
-            document.getElementById('totalPhotos').textContent = '12';
-            document.getElementById('approvedPhotos').textContent = '8';
-            document.getElementById('pendingPhotos').textContent = '4';
-            document.getElementById('totalGuests').textContent = '15';
+        async function updateStats() {
+            try {
+                console.log('📊 Actualizando estadísticas para evento:', currentEvent.id);
+
+                // Intentar obtener estadísticas reales desde la API
+                const response = await fetch(`${window.location.origin}/.netlify/functions/get-demo-photos?eventId=${currentEvent.id}`);
+                const data = await response.json();
+
+                if (response.ok && data.photos) {
+                    const photos = data.photos;
+                    const totalPhotos = photos.length;
+                    const approvedPhotos = photos.filter(p => p.status === 'approved' || !p.status).length; // Considerar approved por defecto
+                    const pendingPhotos = totalPhotos - approvedPhotos;
+
+                    // Calcular invitados aproximado (basado en fotos únicas, estimación simple)
+                    const estimatedGuests = Math.max(1, Math.ceil(totalPhotos / 2)); // Asumir ~2 fotos por invitado
+
+                    console.log(`📈 Estadísticas reales: ${totalPhotos} total, ${approvedPhotos} aprobadas, ${pendingPhotos} pendientes`);
+
+                    document.getElementById('totalPhotos').textContent = totalPhotos;
+                    document.getElementById('approvedPhotos').textContent = approvedPhotos;
+                    document.getElementById('pendingPhotos').textContent = pendingPhotos;
+                    document.getElementById('totalGuests').textContent = estimatedGuests;
+
+                } else {
+                    // Si no hay fotos o error, mostrar ceros
+                    console.log('ℹ️ No hay fotos para este evento, mostrando estadísticas en cero');
+                    document.getElementById('totalPhotos').textContent = '0';
+                    document.getElementById('approvedPhotos').textContent = '0';
+                    document.getElementById('pendingPhotos').textContent = '0';
+                    document.getElementById('totalGuests').textContent = '0';
+                }
+
+            } catch (error) {
+                console.error('❌ Error obteniendo estadísticas:', error);
+
+                // En caso de error, mostrar estadísticas en cero
+                document.getElementById('totalPhotos').textContent = '0';
+                document.getElementById('approvedPhotos').textContent = '0';
+                document.getElementById('pendingPhotos').textContent = '0';
+                document.getElementById('totalGuests').textContent = '0';
+            }
         }
 
         // Funciones de navegación
