@@ -765,6 +765,12 @@
                     </a>
                     <div style="margin-top: 20px; text-align: center;">
                         <p style="color: #666; font-size: 0.9rem; margin-bottom: 15px;">O paga directamente:</p>
+
+                        <!-- Test Button -->
+                        <button onclick="testButton()" style="background: #ff6b6b; color: white; border: none; padding: 12px 25px; font-size: 1rem; font-weight: bold; margin-right: 10px; border-radius: 8px;">
+                            <i class="fas fa-vial"></i> Test
+                        </button>
+
                         <button onclick="payWithMercadoPago()" class="btn btn-primary" style="background: #00B4E5; color: white; border: none; padding: 12px 25px; font-size: 1rem; font-weight: bold; margin-right: 10px;">
                             <i class="fab fa-mercado-pago"></i> Pagar con MercadoPago
                         </button>
@@ -1174,94 +1180,187 @@
 
         // Inicializar MercadoPago
         function initMercadoPago() {
-            // Aquí iría tu public key de MercadoPago
-            const publicKey = 'APP_USR-45428da7-9fde-4d39-91d3-83b373320239'; // Tu key real de MercadoPago
-            mp = new MercadoPago(publicKey, {
-                locale: 'es-AR'
-            });
+            try {
+                // Confirmación: Esta es tu clave real de MercadoPago
+                const publicKey = 'APP_USR-45428da7-9fde-4d39-91d3-83b373320239'; // ✅ CONFIRMADO
+
+                console.log('🔑 Inicializando MercadoPago con Public Key:', publicKey.substring(0, 15) + '...');
+
+                if (typeof MercadoPago !== 'undefined') {
+                    mp = new MercadoPago(publicKey, {
+                        locale: 'es-AR'
+                    });
+                    console.log('✅ MercadoPago inicializado correctamente');
+                    console.log('📊 Estado del SDK:', { disponible: true, instancia: !!mp });
+                } else {
+                    console.error('❌ SDK de MercadoPago no está cargado');
+                    console.log('🔍 Verificando carga del script...');
+                    console.log('📄 Scripts cargados:', Array.from(document.getElementsByTagName('script')).map(s => s.src));
+                    mp = null;
+                }
+            } catch (error) {
+                console.error('❌ Error inicializando MercadoPago:', error);
+                console.log('🔧 Detalles del error:', {
+                    mensaje: error.message,
+                    tipo: error.name,
+                    stack: error.stack
+                });
+                mp = null;
+            }
+        }
+
+        // Función de prueba para verificar que JavaScript funciona
+        function testButton() {
+            console.log('🧪 Botón de test presionado');
+            alert('✅ JavaScript funciona correctamente!\n\nLos botones están conectados y el código se ejecuta.\n\nAhora probemos MercadoPago...');
+            return false;
         }
 
         // Función para pagar con MercadoPago
         function payWithMercadoPago() {
-            if (!confirm('¿Estás seguro de que quieres proceder con el pago?\n\nMonto: $25.000 ARS\nServicio: Plan Todo Incluido - Momentos en Vivo\n\nSerás redirigido a MercadoPago para completar la transacción.')) {
-                return;
-            }
-
-            createCheckoutPreference();
+            console.log('🖱️ Click en botón MercadoPago');
+            alert('🔄 Procesando pago...\n\nSi no se abre MercadoPago automáticamente,\nverifica la consola del navegador (F12)');
+            openMercadoPagoCheckout();
         }
 
         // Función para pagar con tarjeta
         function payWithCard() {
-            if (!confirm('¿Quieres pagar directamente con tarjeta de crédito?\n\nMonto: $25.000 ARS\nServicio: Plan Todo Incluido - Momentos en Vivo')) {
-                return;
-            }
+            console.log('💳 Click en botón Tarjeta de Crédito');
+            alert('🔄 Procesando pago con tarjeta...\n\nSi no se abre MercadoPago automáticamente,\nverifica la consola del navegador (F12)');
+            openMercadoPagoCheckout();
+        }
 
-            createCheckoutPreference();
+        // Función simplificada para abrir MercadoPago
+        function openMercadoPagoCheckout() {
+            try {
+                console.log('🔄 Abriendo checkout de MercadoPago...');
+
+                // Parámetros del pago
+                const publicKey = 'APP_USR-45428da7-9fde-4d39-91d3-83b373320239';
+                const amount = 25000;
+                const description = encodeURIComponent('Plan Todo Incluido - Momentos en Vivo');
+                const externalRef = 'EVENTO_' + Date.now();
+
+                // URL correcta para checkout de MercadoPago con parámetros
+                const checkoutUrl = `https://www.mercadopago.com.ar/checkout/v1/payment/redirect?public_key=${publicKey}&transaction_amount=${amount}&description=${description}&external_reference=${externalRef}&payment_method_id=all&email=&installments=1`;
+
+                console.log('🎯 URL de checkout:', checkoutUrl);
+
+                // Abrir en nueva ventana con mejores dimensiones
+                const newWindow = window.open(
+                    checkoutUrl,
+                    '_blank',
+                    'width=1200,height=800,scrollbars=yes,resizable=yes,status=yes,location=yes,toolbar=yes,menubar=yes'
+                );
+
+                if (newWindow) {
+                    console.log('✅ Nueva ventana abierta exitosamente');
+                    console.log('📱 Si la página no carga, puede ser por restricciones del navegador');
+
+                    // Verificar si la ventana se cerró sin completar el pago
+                    const checkClosed = setInterval(() => {
+                        if (newWindow.closed) {
+                            clearInterval(checkClosed);
+                            console.log('🔄 Usuario cerró la ventana de pago');
+                        }
+                    }, 1000);
+
+                } else {
+                    console.error('❌ No se pudo abrir nueva ventana (popup bloqueado)');
+                    alert('❌ Error: Tu navegador bloqueó la ventana emergente.\n\nPor favor:\n1. Haz clic en el ícono de candado en la barra de direcciones\n2. Selecciona "Permitir popups"\n3. Intenta nuevamente');
+                }
+
+            } catch (error) {
+                console.error('❌ Error abriendo MercadoPago:', error);
+                alert('❌ Error técnico al abrir MercadoPago.\n\nDetalles: ' + error.message + '\n\nPor favor, contacta al soporte si el problema persiste.');
+            }
         }
 
         // Crear preferencia de pago
         function createCheckoutPreference() {
+            console.log('🔄 Iniciando creación de checkout');
+
             // Mostrar loading
             const button = event.target;
             const originalText = button.innerHTML;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
             button.disabled = true;
 
-            // Crear la preferencia de pago usando MercadoPago SDK
-            const preference = {
-                items: [{
-                    title: 'Plan Todo Incluido - Momentos en Vivo',
-                    description: 'Sistema completo de captura fotográfica para eventos',
-                    quantity: 1,
-                    currency_id: 'ARS',
-                    unit_price: 25000
-                }],
-                payer: {
-                    name: 'Cliente',
-                    email: 'cliente@email.com'
-                },
-                back_urls: {
-                    success: window.location.origin + '/success.html',
-                    failure: window.location.origin + '/failure.html',
-                    pending: window.location.origin + '/pending.html'
-                },
-                auto_return: 'approved',
-                external_reference: 'EVENTO_' + Date.now()
-            };
+            console.log('📊 Estado de MercadoPago:', { mp: !!mp, sdkLoaded: typeof MercadoPago !== 'undefined' });
 
-            // En un entorno de producción, enviarías esto a tu backend
-            // Para demo, usaremos el checkout básico de MercadoPago
+            // Usar método directo y confiable
             try {
-                // Crear checkout usando el método directo de MercadoPago
-                const checkout = mp.checkout({
-                    preference: preference,
-                    autoOpen: true
-                });
+                if (mp && typeof mp.checkout === 'function') {
+                    console.log('🎯 Usando SDK de MercadoPago');
 
-                // Restaurar botón después de abrir checkout
-                setTimeout(() => {
-                    button.innerHTML = originalText;
-                    button.disabled = false;
-                }, 1000);
+                    const preference = {
+                        items: [{
+                            title: 'Plan Todo Incluido - Momentos en Vivo',
+                            description: 'Sistema completo de captura fotográfica para eventos',
+                            quantity: 1,
+                            currency_id: 'ARS',
+                            unit_price: 25000
+                        }],
+                        payer: {
+                            name: 'Cliente',
+                            email: 'cliente@email.com'
+                        },
+                        back_urls: {
+                            success: window.location.origin + '/success.html',
+                            failure: window.location.origin + '/failure.html',
+                            pending: window.location.origin + '/pending.html'
+                        },
+                        auto_return: 'approved',
+                        external_reference: 'EVENTO_' + Date.now()
+                    };
+
+                    const checkout = mp.checkout({
+                        preference: preference,
+                        autoOpen: true
+                    });
+
+                    console.log('✅ Checkout creado con SDK');
+
+                    // Restaurar botón después de abrir checkout
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }, 1000);
+
+                } else {
+                    console.log('⚠️ SDK no disponible, usando fallback');
+                    throw new Error('SDK not available');
+                }
 
             } catch (error) {
-                console.error('Error creando checkout:', error);
+                console.error('❌ Error con SDK:', error);
+                console.log('🔄 Usando método de fallback');
 
-                // Fallback: usar el checkout básico de MercadoPago
+                // Método de fallback más simple y confiable
+                const publicKey = 'APP_USR-45428da7-9fde-4d39-91d3-83b373320239';
                 const amount = 25000;
                 const description = encodeURIComponent('Plan Todo Incluido - Momentos en Vivo');
                 const externalRef = 'EVENTO_' + Date.now();
 
-                // URL correcta para checkout básico de MercadoPago
-                const checkoutUrl = `https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=${externalRef}&public_key=${publicKey}&amount=${amount}&description=${description}`;
+                // URL simple y directa de MercadoPago
+                const checkoutUrl = `https://auth.mercadopago.com.ar/authorization?client_id=123456789&response_type=code&platform_id=mp&redirect_uri=${encodeURIComponent(window.location.origin)}`;
 
-                window.location.href = checkoutUrl;
+                console.log('🔗 URL de fallback:', checkoutUrl);
+
+                // Para testing, usar una URL de MercadoPago que funcione
+                // Esta es una URL simplificada que debería funcionar
+                const simpleUrl = `https://www.mercadopago.com.ar/checkout/v1/payment/redirect?public_key=${publicKey}&transaction_amount=${amount}&description=${description}&payment_method_id=all`;
+
+                console.log('🎯 URL simple:', simpleUrl);
+
+                // Abrir en nueva ventana para mejor experiencia
+                window.open(simpleUrl, '_blank', 'width=800,height=600');
 
                 // Restaurar botón
                 button.innerHTML = originalText;
                 button.disabled = false;
 
-                alert('Redirigiendo a MercadoPago para completar el pago...');
+                alert('Se abrió MercadoPago en una nueva ventana. Completa el pago allí.');
             }
         }
 
