@@ -55,17 +55,31 @@ exports.handler = async (event, context) => {
 
         console.log(`📂 Moviendo foto: ${photo.public_id} -> ${newPublicId}`);
 
-        // Mover la foto
-        await cloudinary.uploader.rename(photo.public_id, newPublicId, { invalidate: true });
+        // Verificar que la foto existe antes de moverla
+        const existingPhoto = await cloudinary.api.resource(photo.public_id);
+        console.log(`📋 Foto existe antes de mover: ${existingPhoto.public_id}`);
 
-        // Eliminar todos los tags para que no sea accesible por las URLs del evento
+        // Mover la foto usando upload con URL de la foto existente
+        const uploadResult = await cloudinary.uploader.upload(existingPhoto.secure_url, {
+          public_id: newPublicId,
+          folder: 'archived',
+          invalidate: true
+        });
+
+        console.log(`✅ Foto subida a archived: ${uploadResult.public_id}`);
+
+        // Eliminar la foto original después de subir la nueva
+        await cloudinary.uploader.destroy(photo.public_id);
+        console.log(`🗑️ Foto original eliminada: ${photo.public_id}`);
+
+        // Eliminar todos los tags de la nueva foto
         await cloudinary.uploader.remove_all_tags(newPublicId);
+        console.log(`🏷️ Tags eliminados de: ${newPublicId}`);
 
-        console.log(`✅ Foto movida exitosamente: ${newPublicId}`);
-
-        return { success: true, filename };
+        return { success: true, filename, newPublicId: uploadResult.public_id };
       } catch (error) {
-        console.error(`Error archivando foto ${photo.public_id}:`, error);
+        console.error(`❌ Error archivando foto ${photo.public_id}:`, error);
+        console.error(`❌ Detalles del error:`, error.message);
         return { success: false, error: error.message };
       }
     });
