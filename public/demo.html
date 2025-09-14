@@ -407,6 +407,15 @@
             }
 
             const user = JSON.parse(registeredUser);
+
+            // VERIFICAR SI EL USUARIO YA ES PREMIUM
+            if (user.isPremium && user.planType === 'Premium') {
+                console.log('👑 Usuario premium detectado, redirigiendo al panel de cliente');
+                alert('Ya eres cliente premium. Redirigiendo a tu panel de cliente...');
+                window.location.href = 'cliente-panel.html';
+                return;
+            }
+
             const demoMode = localStorage.getItem('demoMode');
             const demoStart = localStorage.getItem('demoStartTime');
 
