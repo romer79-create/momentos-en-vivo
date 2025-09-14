@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control Demo - Momentos en Vivo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 2rem;
+            color: #e91e63;
+        }
+
+        .logo i {
+            color: #ffd93d;
+        }
+
+        .brand-text h1 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .brand-text p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .demo-badge {
+            background: linear-gradient(135deg, #e91e63, #f06292);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            color: #e91e63;
+            margin-bottom: 15px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section h2 i {
+            color: #e91e63;
+        }
+
+        /* URLs Section */
+        .urls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .url-card {
+            border: 2px solid #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .url-card:hover {
+            border-color: #e91e63;
+            box-shadow: 0 5px 15px rgba(233, 30, 99, 0.1);
+        }
+
+        .url-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            background: #f8f9fa;
+            margin-bottom: 10px;
+        }
+
+        .url-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #e91e63, #f06292);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        /* Photos Section */
+        .photos-section {
+            margin-top: 30px;
+        }
+
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .photo-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .photo-info {
+            padding: 10px;
+        }
+
+        .photo-info p {
+            font-size: 0.8rem;
+            color: #666;
+            margin: 2px 0;
+        }
+
+        .demo-limit {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        /* Upgrade Section */
+        .upgrade-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .upgrade-content {
+            padding: 40px 20px;
+        }
+
+        .upgrade-content h3 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .upgrade-content p {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+
+        .upgrade-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .upgrade-feature {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .upgrade-feature i {
+            font-size: 2rem;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .urls-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .photos-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .photos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        .loading i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #e91e63;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-section">
+                <div class="logo">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Momentos en Vivo</h1>
+                    <p>Panel de Control Demo</p>
+                </div>
+            </div>
+            <div class="demo-badge">
+                <i class="fas fa-gift"></i>
+                DEMO GRATUITA
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-number" id="timeRemaining">--:--:--</div>
+                <div class="stat-label">Tiempo Restante</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <div class="stat-number" id="photosSent">--</div>
+                <div class="stat-label">Fotos Enviadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-number" id="photosApproved">--</div>
+                <div class="stat-label">Fotos Aprobadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-number" id="completionPercent">--%</div>
+                <div class="stat-label">Demo Completada</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- URLs Section -->
+            <div class="section">
+                <h2><i class="fas fa-link"></i> URLs de tu Evento Demo</h2>
+                <p style="color: #666; margin-bottom: 20px;">
+                    Comparte estas URLs con tus invitados para que puedan participar en tu demo.
+                    Todas las funcionalidades están disponibles para testing completo.
+                </p>
+
+                <div class="urls-grid">
+                    <div class="url-card">
+                        <div class="url-title">
+                            <i class="fas fa-camera" style="color: #e91e63;"></i>
+                            Captura de Fotos
+                        </div>
+                        <input type="text" class="url-input" id="captureUrl" readonly>
+                        <div class="url-actions">
+                            <button class="btn btn-primary" onclick="openUrl('capture')">
+                                <i class="fas fa-external-link-alt"></i> Abrir
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyUrl('capture')">
+                                <i class="fas fa-copy"></i> Copiar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="url-card">
+                        <div class="url-title">
+                            <i class="fas fa-check-circle" style="color: #27ae60;"></i>
+                            Moderación
+                        </div>
+                        <input type="text" class="url-input" id="moderationUrl" readonly>
+                        <div class="url-actions">
+                            <button class="btn btn-primary" onclick="openUrl('moderation')">
+                                <i class="fas fa-external-link-alt"></i> Abrir
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyUrl('moderation')">
+                                <i class="fas fa-copy"></i> Copiar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="url-card">
+                        <div class="url-title">
+                            <i class="fas fa-tv" style="color: #f39c12;"></i>
+                            Pantalla de Proyección
+                        </div>
+                        <input type="text" class="url-input" id="projectionUrl" readonly>
+                        <div class="url-actions">
+                            <button class="btn btn-primary" onclick="openUrl('projection')">
+                                <i class="fas fa-external-link-alt"></i> Abrir
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyUrl('projection')">
+                                <i class="fas fa-copy"></i> Copiar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="url-card">
+                        <div class="url-title">
+                            <i class="fas fa-cog" style="color: #95a5a6;"></i>
+                            Panel de Administración
+                        </div>
+                        <input type="text" class="url-input" id="adminUrl" readonly>
+                        <div class="url-actions">
+                            <button class="btn btn-primary" onclick="openUrl('admin')">
+                                <i class="fas fa-external-link-alt"></i> Abrir
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyUrl('admin')">
+                                <i class="fas fa-copy"></i> Copiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Demo Limits Info -->
+            <div class="demo-limit">
+                <h4><i class="fas fa-info-circle"></i> Limitaciones de la Demo</h4>
+                <p><strong>Máximo 2 fotos por evento</strong> • Sin descargas de fotos • Sin personalización avanzada • Datos eliminados en 3 días</p>
+            </div>
+
+            <!-- Photos Section -->
+            <div class="section photos-section">
+                <h2><i class="fas fa-images"></i> Tus Fotos de la Demo</h2>
+                <div id="photosContainer">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Cargando fotos...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upgrade Section -->
+        <div class="upgrade-section">
+            <div class="upgrade-content">
+                <h3>¿Te Gustó la Demo? ¡Actualiza Ahora!</h3>
+                <p>Obtén acceso completo a todas las funcionalidades sin límites</p>
+
+                <div class="upgrade-features">
+                    <div class="upgrade-feature">
+                        <i class="fas fa-infinity"></i>
+                        <h4>Fotos Ilimitadas</h4>
+                        <p>Todas las fotos que necesites</p>
+                    </div>
+                    <div class="upgrade-feature">
+                        <i class="fas fa-download"></i>
+                        <h4>Descargas ZIP</h4>
+                        <p>Descarga todas tus fotos en un archivo comprimido</p>
+                    </div>
+                    <div class="upgrade-feature">
+                        <i class="fas fa-palette"></i>
+                        <h4>Personalización Completa</h4>
+                        <p>Temas, colores y branding personalizado</p>
+                    </div>
+                    <div class="upgrade-feature">
+                        <i class="fas fa-headset"></i>
+                        <h4>Soporte Premium</h4>
+                        <p>Asistencia técnica prioritaria</p>
+                    </div>
+                </div>
+
+                <a href="home.html#services" class="btn btn-primary" style="font-size: 1.2rem; padding: 15px 30px;">
+                    <i class="fas fa-rocket"></i> Ver Planes Completos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let demoData = {};
+
+        // Cargar datos de la demo al iniciar
+        window.onload = function() {
+            loadDemoData();
+            updateStats();
+            generateUrls();
+            loadPhotos();
+
+            // Actualizar contador cada minuto
+            setInterval(updateStats, 60000);
+        };
+
+        // Cargar datos de la demo desde localStorage
+        function loadDemoData() {
+            demoData = {
+                eventId: localStorage.getItem('demoId'),
+                eventName: localStorage.getItem('demoEventName'),
+                userEmail: localStorage.getItem('demoUserEmail'),
+                startTime: localStorage.getItem('demoStartTime'),
+                photosSent: parseInt(localStorage.getItem(`photoCount_${localStorage.getItem('demoId')}`) || '0')
+            };
+
+            // Verificar si la demo existe
+            if (!demoData.eventId || !demoData.startTime) {
+                alert('No se encontró una sesión de demo activa. Serás redirigido.');
+                window.location.href = 'demo.html';
+                return;
+            }
+
+            // Verificar expiración
+            const startTime = parseInt(demoData.startTime);
+            const now = Date.now();
+            const daysPassed = (now - startTime) / (1000 * 60 * 60 * 24);
+
+            if (daysPassed >= 3) {
+                alert('Tu demo ha expirado. Gracias por probar Momentos en Vivo.');
+                clearDemoData();
+                window.location.href = 'demo.html';
+                return;
+            }
+        }
+
+        // Actualizar estadísticas
+        function updateStats() {
+            const startTime = parseInt(demoData.startTime);
+            const now = Date.now();
+            const timeLeft = (3 * 24 * 60 * 60 * 1000) - (now - startTime);
+
+            if (timeLeft <= 0) {
+                document.getElementById('timeRemaining').textContent = 'EXPIRADO';
+                return;
+            }
+
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+
+            document.getElementById('timeRemaining').textContent =
+                `${days}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+            // Las demás estadísticas se actualizan en loadPhotos()
+        }
+
+        // Generar URLs para el evento demo
+        function generateUrls() {
+            const baseUrl = window.location.origin;
+            const eventId = demoData.eventId;
+
+            document.getElementById('captureUrl').value = `${baseUrl}/index.html?event=${eventId}&theme=demo-pink&demo=true`;
+            document.getElementById('moderationUrl').value = `${baseUrl}/moderador.html?event=${eventId}`;
+            document.getElementById('projectionUrl').value = `${baseUrl}/proyeccion.html?event=${eventId}`;
+            document.getElementById('adminUrl').value = `${baseUrl}/admin.html`;
+        }
+
+        // Cargar fotos del evento demo
+        async function loadPhotos() {
+            const container = document.getElementById('photosContainer');
+
+            try {
+                const eventId = demoData.eventId;
+                const response = await fetch(`${window.location.origin}/.netlify/functions/get-demo-photos?eventId=${eventId}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Error al obtener fotos');
+                }
+
+                const photos = data.photos || [];
+
+                if (photos.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #666;">
+                            <i class="fas fa-camera" style="font-size: 3rem; margin-bottom: 20px; color: #e91e63;"></i>
+                            <p>Aún no has enviado fotos en tu demo.</p>
+                            <p>¡Comparte el enlace de captura con tus invitados para comenzar!</p>
+                            <button class="btn btn-primary" onclick="openUrl('capture')" style="margin-top: 15px;">
+                                <i class="fas fa-external-link-alt"></i> Ir a Captura de Fotos
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const photosHtml = photos.map(photo => `
+                    <div class="photo-item">
+                        <img src="${photo.thumbnail_url}" alt="Foto demo">
+                        <div class="photo-info">
+                            <p><strong>${photo.filename}</strong></p>
+                            <p>${new Date(photo.created_at).toLocaleString()}</p>
+                            <p style="color: #e91e63;"><i class="fas fa-lock"></i> Descarga no disponible en demo</p>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = `<div class="photos-grid">${photosHtml}</div>`;
+
+                // Actualizar estadísticas
+                document.getElementById('photosSent').textContent = photos.length;
+                document.getElementById('photosApproved').textContent = photos.length;
+                document.getElementById('completionPercent').textContent = Math.min(100, Math.round((photos.length / 2) * 100)) + '%';
+
+            } catch (error) {
+                console.error('Error cargando fotos:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #e74c3c;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                        <p>Error al cargar las fotos. Inténtalo de nuevo más tarde.</p>
+                        <button class="btn btn-secondary" onclick="loadPhotos()" style="margin-top: 15px;">
+                            <i class="fas fa-redo"></i> Reintentar
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Funciones de navegación
+        function openUrl(type) {
+            const urls = {
+                capture: document.getElementById('captureUrl').value,
+                moderation: document.getElementById('moderationUrl').value,
+                projection: document.getElementById('projectionUrl').value,
+                admin: document.getElementById('adminUrl').value
+            };
+
+            window.open(urls[type], '_blank');
+        }
+
+        function copyUrl(type) {
+            const inputs = {
+                capture: document.getElementById('captureUrl'),
+                moderation: document.getElementById('moderationUrl'),
+                projection: document.getElementById('projectionUrl'),
+                admin: document.getElementById('adminUrl')
+            };
+
+            inputs[type].select();
+            document.execCommand('copy');
+
+            // Mostrar feedback
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+            button.style.background = '#27ae60';
+
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = '';
+            }, 2000);
+        }
+
+        // Limpiar datos de demo
+        function clearDemoData() {
+            const demoId = localStorage.getItem('demoId');
+            if (demoId) {
+                localStorage.removeItem(`photoCount_${demoId}`);
+            }
+            localStorage.removeItem('demoMode');
+            localStorage.removeItem('demoId');
+            localStorage.removeItem('demoEventName');
+            localStorage.removeItem('demoUserEmail');
+            localStorage.removeItem('demoStartTime');
+        }
+
+        // Función para renovar demo (por si el usuario quiere extender)
+        function extendDemo() {
+            // Aquí podría implementarse una renovación de demo
+            alert('La renovación de demo estará disponible próximamente. Contacta con soporte.');
+        }
+    </script>
+</body>
+</html>

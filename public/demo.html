@@ -370,9 +370,9 @@
             localStorage.setItem('demoUserEmail', userEmail);
             localStorage.setItem('demoStartTime', Date.now().toString());
 
-            // Redirigir a la página de captura con modo demo
-            const captureUrl = `index.html?event=${demoId}&theme=demo-pink&demo=true`;
-            window.location.href = captureUrl;
+            // Redirigir al panel de control demo en lugar de directamente a captura
+            const dashboardUrl = `demo-dashboard.html`;
+            window.location.href = dashboardUrl;
         }
 
         // Función para volver al inicio
@@ -404,12 +404,7 @@
                     const startBtn = document.querySelector('.btn-primary');
                     startBtn.innerHTML = '<i class="fas fa-play"></i> Continuar Demo';
                     startBtn.onclick = function() {
-                        const demoId = localStorage.getItem('demoId');
-                        if (demoId) {
-                            window.location.href = `index.html?event=${demoId}&theme=demo-pink&demo=true`;
-                        } else {
-                            startDemo();
-                        }
+                        window.location.href = `demo-dashboard.html`;
                     };
                 }
             }
