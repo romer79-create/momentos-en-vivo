@@ -415,7 +415,7 @@
             if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
                 localStorage.removeItem('adminAuthenticated');
                 localStorage.removeItem('adminLoginTime');
-                window.location.href = '/home.html';
+                window.location.href = 'index.html';
             }
         }
     </script>
@@ -428,6 +428,7 @@
         }
 
         const NETLIFY_URL = window.location.origin;
+        const API_BASE_URL = window.location.origin + '/api';
         const statusEl = document.getElementById('status');
         let events = JSON.parse(localStorage.getItem('events') || '[]');
 
@@ -648,7 +649,7 @@
                 console.log('📥 Iniciando descarga para evento:', event.id);
 
                 // Llamar a la nueva función de descarga
-                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/download-event-photos?eventId=${event.id}`);
+                const response = await fetch(`${API_BASE_URL}/download-event-photos?eventId=${event.id}`);
                 console.log('📡 Respuesta de descarga:', response.status);
 
                 const result = await response.json();
@@ -952,7 +953,7 @@ ${event.urls.projection}
                 console.log('🧪 Probando conectividad con Netlify Functions...');
                 console.log('📡 URL base:', NETLIFY_URL);
 
-                const testUrl = `${NETLIFY_URL}/.netlify/functions/archive-event?eventId=TEST`;
+                const testUrl = `${API_BASE_URL}/archive-event?eventId=TEST`;
                 console.log('🔗 URL de prueba:', testUrl);
 
                 const response = await fetch(testUrl);
@@ -1148,7 +1149,7 @@ ${event.urls.projection}
 
             try {
                 // Llamar a la función para obtener fotos archivadas
-                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/get-archived-photos`);
+                const response = await fetch(`${API_BASE_URL}/get-archived-photos`);
                 const result = await response.json();
 
                 if (!response.ok) {
@@ -1464,7 +1465,7 @@ ${event.urls.projection}
 
             try {
                 // Llamar a la función de eliminación
-                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/delete-single-archived-photo`, {
+                const response = await fetch(`${API_BASE_URL}/delete-single-archived-photo`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
@@ -1510,8 +1511,8 @@ ${event.urls.projection}
                 showStatus('⏳ Eliminando evento y fotos...', 'info');
 
                 // Llamar a la función de eliminación
-                const NETLIFY_URL = 'https://playful-parfait-6bfab1.netlify.app';
-                const response = await fetch(`${NETLIFY_URL}/.netlify/functions/delete-archived-event`, {
+                const NETLIFY_URL = 'https://momentos-en-vivo.vercel.app';
+                const response = await fetch(`${NETLIFY_URL}/api/delete-archived-event`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
