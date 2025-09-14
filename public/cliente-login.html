@@ -222,7 +222,7 @@
             <a href="registro.html">Regístrate aquí</a>
         </div>
 
-        <a href="home.html" class="back-link">
+        <a href="index.html" class="back-link">
             <i class="fas fa-arrow-left"></i>
             Volver al inicio
         </a>
@@ -247,20 +247,33 @@
 
             try {
                 // Verificar credenciales
+                console.log('=== INICIANDO VERIFICACIÓN DE LOGIN ===');
+
                 const registeredUser = JSON.parse(localStorage.getItem('registeredUser') || 'null');
+                console.log('Usuario registrado encontrado:', registeredUser);
 
                 if (!registeredUser) {
+                    console.error('ERROR: No se encontró ningún usuario registrado en localStorage');
                     throw new Error('Usuario no encontrado. Regístrate primero.');
                 }
 
+                console.log('Comparando emails:');
+                console.log('- Email ingresado:', email);
+                console.log('- Email registrado:', registeredUser.email);
+                console.log('- Coinciden:', registeredUser.email === email);
+
                 if (registeredUser.email !== email) {
+                    console.error('ERROR: Email no coincide');
                     throw new Error('Correo electrónico no registrado.');
                 }
 
+                console.log('Comparando contraseñas...');
                 if (registeredUser.password !== password) {
+                    console.error('ERROR: Contraseña incorrecta');
                     throw new Error('Contraseña incorrecta.');
                 }
 
+                console.log('Verificando si es premium...');
                 if (!registeredUser.isPremium) {
                     // Mostrar error y redirigir
                     messageDiv.textContent = 'Esta cuenta no tiene acceso premium. Completa tu compra primero.';
@@ -273,10 +286,27 @@
                     return;
                 }
 
+                console.log('✅ LOGIN EXITOSO - Todas las verificaciones pasaron');
+                console.log('=== FIN VERIFICACIÓN LOGIN ===');
+
                 // Login exitoso
                 messageDiv.textContent = '¡Bienvenido de vuelta! Redirigiendo...';
                 messageDiv.className = 'message success';
                 messageDiv.style.display = 'block';
+
+                // Crear sesión segura con tiempo de expiración (24 horas)
+                const sessionData = {
+                    userId: registeredUser.id,
+                    email: registeredUser.email,
+                    loginTime: new Date().getTime(),
+                    expiresAt: new Date().getTime() + (24 * 60 * 60 * 1000) // 24 horas
+                };
+
+                // Guardar sesión en sessionStorage (más seguro que localStorage)
+                sessionStorage.setItem('premiumSession', JSON.stringify(sessionData));
+
+                // También guardar en localStorage para recordar último usuario (opcional)
+                localStorage.setItem('lastPremiumLogin', registeredUser.email);
 
                 // Redirigir al panel de cliente
                 setTimeout(() => {
@@ -294,13 +324,138 @@
             }
         });
 
-        // Auto-fill email si hay usuario registrado
+        // Verificar sesión existente y manejar auto-fill
         window.onload = function() {
-            const registeredUser = JSON.parse(localStorage.getItem('registeredUser') || 'null');
-            if (registeredUser && registeredUser.email) {
-                document.getElementById('email').value = registeredUser.email;
+            console.log('=== INICIANDO CARGA DE PÁGINA ===');
+
+            // Limpiar datos antiguos primero
+            clearOldUserData();
+
+            // Crear usuario de prueba si no existe
+            createTestUserIfNeeded();
+
+            // Verificar si hay una sesión activa
+            const currentSession = sessionStorage.getItem('premiumSession');
+            if (currentSession) {
+                try {
+                    const sessionData = JSON.parse(currentSession);
+                    const now = new Date().getTime();
+
+                    // Verificar si la sesión no ha expirado
+                    if (now < sessionData.expiresAt) {
+                        // Sesión válida - redirigir automáticamente
+                        console.log('Sesión premium activa encontrada, redirigiendo...');
+                        window.location.href = 'cliente-panel.html';
+                        return;
+                    } else {
+                        // Sesión expirada - limpiar
+                        sessionStorage.removeItem('premiumSession');
+                        console.log('Sesión premium expirada, limpiada');
+                    }
+                } catch (error) {
+                    // Sesión corrupta - limpiar
+                    sessionStorage.removeItem('premiumSession');
+                }
             }
+
+            // Recordar último usuario logueado (opcional, solo para comodidad)
+            const lastLogin = localStorage.getItem('lastPremiumLogin');
+            if (lastLogin) {
+                // No autocompletar por seguridad, solo mostrar placeholder
+                document.getElementById('email').placeholder = `Último: ${lastLogin}`;
+            }
+
+            console.log('=== CARGA DE PÁGINA COMPLETADA ===');
         };
+
+        // Crear usuario de prueba limpio
+        function createTestUserIfNeeded() {
+            console.log('=== VERIFICANDO USUARIO DE PRUEBA ===');
+
+            // Limpiar cualquier dato antiguo primero
+            clearOldUserData();
+
+            // Pequeña pausa para asegurar que la limpieza se complete
+            setTimeout(() => {
+                const existingUser = localStorage.getItem('registeredUser');
+                console.log('Usuario existente DESPUÉS de limpieza:', existingUser);
+
+                if (!existingUser || existingUser === 'null') {
+                    console.log('Creando NUEVO usuario de prueba...');
+
+                    // Crear usuario premium de prueba completamente nuevo
+                    const testUser = {
+                        id: 'test_user_' + Date.now(),
+                        fullName: 'Usuario de Prueba',
+                        email: 'test@prueba.com',
+                        password: 'test123',
+                        company: 'Empresa de Prueba',
+                        isPremium: true,
+                        eventLimit: 2,
+                        createdAt: new Date().toISOString(),
+                        usedCodes: []
+                    };
+
+                    // Forzar guardado
+                    localStorage.setItem('registeredUser', JSON.stringify(testUser));
+                    console.log('Usuario de prueba creado exitosamente:', testUser);
+                    console.log('Guardado en localStorage con clave: registeredUser');
+
+                    // Verificar inmediatamente que se guardó correctamente
+                    const savedUser = localStorage.getItem('registeredUser');
+                    if (savedUser) {
+                        const parsedUser = JSON.parse(savedUser);
+                        console.log('✅ VERIFICACIÓN EXITOSA - Usuario guardado:', parsedUser.email);
+                        console.log('Datos completos:', parsedUser);
+                    } else {
+                        console.error('❌ ERROR: Usuario no se guardó correctamente');
+                    }
+
+                } else {
+                    console.log('Usuario ya existe después de limpieza:', JSON.parse(existingUser));
+                }
+
+                console.log('=== FIN VERIFICACIÓN USUARIO ===');
+            }, 100);
+        }
+
+        // Limpiar datos antiguos de usuarios y eventos
+        function clearOldUserData() {
+            try {
+                console.log('=== INICIANDO LIMPIEZA DE DATOS ANTIGUOS ===');
+
+                // Limpiar sesiones antiguas
+                sessionStorage.removeItem('premiumSession');
+                sessionStorage.removeItem('clientLoginTime');
+                localStorage.removeItem('lastPremiumLogin');
+                localStorage.removeItem('clientLoginTime');
+
+                // Forzar eliminación del usuario registrado anterior
+                console.log('Eliminando usuario registrado anterior...');
+                localStorage.removeItem('registeredUser');
+
+                // Verificar que se eliminó
+                const checkOldUser = localStorage.getItem('registeredUser');
+                console.log('Usuario anterior eliminado:', checkOldUser === null ? 'SÍ' : 'NO');
+
+                // Limpiar eventos antiguos (excepto si hay eventos del admin)
+                const allEvents = JSON.parse(localStorage.getItem('premiumEvents') || '[]');
+                console.log('Eventos encontrados antes de limpieza:', allEvents.length);
+
+                const cleanEvents = allEvents.filter(event =>
+                    event.userId && event.userId.includes('admin')
+                );
+
+                if (cleanEvents.length !== allEvents.length) {
+                    localStorage.setItem('premiumEvents', JSON.stringify(cleanEvents));
+                    console.log('Eventos antiguos limpiados. Eventos restantes:', cleanEvents.length);
+                }
+
+                console.log('=== LIMPIEZA DE DATOS COMPLETADA ===');
+            } catch (error) {
+                console.error('Error limpiando datos antiguos:', error);
+            }
+        }
     </script>
 </body>
 </html>

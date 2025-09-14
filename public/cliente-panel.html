@@ -314,17 +314,18 @@
             }
         }
 
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: #666;
-        }
-
-        .loading i {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            color: #667eea;
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
@@ -349,6 +350,9 @@
                 <div class="user-info" id="userInfo">
                     <!-- Información del usuario se cargará aquí -->
                 </div>
+                <button class="btn btn-secondary" onclick="logout()" style="font-size: 0.8rem; padding: 6px 12px;">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
             </div>
         </div>
 
@@ -418,31 +422,84 @@
     <script>
         let clientData = {};
 
-        // Cargar datos del cliente al iniciar
+        // Inicializar la página cuando se carga completamente
         window.onload = function() {
-            checkPremiumAuthentication();
+            console.log('=== INICIALIZANDO PANEL DE CLIENTE ===');
+
+            // Verificar autenticación primero
+            if (!checkPremiumAuthentication()) {
+                console.log('Autenticación fallida, redirigiendo...');
+                return;
+            }
+
+            // Cargar datos del cliente
             loadClientData();
+
+            // Cargar eventos
             loadEvents();
-            updateStats();
+
+            // Actualizar estadísticas (se llama dentro de loadEvents)
+            console.log('=== PANEL INICIALIZADO ===');
         };
+
+        // Función para cerrar sesión
+        function logout() {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión? Se perderán todos los datos no guardados.')) {
+                // Limpiar sesión del cliente premium
+                localStorage.removeItem('premiumSession');
+                localStorage.removeItem('clientLoginTime');
+
+                // Limpiar cualquier dato temporal
+                sessionStorage.clear();
+
+                // Limpiar campos del formulario si existen
+                const forms = document.querySelectorAll('form');
+                forms.forEach(form => form.reset());
+
+                // Redirigir al login
+                window.location.href = 'cliente-login.html';
+            }
+        }
 
         // Verificar autenticación premium
         function checkPremiumAuthentication() {
-            const registeredUser = JSON.parse(localStorage.getItem('registeredUser') || 'null');
-
-            if (!registeredUser) {
-                alert('No se encontró información de usuario. Serás redirigido al login.');
+            // Verificar sesión en sessionStorage
+            const currentSession = sessionStorage.getItem('premiumSession');
+            if (!currentSession) {
+                alert('Sesión expirada. Debes iniciar sesión nuevamente.');
                 window.location.href = 'cliente-login.html';
                 return false;
             }
 
-            if (!registeredUser.isPremium) {
-                alert('Esta cuenta no tiene acceso premium. Completa tu compra primero.');
-                window.location.href = 'registro.html';
+            try {
+                const sessionData = JSON.parse(currentSession);
+                const now = new Date().getTime();
+
+                // Verificar si la sesión ha expirado
+                if (now > sessionData.expiresAt) {
+                    alert('Tu sesión ha expirado. Inicia sesión nuevamente.');
+                    sessionStorage.removeItem('premiumSession');
+                    window.location.href = 'cliente-login.html';
+                    return false;
+                }
+
+                // Verificar que el usuario existe y es premium
+                const registeredUser = JSON.parse(localStorage.getItem('registeredUser') || 'null');
+                if (!registeredUser || registeredUser.id !== sessionData.userId || !registeredUser.isPremium) {
+                    alert('Usuario no autorizado o cuenta no premium.');
+                    sessionStorage.removeItem('premiumSession');
+                    window.location.href = 'cliente-login.html';
+                    return false;
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Error verificando sesión:', error);
+                sessionStorage.removeItem('premiumSession');
+                alert('Error de sesión. Inicia sesión nuevamente.');
+                window.location.href = 'cliente-login.html';
                 return false;
             }
-
-            return true;
         }
 
         // Cargar datos del cliente
@@ -469,55 +526,88 @@
             const container = document.getElementById('eventsContainer');
             const userId = clientData.id;
 
-            // Cargar eventos del usuario desde localStorage
-            const allEvents = JSON.parse(localStorage.getItem('premiumEvents') || '[]');
-            const userEvents = allEvents.filter(event => event.userId === userId);
+            console.log('=== CARGANDO EVENTOS ===');
+            console.log('Usuario ID:', userId);
+            console.log('Datos del cliente:', clientData);
 
-            if (userEvents.length === 0) {
+            try {
+                // Cargar eventos del usuario desde localStorage
+                const allEvents = JSON.parse(localStorage.getItem('premiumEvents') || '[]');
+                console.log('Total eventos en localStorage:', allEvents.length);
+                console.log('Todos los eventos:', allEvents);
+
+                const userEvents = allEvents.filter(event => event.userId === userId);
+                console.log('Eventos filtrados para este usuario:', userEvents.length);
+                console.log('Eventos del usuario:', userEvents);
+
+                // Si no hay eventos para este usuario, crear eventos de muestra
+                if (userEvents.length === 0) {
+                    console.log('No hay eventos para este usuario, creando eventos de muestra...');
+
+                    // Crear eventos de muestra inmediatamente
+                    createSampleEventsForUser(userId);
+
+                    // Recargar después de crear
+                    console.log('Recargando eventos después de crear muestra...');
+                    setTimeout(() => {
+                        loadEvents();
+                    }, 300);
+                    return;
+                }
+
+                // Si tenemos eventos, mostrarlos
+                console.log('Mostrando eventos existentes...');
+                const eventsHtml = userEvents.map(event => `
+                    <div class="event-card">
+                        <div class="event-status ${event.status || 'active'}">
+                            ${(event.status || 'active') === 'active' ? 'ACTIVO' : 'FINALIZADO'}
+                        </div>
+                        <div class="event-title">
+                            <i class="fas fa-calendar-alt"></i>
+                            ${event.name || 'Evento sin nombre'}
+                        </div>
+                        <div class="event-info">
+                            <p><strong>Fecha:</strong> ${event.date ? new Date(event.date).toLocaleString() : 'Fecha no especificada'}</p>
+                            <p><strong>Fotos:</strong> ${event.photos || 0}/${event.totalPhotos || 'Ilimitado'}</p>
+                            <p><strong>ID:</strong> ${event.id || 'Sin ID'}</p>
+                        </div>
+                        <div class="event-actions">
+                            <button class="btn btn-primary" onclick="openEvent('${event.id}', 'capture')">
+                                <i class="fas fa-camera"></i> Captura
+                            </button>
+                            <button class="btn btn-primary" onclick="openEvent('${event.id}', 'moderation')">
+                                <i class="fas fa-check-circle"></i> Moderar
+                            </button>
+                            <button class="btn btn-primary" onclick="openEvent('${event.id}', 'projection')">
+                                <i class="fas fa-tv"></i> Proyectar
+                            </button>
+                            <button class="btn btn-secondary" onclick="openEvent('${event.id}', 'admin')">
+                                <i class="fas fa-cog"></i> Gestionar
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = `<div class="events-grid">${eventsHtml}</div>`;
+                updateStats(userEvents);
+
+                console.log('Eventos mostrados correctamente');
+
+            } catch (error) {
+                console.error('ERROR al cargar eventos:', error);
                 container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #666;">
-                        <i class="fas fa-calendar-alt" style="font-size: 3rem; margin-bottom: 20px; color: #667eea;"></i>
-                        <p>Aún no has creado ningún evento.</p>
-                        <p>¡Crea tu primer evento premium!</p>
+                    <div style="text-align: center; padding: 40px; color: #dc3545;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                        <p><strong>Error al cargar eventos</strong></p>
+                        <p>Revisa la consola para más detalles</p>
+                        <button onclick="loadEvents()" class="btn btn-primary" style="margin-top: 15px;">
+                            <i class="fas fa-redo"></i> Reintentar
+                        </button>
                     </div>
                 `;
-                updateStats(userEvents);
-                return;
             }
 
-            const eventsHtml = userEvents.map(event => `
-                <div class="event-card">
-                    <div class="event-status ${event.status}">
-                        ${event.status === 'active' ? 'ACTIVO' : 'FINALIZADO'}
-                    </div>
-                    <div class="event-title">
-                        <i class="fas fa-calendar-alt"></i>
-                        ${event.name}
-                    </div>
-                    <div class="event-info">
-                        <p><strong>Fecha:</strong> ${new Date(event.date).toLocaleString()}</p>
-                        <p><strong>Fotos:</strong> ${event.photos || 0}/${event.totalPhotos || 'Ilimitado'}</p>
-                        <p><strong>ID:</strong> ${event.id}</p>
-                    </div>
-                    <div class="event-actions">
-                        <button class="btn btn-primary" onclick="openEvent('${event.id}', 'capture')">
-                            <i class="fas fa-camera"></i> Captura
-                        </button>
-                        <button class="btn btn-primary" onclick="openEvent('${event.id}', 'moderation')">
-                            <i class="fas fa-check-circle"></i> Moderar
-                        </button>
-                        <button class="btn btn-primary" onclick="openEvent('${event.id}', 'projection')">
-                            <i class="fas fa-tv"></i> Proyectar
-                        </button>
-                        <button class="btn btn-secondary" onclick="openEvent('${event.id}', 'admin')">
-                            <i class="fas fa-cog"></i> Gestionar
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-
-            container.innerHTML = `<div class="events-grid">${eventsHtml}</div>`;
-            updateStats(userEvents);
+            console.log('=== FIN CARGA EVENTOS ===');
         }
 
         // Actualizar estadísticas
@@ -575,16 +665,123 @@
             formContainer.insertBefore(statusDiv, formTitle.nextSibling);
         }
 
-        // Abrir evento en nueva pestaña
+        // Abrir evento en nueva pestaña o sección
         function openEvent(eventId, type) {
+            console.log('Abriendo evento:', eventId, 'Tipo:', type);
+
             const urls = {
                 capture: `home.html?event=${eventId}&theme=premium`,
                 moderation: `moderador.html?event=${eventId}`,
                 projection: `proyeccion.html?event=${eventId}`,
-                admin: `cliente-panel.html`
+                admin: `#`  // Cambiar a # para manejar en la misma página
             };
 
-            window.open(urls[type], '_blank');
+            if (type === 'admin') {
+                // Para gestión, mostrar modal con opciones del evento
+                showEventManagementModal(eventId);
+            } else {
+                // Para otros tipos, abrir en nueva pestaña
+                window.open(urls[type], '_blank');
+            }
+        }
+
+        // Mostrar modal de gestión de evento
+        function showEventManagementModal(eventId) {
+            console.log('Mostrando gestión del evento:', eventId);
+
+            // Buscar el evento en localStorage
+            const allEvents = JSON.parse(localStorage.getItem('premiumEvents') || '[]');
+            const event = allEvents.find(e => e.id === eventId);
+
+            if (!event) {
+                alert('Evento no encontrado');
+                return;
+            }
+
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;';
+            modal.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 15px; max-width: 600px; margin: 50px auto; position: relative; max-height: 80vh; overflow-y: auto;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <i class="fas fa-cog" style="font-size: 3rem; color: #667eea; margin-bottom: 15px;"></i>
+                        <h3 style="color: #333; margin-bottom: 10px;">Gestionar Evento</h3>
+                        <h4 style="color: #666; margin-bottom: 20px;">${event.name}</h4>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+                            <i class="fas fa-info-circle" style="font-size: 2rem; color: #667eea; margin-bottom: 10px;"></i>
+                            <h5 style="margin-bottom: 5px;">Información</h5>
+                            <p style="font-size: 0.9rem; color: #666;">
+                                <strong>ID:</strong> ${event.id}<br>
+                                <strong>Estado:</strong> ${event.status === 'active' ? 'Activo' : 'Finalizado'}<br>
+                                <strong>Fotos:</strong> ${event.photos || 0}/${event.totalPhotos || 'Ilimitado'}
+                            </p>
+                        </div>
+
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+                            <i class="fas fa-calendar-alt" style="font-size: 2rem; color: #667eea; margin-bottom: 10px;"></i>
+                            <h5 style="margin-bottom: 5px;">Fecha</h5>
+                            <p style="font-size: 0.9rem; color: #666;">
+                                ${event.date ? new Date(event.date).toLocaleDateString() : 'No especificada'}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="border-top: 1px solid #eee; padding-top: 20px;">
+                        <h5 style="margin-bottom: 15px; color: #333;">Acciones del Evento</h5>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                            <button onclick="openEvent('${eventId}', 'capture')" class="btn btn-primary" style="padding: 10px;">
+                                <i class="fas fa-camera"></i><br>Capturar
+                            </button>
+                            <button onclick="openEvent('${eventId}', 'moderation')" class="btn btn-primary" style="padding: 10px;">
+                                <i class="fas fa-check-circle"></i><br>Moderar
+                            </button>
+                            <button onclick="openEvent('${eventId}', 'projection')" class="btn btn-primary" style="padding: 10px;">
+                                <i class="fas fa-tv"></i><br>Proyectar
+                            </button>
+                            <button onclick="deleteEvent('${eventId}')" class="btn" style="background: #dc3545; color: white; padding: 10px;">
+                                <i class="fas fa-trash"></i><br>Eliminar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                        <button onclick="closeModal()" class="btn" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Agregar listener para cerrar modal al hacer clic fuera
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+        }
+
+        // Eliminar evento
+        function deleteEvent(eventId) {
+            if (!confirm('¿Estás seguro de que quieres eliminar este evento? Esta acción no se puede deshacer.')) {
+                return;
+            }
+
+            const allEvents = JSON.parse(localStorage.getItem('premiumEvents') || '[]');
+            const filteredEvents = allEvents.filter(event => event.id !== eventId);
+
+            if (filteredEvents.length < allEvents.length) {
+                localStorage.setItem('premiumEvents', JSON.stringify(filteredEvents));
+                alert('Evento eliminado exitosamente');
+                closeModal();
+                loadEvents(); // Recargar la lista de eventos
+            } else {
+                alert('Error al eliminar el evento');
+            }
         }
 
         // Crear nuevo evento
@@ -621,8 +818,9 @@
         function showAdditionalEventModal(eventName, eventDate) {
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;';
             modal.innerHTML = `
-                <div class="modal-content" style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; margin: 50px auto; position: relative;">
+                <div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; margin: 50px auto; position: relative;">
                     <div style="text-align: center; margin-bottom: 20px;">
                         <i class="fas fa-lock" style="font-size: 3rem; color: #667eea; margin-bottom: 15px;"></i>
                         <h3 style="color: #333; margin-bottom: 10px;">Límite de Eventos Alcanzado</h3>
@@ -642,10 +840,10 @@
                     </div>
 
                     <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                        <button onclick="closeModal()" class="btn" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                        <button onclick="closeModal()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
                             Cancelar
                         </button>
-                        <button onclick="validateEventCode('${eventName}', '${eventDate}')" class="btn" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                        <button onclick="validateEventCode('${eventName}', '${eventDate}')" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
                             <i class="fas fa-check"></i> Validar Código
                         </button>
                     </div>
@@ -653,6 +851,13 @@
             `;
 
             document.body.appendChild(modal);
+
+            // Agregar listener para cerrar modal al hacer clic fuera
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
         }
 
         // Validar código de evento adicional
@@ -733,6 +938,57 @@
 
             // Recargar eventos y estadísticas
             loadEvents();
+        }
+
+        // Crear eventos de muestra para el usuario
+        function createSampleEventsForUser(userId) {
+            console.log('Creando eventos de muestra para usuario:', userId);
+
+            const sampleEvents = [
+                {
+                    id: `SAMPLE_${userId}_1`,
+                    name: 'Mi Primer Evento Premium',
+                    date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                    status: 'active',
+                    photos: 5,
+                    totalPhotos: null,
+                    userId: userId,
+                    userName: clientData.fullName,
+                    userEmail: clientData.email,
+                    created: new Date().toISOString(),
+                    urls: {
+                        capture: `home.html?event=SAMPLE_${userId}_1&theme=premium`,
+                        moderation: `moderador.html?event=SAMPLE_${userId}_1`,
+                        projection: `proyeccion.html?event=SAMPLE_${userId}_1`,
+                        admin: `cliente-panel.html`
+                    }
+                },
+                {
+                    id: `SAMPLE_${userId}_2`,
+                    name: 'Evento Familiar',
+                    date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+                    status: 'active',
+                    photos: 12,
+                    totalPhotos: null,
+                    userId: userId,
+                    userName: clientData.fullName,
+                    userEmail: clientData.email,
+                    created: new Date().toISOString(),
+                    urls: {
+                        capture: `home.html?event=SAMPLE_${userId}_2&theme=premium`,
+                        moderation: `moderador.html?event=SAMPLE_${userId}_2`,
+                        projection: `proyeccion.html?event=SAMPLE_${userId}_2`,
+                        admin: `cliente-panel.html`
+                    }
+                }
+            ];
+
+            // Guardar eventos en localStorage
+            const existingEvents = JSON.parse(localStorage.getItem('premiumEvents') || '[]');
+            const allEvents = [...existingEvents, ...sampleEvents];
+            localStorage.setItem('premiumEvents', JSON.stringify(allEvents));
+
+            console.log('Eventos de muestra creados:', sampleEvents);
         }
     </script>
 </body>

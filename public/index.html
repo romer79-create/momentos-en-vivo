@@ -708,14 +708,14 @@
                 <i class="fas fa-bars"></i>
             </button>
             <ul class="nav-links" id="navMenu">
-                <li><a href="#about">¿Quiénes Somos?</a></li>
                 <li><a href="#features">Características</a></li>
                 <li><a href="#services">Planes</a></li>
                 <li><a href="#faq">FAQ</a></li>
                 <li><a href="preguntas.html">Preguntas</a></li>
                 <li><a href="contacto.html">Contacto</a></li>
                 <li><a href="registro.html" style="background: linear-gradient(135deg, #e91e63, #f06292); color: white;">🎯 Demo Gratuita</a></li>
-                <li><a href="#" class="admin-btn" onclick="goToLogin()">Acceso Admin</a></li>
+                <li><a href="cliente-login.html" class="admin-btn" style="background: linear-gradient(135deg, #9c27b0, #673ab7); color: white;">Acceso Cliente</a></li>
+                <li><a href="admin-login.html" class="admin-btn">Acceso Admin</a></li>
             </ul>
         </nav>
     </header>
@@ -1388,9 +1388,14 @@
             });
         }
 
-        // Funciones del modal de login (simplificadas)
+        // Función del modal de login (simplificadas)
         function showLoginModal() {
             goToLogin();
+        }
+
+        // Función para ir al login de administrador
+        function goToLogin() {
+            window.location.href = 'login.html';
         }
 
         function closeLoginModal() {

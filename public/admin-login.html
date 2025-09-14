@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administración - Momentos en Vivo</title>
+    <title>Login Administrador - Momentos en Vivo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -93,6 +94,12 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .back-link {
             display: inline-block;
             margin-top: 20px;
@@ -156,14 +163,14 @@
 <body>
     <div class="login-container">
         <div class="logo">
-            <i class="fas fa-camera"></i>
+            <i class="fas fa-shield-alt"></i>
             Momentos en Vivo
         </div>
-        <div class="subtitle">Panel de Administración</div>
+        <div class="subtitle">Acceso Panel de Administración</div>
 
-        <form id="loginForm">
+        <form id="adminLoginForm">
             <div class="form-group">
-                <label for="username">Usuario</label>
+                <label for="username">Usuario Administrador</label>
                 <input type="text" id="username" name="username" required placeholder="Ingresa tu usuario">
             </div>
             <div class="form-group">
@@ -172,7 +179,7 @@
             </div>
             <button type="submit" class="btn" id="loginBtn">
                 <i class="fas fa-sign-in-alt"></i>
-                Iniciar Sesión
+                Acceder al Panel
             </button>
         </form>
 
@@ -185,40 +192,45 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             const loginBtn = document.getElementById('loginBtn');
             const messageDiv = document.getElementById('message');
 
             // Mostrar loading
             loginBtn.disabled = true;
-            loginBtn.innerHTML = '<span class="loading"></span>Iniciando sesión...';
+            loginBtn.innerHTML = '<span class="loading"></span>Verificando...';
 
             // Limpiar mensaje anterior
             messageDiv.style.display = 'none';
+            messageDiv.className = 'message';
 
             try {
-                // Aquí iría la llamada a la API de autenticación
-                // Por ahora, simulamos la autenticación
-                await new Promise(resolve => setTimeout(resolve, 1500)); // Simular delay
+                // Simular verificación de credenciales (en producción esto iría a una API)
+                await new Promise(resolve => setTimeout(resolve, 1500));
 
+                // Credenciales hardcodeadas para demo
                 if (username === 'admin' && password === 'admin123') {
-                    // Autenticación exitosa
+                    // Login exitoso
+                    messageDiv.textContent = '✅ Acceso concedido. Redirigiendo al panel...';
                     messageDiv.className = 'message success';
-                    messageDiv.textContent = '✅ Acceso concedido. Redirigiendo...';
                     messageDiv.style.display = 'block';
 
                     // Guardar sesión en localStorage
-                    localStorage.setItem('adminAuthenticated', 'true');
-                    localStorage.setItem('adminLoginTime', new Date().toISOString());
+                    const adminSession = {
+                        username: username,
+                        timestamp: new Date().getTime(),
+                        role: 'admin'
+                    };
+                    localStorage.setItem('adminSession', JSON.stringify(adminSession));
 
-                    // Redirigir después de 2 segundos
+                    // Redirigir al panel de administración
                     setTimeout(() => {
-                        window.location.href = '/admin.html';
-                    }, 2000);
+                        window.location.href = 'admin.html';
+                    }, 1500);
 
                 } else {
                     // Credenciales incorrectas
@@ -226,27 +238,35 @@
                 }
 
             } catch (error) {
-                messageDiv.className = 'message error';
                 messageDiv.textContent = '❌ ' + error.message;
+                messageDiv.className = 'message error';
                 messageDiv.style.display = 'block';
             } finally {
                 // Restaurar botón
                 loginBtn.disabled = false;
-                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Acceder al Panel';
             }
         });
 
         // Verificar si ya está autenticado
-        if (localStorage.getItem('adminAuthenticated') === 'true') {
-            const loginTime = new Date(localStorage.getItem('adminLoginTime'));
-            const now = new Date();
-            const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
+        window.onload = function() {
+            const adminSession = localStorage.getItem('adminSession');
+            if (adminSession) {
+                try {
+                    const session = JSON.parse(adminSession);
+                    const currentTime = new Date().getTime();
+                    const hoursDiff = (currentTime - session.timestamp) / (1000 * 60 * 60);
 
-            // Si la sesión es menor a 24 horas, redirigir automáticamente
-            if (hoursDiff < 24) {
-                window.location.href = '/admin.html';
+                    // Si la sesión es menor a 24 horas, redirigir automáticamente
+                    if (hoursDiff < 24 && session.role === 'admin') {
+                        window.location.href = 'admin.html';
+                    }
+                } catch (error) {
+                    // Si hay error en el JSON, limpiar la sesión
+                    localStorage.removeItem('adminSession');
+                }
             }
-        }
+        };
     </script>
 </body>
 </html>
