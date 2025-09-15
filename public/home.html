@@ -428,13 +428,27 @@
                 if (message) {
                     formData.append('message', message);
                 }
-                fetch(functionUrl, {
+                // Intentar con header primero, si falla usar query parameter
+                const url = new URL(functionUrl);
+                if (!isLocal) {
+                    url.searchParams.set('apiKey', API_KEY);
+                }
+
+                const fetchOptions = {
                     method: 'POST',
-                    body: formData,
-                    headers: {
+                    body: formData
+                };
+
+                if (isLocal) {
+                    fetchOptions.headers = {
                         'x-api-key': API_KEY
-                    }
-                })
+                    };
+                }
+
+                console.log('--- DEBUG Frontend: URL final:', url.toString());
+                console.log('--- DEBUG Frontend: Headers:', fetchOptions.headers);
+
+                fetch(url.toString(), fetchOptions)
                 .then(response => {
                     if (!response.ok) { throw new Error(`Error del servidor: ${response.status} ${response.statusText}`); }
                     return response.json();

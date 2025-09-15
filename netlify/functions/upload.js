@@ -16,12 +16,30 @@ const headers = {
 
 // Función de autenticación
 const authenticate = (event) => {
-  const apiKey = event.headers['x-api-key'] || event.queryStringParameters?.apiKey;
+  // Intentar múltiples formas de obtener la API key
+  let apiKey = event.headers['x-api-key'] ||
+               event.headers['X-API-Key'] ||
+               event.headers['X-Api-Key'] ||
+               event.queryStringParameters?.apiKey ||
+               event.queryStringParameters?.apikey;
+
   const expectedApiKey = process.env.API_KEY;
 
+  console.log('--- DEBUG AUTH: API Key recibida:', apiKey);
+  console.log('--- DEBUG AUTH: API Key esperada:', expectedApiKey);
+  console.log('--- DEBUG AUTH: Headers completos:', JSON.stringify(event.headers, null, 2));
+  console.log('--- DEBUG AUTH: Query params:', JSON.stringify(event.queryStringParameters, null, 2));
+
   if (!apiKey || apiKey !== expectedApiKey) {
-    return { statusCode: 401, headers, body: JSON.stringify({ message: 'API key inválida o faltante' }) };
+    console.log('--- DEBUG AUTH: Autenticación FALLIDA');
+    return { statusCode: 401, headers, body: JSON.stringify({
+      message: 'API key inválida o faltante',
+      received: apiKey ? 'API key presente pero inválida' : 'API key faltante',
+      expected: expectedApiKey ? 'API key configurada' : 'API key no configurada en entorno'
+    }) };
   }
+
+  console.log('--- DEBUG AUTH: Autenticación EXITOSA');
   return null; // Autenticación exitosa
 };
 
@@ -33,6 +51,10 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers, body: 'Method Not Allowed' };
   }
+
+  // Debug: Verificar variables de entorno
+  console.log('--- DEBUG ENV: API_KEY from env:', process.env.API_KEY);
+  console.log('--- DEBUG ENV: CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME);
 
   // Verificar autenticación
   const authError = authenticate(event);

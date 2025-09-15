@@ -16,9 +16,16 @@ const authenticate = (event) => {
   const apiKey = event.headers['x-api-key'] || event.queryStringParameters?.apiKey;
   const expectedApiKey = process.env.API_KEY;
 
+  console.log('--- DEBUG AUTH get-photos: API Key recibida:', apiKey);
+  console.log('--- DEBUG AUTH get-photos: API Key esperada:', expectedApiKey);
+  console.log('--- DEBUG AUTH get-photos: Headers:', JSON.stringify(event.headers, null, 2));
+
   if (!apiKey || apiKey !== expectedApiKey) {
+    console.log('--- DEBUG AUTH get-photos: Autenticación FALLIDA');
     return { statusCode: 401, headers, body: JSON.stringify({ message: 'API key inválida o faltante' }) };
   }
+
+  console.log('--- DEBUG AUTH get-photos: Autenticación EXITOSA');
   return null; // Autenticación exitosa
 };
 
