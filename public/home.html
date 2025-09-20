@@ -379,7 +379,8 @@
         const mirrorCheckbox = document.getElementById('mirror-checkbox');
         // Detectar si estamos en desarrollo local o producción
         const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const functionUrl = isLocal ? '/upload' : '/.netlify/functions/upload';
+        // Nuevo endpoint JSON/base64 para evitar problemas de multipart
+        const functionUrl = isLocal ? '/api/upload-base64' : '/api/upload-base64';
         const API_KEY = 'MiClaveSuperSecreta2024!@#';
 
         // Variables para controlar la cámara
@@ -419,42 +420,37 @@
 
         fileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
-            if (file) {
-                statusEl.textContent = "Procesando...";
-                const formData = new FormData();
-                formData.append('photo', file, 'foto_subida.jpg');
-                formData.append('eventId', eventId);
-                const message = messageInput.value.trim();
-                if (message) {
-                    formData.append('message', message);
-                }
-                // Intentar con header primero, si falla usar query parameter
-                const url = new URL(functionUrl);
+            if (!file) return;
+
+            statusEl.textContent = "Procesando...";
+            const reader = new FileReader();
+            reader.onload = () => {
+                const dataUrl = reader.result; // data:image/xxx;base64,....
+                const payload = {
+                    imageBase64: dataUrl,
+                    eventId,
+                    message: messageInput.value.trim() || ''
+                };
+
+                const url = new URL(functionUrl, window.location.origin);
                 if (!isLocal) {
                     url.searchParams.set('apiKey', API_KEY);
                 }
+                console.log('--- DEBUG: URL construida:', url.toString());
 
-                const fetchOptions = {
+                fetch(url.toString(), {
                     method: 'POST',
-                    body: formData
-                };
-
-                if (isLocal) {
-                    fetchOptions.headers = {
+                    headers: {
+                        'Content-Type': 'application/json',
                         'x-api-key': API_KEY
-                    };
-                }
-
-                console.log('--- DEBUG Frontend: URL final:', url.toString());
-                console.log('--- DEBUG Frontend: Headers:', fetchOptions.headers);
-
-                fetch(url.toString(), fetchOptions)
+                    },
+                    body: JSON.stringify(payload)
+                })
                 .then(response => {
                     if (!response.ok) { throw new Error(`Error del servidor: ${response.status} ${response.statusText}`); }
                     return response.json();
                 })
-                .then(data => {
-                    console.log(data.message);
+                .then(() => {
                     incrementPhotoCount();
                     showToast("¡Gracias! Tu foto fue enviada 🎉", 'success');
                     messageInput.value = '';
@@ -466,7 +462,12 @@
                     console.error('Error al subir la foto:', err);
                     showToast("Hubo un error al enviar. Intenta de nuevo.", 'error');
                 });
-            }
+            };
+            reader.onerror = (e) => {
+                console.error('Error leyendo archivo:', e);
+                showToast("No se pudo leer el archivo", 'error');
+            };
+            reader.readAsDataURL(file);
         });
 
         // Extraer eventId, theme y demo mode de la URL
@@ -767,60 +768,47 @@
                     ctx.drawImage(video, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
                 }
                 
-                canvas.toBlob(blob => {
-                    if (!blob) { 
-                        showToast("Error al capturar la imagen.", 'error'); 
-                        return; 
-                    }
-                    statusEl.textContent = "Enviando...";
-                    const formData = new FormData();
-                    formData.append('photo', blob, 'foto_celular.jpg');
-                    
-                    // Agregar el eventId
-                    formData.append('eventId', eventId);
-                    console.log('--- DEBUG Frontend: EventId agregado al FormData:', eventId);
-                    
-                    // Agregar el mensaje si existe
-                    const message = messageInput.value.trim();
-                    console.log('--- DEBUG Frontend: Mensaje a enviar:', message);
-                    if (message) {
-                        formData.append('message', message);
-                        console.log('--- DEBUG Frontend: Mensaje agregado al FormData');
-                    } else {
-                        console.log('--- DEBUG Frontend: No hay mensaje para enviar');
-                    }
+                // Convertir a Base64 y enviar como JSON al endpoint /api/upload-base64
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                statusEl.textContent = "Enviando...";
 
-                    // Debug: mostrar contenido del FormData
-                    for (let [key, value] of formData.entries()) {
-                        console.log('--- DEBUG Frontend FormData:', key, value);
-                    }
+                const payload = {
+                    imageBase64: dataUrl,
+                    eventId,
+                    message: messageInput.value.trim() || ''
+                };
 
-                    fetch(functionUrl, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'x-api-key': API_KEY
-                        }
-                    })
-                    .then(response => {
-                        if (!response.ok) { throw new Error(`Error del servidor: ${response.status} ${response.statusText}`); }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log(data.message);
-                        incrementPhotoCount(); // Incrementar contador después del envío exitoso
-                        showToast("¡Gracias! Tu foto fue enviada 🎉", 'success');
-                        // Limpiar el mensaje después del envío exitoso
-                        messageInput.value = '';
-                        charCount.textContent = '0';
-                        charCount.style.color = 'rgba(255,255,255,0.8)';
-                        setTimeout(() => updatePhotoCounter(), 4000);
-                    })
-                    .catch(err => {
-                        console.error('Error al subir la foto:', err);
-                        showToast("Hubo un error al enviar. Intenta de nuevo.", 'error');
-                    });
-                }, 'image/jpeg', 0.7); // Reducir calidad para comprimir más
+                const url = new URL(functionUrl, window.location.origin);
+                if (!isLocal) {
+                    url.searchParams.set('apiKey', API_KEY);
+                }
+                console.log('--- DEBUG: URL construida para captura:', url.toString());
+
+                fetch(url.toString(), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': API_KEY
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(response => {
+                    if (!response.ok) { throw new Error(`Error del servidor: ${response.status} ${response.statusText}`); }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data.message);
+                    incrementPhotoCount();
+                    showToast("¡Gracias! Tu foto fue enviada 🎉", 'success');
+                    messageInput.value = '';
+                    charCount.textContent = '0';
+                    charCount.style.color = 'rgba(255,255,255,0.8)';
+                    setTimeout(() => updatePhotoCounter(), 4000);
+                })
+                .catch(err => {
+                    console.error('Error al subir la foto:', err);
+                    showToast("Hubo un error al enviar. Intenta de nuevo.", 'error');
+                });
             }, 3000);
         });
 
@@ -1088,9 +1076,12 @@
                         formData.append('photo', blob, `photo_${Date.now()}.jpg`);
                         formData.append('eventId', eventId);
 
-                        const response = await fetch('/.netlify/functions/upload', {
+                        const response = await fetch('/api/upload', {
                             method: 'POST',
-                            body: formData
+                            body: formData,
+                            headers: {
+                                'x-api-key': API_KEY
+                            }
                         });
 
                         if (response.ok) {

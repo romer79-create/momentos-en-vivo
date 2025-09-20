@@ -1310,9 +1310,12 @@
                     formData.append('photo', blob, `photo_${Date.now()}.jpg`);
                     formData.append('eventId', eventId);
 
-                    const response = await fetch('/.netlify/functions/upload', {
+                    const response = await fetch('/api/upload', {
                         method: 'POST',
-                        body: formData
+                        body: formData,
+                        headers: {
+                            'x-api-key': 'MiClaveSuperSecreta2024!@#'
+                        }
                     });
 
                     if (response.ok) {

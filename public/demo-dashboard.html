@@ -593,19 +593,22 @@
         // Cargar datos de la demo desde localStorage
         function loadDemoData() {
             demoData = {
-                eventId: localStorage.getItem('demoId'),
-                eventName: localStorage.getItem('demoEventName'),
-                userEmail: localStorage.getItem('demoUserEmail'),
-                startTime: localStorage.getItem('demoStartTime'),
-                userId: localStorage.getItem('userId'),
-                photosSent: parseInt(localStorage.getItem(`photoCount_${localStorage.getItem('demoId')}`) || '0')
+                eventId: localStorage.getItem('demoId') || 'demo_001', // Usar demo_001 por defecto si no hay sesión
+                eventName: localStorage.getItem('demoEventName') || 'Demo de Prueba',
+                userEmail: localStorage.getItem('demoUserEmail') || 'demo@momentosenvivo.com',
+                startTime: localStorage.getItem('demoStartTime') || Date.now().toString(),
+                userId: localStorage.getItem('userId') || 'demo_user',
+                photosSent: parseInt(localStorage.getItem(`photoCount_${localStorage.getItem('demoId') || 'demo_001'}`) || '0')
             };
 
-            // Verificar si la demo existe
-            if (!demoData.eventId || !demoData.startTime) {
-                alert('No se encontró una sesión de demo activa. Serás redirigido.');
-                window.location.href = 'registro.html';
-                return;
+            // Si no hay sesión activa, crear una por defecto para mostrar las fotos
+            if (!localStorage.getItem('demoId')) {
+                localStorage.setItem('demoId', 'demo_001');
+                localStorage.setItem('demoEventName', 'Demo de Prueba');
+                localStorage.setItem('demoUserEmail', 'demo@momentosenvivo.com');
+                localStorage.setItem('demoStartTime', Date.now().toString());
+                localStorage.setItem('userId', 'demo_user');
+                console.log('✅ Sesión de demo creada por defecto');
             }
 
             const startTime = parseInt(demoData.startTime);
@@ -681,7 +684,7 @@
             });
 
             // Generar URLs
-            const captureUrl = `${baseUrl}/index.html?event=${eventId}&theme=demo-pink&demo=true`;
+            const captureUrl = `${baseUrl}/home.html?event=${eventId}&theme=demo-pink&demo=true`;
             const moderationUrl = `${baseUrl}/moderador.html?event=${eventId}`;
             const projectionUrl = `${baseUrl}/proyeccion.html?event=${eventId}`;
             const adminUrl = `${baseUrl}/admin.html`;
@@ -729,7 +732,11 @@
 
             try {
                 const eventId = demoData.eventId;
-                const response = await fetch(`${window.location.origin}/.netlify/functions/get-demo-photos?eventId=${eventId}`);
+                const response = await fetch(`https://us-central1-momentos-en-vivo.cloudfunctions.net/api1/get-demo-photos?eventId=${eventId}`, {
+                    headers: {
+                        'x-api-key': 'MiClaveSuperSecreta2024!@#'
+                    }
+                });
                 const data = await response.json();
 
                 if (!response.ok) {

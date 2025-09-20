@@ -1,0 +1,18 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /photos/{eventId}/{allPaths=**} {
+      // Permitir lectura pública para las fotos
+      allow read: if true;
+      // Solo funciones autenticadas pueden escribir
+      allow write: if request.auth != null ||
+                   (request.auth == null && request.resource.size < 10 * 1024 * 1024); // Máximo 10MB
+      allow delete: if request.auth != null;
+    }
+
+    // Reglas más restrictivas para otros archivos
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

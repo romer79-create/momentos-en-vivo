@@ -313,10 +313,8 @@
         document.documentElement.setAttribute('data-theme', theme);
 
         async function handleAction(action, photoId, cardElement) {
-            const url = isLocal ? `/${action}-photo` : `${NETLIFY_URL}/.netlify/functions/${action}-photo`;
-            const requestBody = isLocal
-                ? { filename: photoId, eventId: eventId }  // Para desarrollo local
-                : { public_id: photoId, eventId: eventId }; // Para producción Cloudinary
+            const url = isLocal ? `/api/${action}-photo` : `https://us-central1-momentos-en-vivo.cloudfunctions.net/api1/${action}-photo`;
+            const requestBody = { photoId: photoId, eventId: eventId };
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -342,7 +340,7 @@
         async function showShareButtons(photoId, cardElement) {
             try {
                 // Obtener la URL de la foto aprobada
-                const url = isLocal ? `/get-approved-photos?eventId=${eventId}` : `${NETLIFY_URL}/.netlify/functions/get-approved-photos?eventId=${eventId}`;
+                const url = isLocal ? `/api/get-approved-photos?eventId=${eventId}` : `https://us-central1-momentos-en-vivo.cloudfunctions.net/api1/get-approved-photos?eventId=${eventId}`;
                 const response = await fetch(url, {
                     headers: {
                         'x-api-key': API_KEY
@@ -373,7 +371,7 @@
                 }
 
                 // Generar URLs de compartir
-                const shareUrl = isLocal ? `/social-share?action=generate-share-urls&photoUrl=${encodeURIComponent(approvedPhoto.secure_url)}&eventId=${eventId}` : `${NETLIFY_URL}/.netlify/functions/social-share?action=generate-share-urls&photoUrl=${encodeURIComponent(approvedPhoto.secure_url)}&eventId=${eventId}`;
+                const shareUrl = isLocal ? `/api/social-share?photoId=${photoId}` : `https://us-central1-momentos-en-vivo.cloudfunctions.net/api1/social-share?photoId=${photoId}`;
                 const shareResponse = await fetch(shareUrl, {
                     headers: {
                         'x-api-key': API_KEY
@@ -428,15 +426,13 @@
 
         // Función para compartir en plataforma específica
         function shareToPlatform(url, platform, photoId) {
-            // Registrar el compartir (solo si no es local, ya que las funciones sociales pueden no estar disponibles)
-            if (!isLocal) {
-                const logUrl = `${NETLIFY_URL}/.netlify/functions/social-share?action=log-share&platform=${platform}&photoId=${photoId}&eventId=${eventId}`;
-                fetch(logUrl, {
-                    headers: {
-                        'x-api-key': API_KEY
-                    }
-                });
-            }
+            // Registrar el compartir
+            const logUrl = isLocal ? `/api/social-share?photoId=${photoId}&platform=${platform}` : `https://us-central1-momentos-en-vivo.cloudfunctions.net/api1/social-share?photoId=${photoId}&platform=${platform}`;
+            fetch(logUrl, {
+                headers: {
+                    'x-api-key': API_KEY
+                }
+            });
 
             // Abrir ventana de compartir
             const width = 600;
@@ -486,7 +482,7 @@
         }
 
         async function loadPendingPhotos() {
-            const url = isLocal ? `/get-photos?eventId=${eventId}` : `${NETLIFY_URL}/.netlify/functions/get-photos?eventId=${eventId}`;
+            const url = isLocal ? `/api/get-photos?eventId=${eventId}` : `https://us-central1-momentos-en-vivo.cloudfunctions.net/api1/get-photos?eventId=${eventId}`;
             const response = await fetch(url, {
                 headers: {
                     'x-api-key': API_KEY

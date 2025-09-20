@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /photos/{photoId} {
+      // Permitir lectura de fotos públicas
+      allow read: if true;
+      // Solo funciones autenticadas pueden escribir
+      allow write: if request.auth != null || resource == null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+
+    // Reglas para otros documentos
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

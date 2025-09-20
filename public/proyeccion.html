@@ -283,9 +283,9 @@
         // Aplicar tema
         document.documentElement.setAttribute('data-theme', theme);
 
-        // Set upload button href
+        // Set upload button href to the universal capture page (home.html)
         document.getElementById('upload-btn').onclick = () => {
-            window.location.href = `index.html?event=${eventId}&theme=${theme}`;
+            window.location.href = `home.html?event=${eventId}&theme=${theme}`;
         };
 
         // Generar QR dinámicamente con la URL de la proyección (para votación)
@@ -393,7 +393,7 @@
 
         async function fetchApprovedPhotos() {
             try {
-                const url = isLocal ? `/get-approved-photos?eventId=${eventId}` : `${NETLIFY_URL}/.netlify/functions/get-approved-photos?eventId=${eventId}`;
+                const url = isLocal ? `/api/get-approved-photos?eventId=${eventId}` : `https://us-central1-momentos-en-vivo.cloudfunctions.net/api1/get-approved-photos?eventId=${eventId}`;
                 const response = await fetch(url, {
                     headers: {
                         'x-api-key': API_KEY
@@ -417,14 +417,29 @@
                 });
 
                 const newPhoto = processedPhotos.find(p => !knownPhotoIds.has(p.asset_id));
+                const hadPhotosBefore = photos.length > 0;
                 photos = processedPhotos;
                 photos.forEach(p => knownPhotoIds.add(p.asset_id));
                 placeholder.style.display = photos.length > 0 ? 'none' : 'block';
-                if (newPhoto) {
-                    console.log("¡Nueva foto detectada! Mostrando ahora:", newPhoto.public_id);
-                    displayPhoto(newPhoto);
-                    clearInterval(slideshowInterval);
-                    slideshowInterval = setInterval(showNextPhotoInLoop, 7000);
+
+                if (photos.length > 0) {
+                    // Si es la primera vez que cargamos fotos, iniciar slideshow
+                    if (!hadPhotosBefore) {
+                        console.log("🎬 Iniciando slideshow con", photos.length, "fotos");
+                        showNextPhotoInLoop();
+                        slideshowInterval = setInterval(showNextPhotoInLoop, 7000);
+                    }
+                    // Si hay una nueva foto, mostrarla inmediatamente
+                    else if (newPhoto) {
+                        console.log("¡Nueva foto detectada! Mostrando ahora:", newPhoto.public_id);
+                        displayPhoto(newPhoto);
+                    }
+                } else {
+                    // No hay fotos, detener slideshow
+                    if (slideshowInterval) {
+                        clearInterval(slideshowInterval);
+                        slideshowInterval = null;
+                    }
                 }
             } catch (error) {
                 console.error("Error cargando fotos:", error);
@@ -433,10 +448,7 @@
 
         async function start() {
             await fetchApprovedPhotos();
-            if (photos.length > 0) {
-                showNextPhotoInLoop();
-            }
-            slideshowInterval = setInterval(showNextPhotoInLoop, 7000);
+            // Iniciar verificación periódica de nuevas fotos cada 10 segundos
             setInterval(fetchApprovedPhotos, 10000);
         }
 

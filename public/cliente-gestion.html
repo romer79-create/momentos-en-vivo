@@ -514,7 +514,11 @@
                 console.log('📸 Cargando fotos para evento:', currentEvent.id);
 
                 // Intentar cargar fotos reales del evento desde la API
-                const response = await fetch(`${window.location.origin}/.netlify/functions/get-demo-photos?eventId=${currentEvent.id}`);
+                const response = await fetch(`https://us-central1-momentos-en-vivo.cloudfunctions.net/api1/get-demo-photos?eventId=${currentEvent.id}`, {
+                    headers: {
+                        'x-api-key': 'MiClaveSuperSecreta2024!@#'
+                    }
+                });
                 const data = await response.json();
 
                 if (response.ok && data.photos && data.photos.length > 0) {
@@ -571,7 +575,11 @@
                 console.log('📊 Actualizando estadísticas para evento:', currentEvent.id);
 
                 // Intentar obtener estadísticas reales desde la API
-                const response = await fetch(`${window.location.origin}/.netlify/functions/get-demo-photos?eventId=${currentEvent.id}`);
+                const response = await fetch(`https://us-central1-momentos-en-vivo.cloudfunctions.net/api1/get-demo-photos?eventId=${currentEvent.id}`, {
+                    headers: {
+                        'x-api-key': 'MiClaveSuperSecreta2024!@#'
+                    }
+                });
                 const data = await response.json();
 
                 if (response.ok && data.photos) {
