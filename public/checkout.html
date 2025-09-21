@@ -325,120 +325,20 @@
 
         <!-- Checkout Content -->
         <div class="checkout-content">
-            <!-- Plan Details -->
-            <div class="plan-card">
-                <div class="plan-badge">MÁS POPULAR</div>
-                <div class="plan-title">
-                    <i class="fas fa-star"></i>
-                    Plan Premium Completo
-                </div>
-                <div class="plan-price">$29.990<span>/mes</span></div>
-                <ul class="plan-features">
-                    <li><i class="fas fa-check"></i> Fotos ilimitadas por evento</li>
-                    <li><i class="fas fa-check"></i> Descargas ZIP completas</li>
-                    <li><i class="fas fa-check"></i> Múltiples eventos simultáneos</li>
-                    <li><i class="fas fa-check"></i> Personalización completa</li>
-                    <li><i class="fas fa-check"></i> Soporte técnico prioritario</li>
-                    <li><i class="fas fa-check"></i> Sin marca de agua</li>
-                </ul>
-            </div>
-
-            <!-- Payment Form -->
-            <form class="payment-form" id="paymentForm">
-                <!-- Billing Information -->
-                <div class="form-section">
-                    <h3><i class="fas fa-user"></i> Información de Facturación</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="firstName">Nombre</label>
-                            <input type="text" id="firstName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="lastName">Apellido</label>
-                            <input type="text" id="lastName" required>
-                        </div>
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="email">Correo Electrónico</label>
-                        <input type="email" id="email" required>
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="company">Empresa (Opcional)</label>
-                        <input type="text" id="company">
-                    </div>
-                </div>
-
-                <!-- Payment Method -->
-                <div class="form-section">
-                    <h3><i class="fas fa-credit-card"></i> Método de Pago</h3>
-                    <div class="payment-methods">
-                        <div class="payment-method selected" data-method="card">
-                            <i class="fas fa-credit-card"></i>
-                            <span>Tarjeta</span>
-                        </div>
-                        <div class="payment-method" data-method="paypal">
-                            <i class="fab fa-paypal"></i>
-                            <span>PayPal</span>
-                        </div>
-                        <div class="payment-method" data-method="transfer">
-                            <i class="fas fa-university"></i>
-                            <span>Transferencia</span>
-                        </div>
-                    </div>
-
-                    <!-- Card Details -->
-                    <div id="cardDetails" style="margin-top: 20px;">
-                        <div class="form-row">
-                            <div class="form-group full-width">
-                                <label for="cardNumber">Número de Tarjeta</label>
-                                <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" required>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="expiryDate">Fecha de Expiración</label>
-                                <input type="text" id="expiryDate" placeholder="MM/AA" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="cvv">CVV</label>
-                                <input type="text" id="cvv" placeholder="123" required>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Terms and Conditions -->
-                <div class="terms">
-                    <label>
-                        <input type="checkbox" id="terms" required>
-                        <span>Acepto los <a href="#" onclick="showTerms()">términos y condiciones</a>, la <a href="#" onclick="showPrivacy()">política de privacidad</a> y autorizo el cargo mensual automático de $29.990.</span>
-                    </label>
-                </div>
-
-                <!-- Checkout Actions -->
-                <div class="checkout-actions">
+            <div style="text-align: center; padding: 40px;">
+                <i class="fas fa-info-circle" style="font-size: 4rem; color: #667eea; margin-bottom: 20px;"></i>
+                <h2 style="color: #333; margin-bottom: 20px;">Checkout Temporalmente Deshabilitado</h2>
+                <p style="font-size: 1.1rem; color: #666; margin-bottom: 30px;">
+                    La activación de cuentas premium se realiza únicamente a través de un código generado por el panel de administración.
+                </p>
+                <p style="font-size: 1rem; color: #888;">
+                    Si has adquirido una licencia, recibirás el código de activación por correo electrónico.
+                </p>
+                <div style="margin-top: 40px;">
                     <button type="button" class="btn btn-secondary" onclick="goBack()">
-                        <i class="fas fa-arrow-left"></i> Volver
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-lock"></i> Pagar $29.990
+                        <i class="fas fa-arrow-left"></i> Volver al Inicio
                     </button>
                 </div>
-            </form>
-
-            <!-- Loading State -->
-            <div class="loading" id="loadingState">
-                <i class="fas fa-spinner"></i>
-                <h3>Procesando Pago...</h3>
-                <p>Por favor espera mientras verificamos tu información</p>
-            </div>
-
-            <!-- Success Message -->
-            <div class="success-message" id="successMessage">
-                <i class="fas fa-check-circle"></i>
-                <h2>¡Pago Exitoso!</h2>
-                <p>Tu cuenta premium ha sido activada.</p>
-                <p>Redirigiendo al panel de cliente...</p>
             </div>
         </div>
     </div>

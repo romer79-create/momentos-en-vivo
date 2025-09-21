@@ -513,6 +513,14 @@
 
             clientData = JSON.parse(registeredUser);
 
+            // Inicializar contador de eventos creados si no existe
+            if (!clientData.eventsCreated) {
+                const allEvents = JSON.parse(localStorage.getItem('premiumEvents') || '[]');
+                const userEvents = allEvents.filter(event => event.userId === clientData.id);
+                clientData.eventsCreated = userEvents.length;
+                localStorage.setItem('registeredUser', JSON.stringify(clientData));
+            }
+
             // Mostrar información del usuario
             const userInfoEl = document.getElementById('userInfo');
             userInfoEl.innerHTML = `
@@ -612,7 +620,7 @@
 
         // Actualizar estadísticas
         function updateStats(events) {
-            const totalEvents = events.length;
+            const totalEvents = clientData.eventsCreated || 0;
             const totalPhotos = events.reduce((acc, event) => acc + (event.photos || 0), 0);
             const activeEvents = events.filter(event => event.status === 'active').length;
             const eventLimit = clientData.eventLimit || 1;
@@ -799,12 +807,11 @@
                 return;
             }
 
-            // Verificar límite de eventos premium
-            const allEvents = JSON.parse(localStorage.getItem('premiumEvents') || '[]');
-            const userEvents = allEvents.filter(event => event.userId === clientData.id);
+            // Verificar límite de eventos premium basado en eventos creados
+            const eventsCreated = clientData.eventsCreated || 0;
+            const eventLimit = clientData.eventLimit || 1;
 
-            // Verificar límite base de 1 evento
-            if (userEvents.length >= (clientData.eventLimit || 1)) {
+            if (eventsCreated >= eventLimit) {
                 // Mostrar modal para código de evento adicional
                 showAdditionalEventModal(eventName, eventDate);
                 return;
@@ -930,6 +937,10 @@
             allEvents.push(newEvent);
             localStorage.setItem('premiumEvents', JSON.stringify(allEvents));
 
+            // Incrementar contador permanente de eventos creados
+            clientData.eventsCreated = (clientData.eventsCreated || 0) + 1;
+            localStorage.setItem('registeredUser', JSON.stringify(clientData));
+
             alert(`Evento "${eventName}" creado exitosamente para ${new Date(eventDate).toLocaleString()}!`);
 
             // Limpiar formulario
@@ -987,6 +998,10 @@
             const existingEvents = JSON.parse(localStorage.getItem('premiumEvents') || '[]');
             const allEvents = [...existingEvents, ...sampleEvents];
             localStorage.setItem('premiumEvents', JSON.stringify(allEvents));
+
+            // Actualizar contador de eventos creados para incluir los eventos de muestra
+            clientData.eventsCreated = (clientData.eventsCreated || 0) + sampleEvents.length;
+            localStorage.setItem('registeredUser', JSON.stringify(clientData));
 
             console.log('Eventos de muestra creados:', sampleEvents);
         }
