@@ -1423,6 +1423,44 @@
             card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
             observer.observe(card);
         });
+
+        // Función para registrar visita a la página
+        async function trackPageVisit() {
+            try {
+                const visitData = {
+                    page: 'index',
+                    userAgent: navigator.userAgent,
+                    referrer: document.referrer,
+                    timestamp: new Date().toISOString(),
+                    url: window.location.href
+                };
+
+                // Solo enviar si no es una recarga de página (evitar duplicados)
+                const lastVisit = localStorage.getItem('lastPageVisit');
+                const now = Date.now();
+
+                if (!lastVisit || (now - parseInt(lastVisit)) > 30000) { // 30 segundos mínimo entre visitas
+                    const response = await fetch('/api/track-visit', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(visitData)
+                    });
+
+                    if (response.ok) {
+                        localStorage.setItem('lastPageVisit', now.toString());
+                        console.log('Visita registrada exitosamente');
+                    }
+                }
+            } catch (error) {
+                console.log('Error al registrar visita:', error);
+                // No mostrar error al usuario, solo log
+            }
+        }
+
+        // Registrar visita cuando se carga la página
+        trackPageVisit();
     </script>
 </body>
 </html>

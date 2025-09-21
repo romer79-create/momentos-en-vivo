@@ -497,6 +497,114 @@ app.get('/social-share', async (req, res) => {
   }
 });
 
+// TRACK PAGE VISIT
+app.post('/track-visit', async (req, res) => {
+  try {
+    const { page, userAgent, referrer, timestamp } = req.body || {};
+
+    // Crear documento de visita
+    const visitData = {
+      page: page || 'index',
+      userAgent: userAgent || '',
+      referrer: referrer || '',
+      ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress || '',
+      timestamp: timestamp || admin.firestore.FieldValue.serverTimestamp(),
+      date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+      hour: new Date().getHours()
+    };
+
+    // Guardar en Firestore
+    await admin.firestore().collection('pageVisits').add(visitData);
+
+    res.json({ success: true });
+
+  } catch (error) {
+    console.error('Error tracking visit:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// GET VISIT STATISTICS
+app.get('/get-visit-stats', authenticate, async (req, res) => {
+  try {
+    const { period = '30' } = req.query; // días
+    const days = parseInt(period);
+
+    // Calcular fecha límite
+    const limitDate = new Date();
+    limitDate.setDate(limitDate.getDate() - days);
+
+    // Obtener visitas del período
+    const visitsRef = admin.firestore().collection('pageVisits');
+    const snapshot = await visitsRef
+      .where('timestamp', '>=', admin.firestore.Timestamp.fromDate(limitDate))
+      .orderBy('timestamp', 'desc')
+      .get();
+
+    let visits = [];
+    snapshot.forEach(doc => {
+      visits.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+
+    // Calcular estadísticas
+    const totalVisits = visits.length;
+    const uniqueIPs = [...new Set(visits.map(v => v.ip))].length;
+
+    // Visitas por día (últimos 7 días)
+    const visitsByDay = {};
+    const last7Days = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      last7Days.push(dateStr);
+      visitsByDay[dateStr] = 0;
+    }
+
+    visits.forEach(visit => {
+      if (last7Days.includes(visit.date)) {
+        visitsByDay[visit.date]++;
+      }
+    });
+
+    // Visitas por hora (últimas 24 horas)
+    const visitsByHour = {};
+    for (let i = 23; i >= 0; i--) {
+      const hour = (new Date().getHours() - i + 24) % 24;
+      visitsByHour[hour] = 0;
+    }
+
+    visits.forEach(visit => {
+      if (visit.hour !== undefined) {
+        visitsByHour[visit.hour]++;
+      }
+    });
+
+    // Páginas más visitadas
+    const pageStats = {};
+    visits.forEach(visit => {
+      const page = visit.page || 'index';
+      pageStats[page] = (pageStats[page] || 0) + 1;
+    });
+
+    res.json({
+      totalVisits,
+      uniqueVisitors: uniqueIPs,
+      visitsByDay,
+      visitsByHour,
+      pageStats,
+      period: `${days} días`
+    });
+
+  } catch (error) {
+    console.error('Error getting visit stats:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 // Health check simple (rutas redundantes por si el normalizador no aplica en algún entorno)
 app.get('/health', (_req, res) => {
   res.json({ ok: true, time: new Date().toISOString(), route: '/health' });
