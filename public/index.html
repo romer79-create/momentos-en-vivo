@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Masamune Code - Sistema de Captura Fotográfica para Eventos</title>
-    <meta name="description" content="Masamune Code - Sistema profesional de captura fotográfica en tiempo real para bodas, fiestas y eventos corporativos. Tecnología innovadora para momentos inolvidables.">
+    <meta name="description"
+        content="Masamune Code - Sistema profesional de captura fotográfica en tiempo real para bodas, fiestas y eventos corporativos. Tecnología innovadora para momentos inolvidables.">
     <link rel="icon" type="image/png" href="https://i.imgur.com/HQVCZdN.png">
     <link rel="shortcut icon" type="image/png" href="https://i.imgur.com/HQVCZdN.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
     <style>
         * {
             margin: 0;
@@ -20,7 +31,8 @@
             line-height: 1.6;
             color: #333;
             background: #f8f9fa;
-            padding-top: 80px; /* Space for fixed header */
+            padding-top: 80px;
+            /* Space for fixed header */
         }
 
         .container {
@@ -38,7 +50,7 @@
             left: 0;
             right: 0;
             z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         nav {
@@ -66,7 +78,7 @@
             width: auto;
             margin-right: 12px;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .logo span {
@@ -91,7 +103,7 @@
         }
 
         .nav-toggle:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         /* Mobile Navigation Menu */
@@ -132,7 +144,7 @@
         }
 
         .nav-links.mobile-menu a:hover {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             transform: none;
         }
 
@@ -152,8 +164,17 @@
         }
 
         .nav-links a:hover {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             transform: translateY(-2px);
+        }
+
+        .nav-links .manual-link {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-links .manual-link:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .admin-btn {
@@ -169,7 +190,7 @@
 
         /* Hero Section */
         .hero {
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
             background-size: cover;
             background-position: center;
             color: white;
@@ -180,7 +201,7 @@
         .hero h1 {
             font-size: 3.5rem;
             margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         .hero p {
@@ -206,7 +227,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             display: inline-block;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         .btn-primary {
@@ -216,7 +237,7 @@
 
         .btn-primary:hover {
             transform: translateY(-3px);
-            box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
         }
 
         .btn-secondary {
@@ -226,7 +247,7 @@
         }
 
         .btn-secondary:hover {
-            background: rgba(255,255,255,0.9);
+            background: rgba(255, 255, 255, 0.9);
             transform: translateY(-3px);
         }
 
@@ -253,14 +274,14 @@
             background: white;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             text-align: center;
             transition: transform 0.3s ease;
         }
 
         .feature-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
 
         .feature-icon {
@@ -303,7 +324,7 @@
             background: white;
             padding: 40px 30px;
             border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             text-align: center;
             transition: all 0.3s ease;
             position: relative;
@@ -311,7 +332,7 @@
 
         .plan-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
         }
 
         .plan-card.featured {
@@ -392,7 +413,7 @@
         }
 
         .contact-item {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             padding: 30px;
             border-radius: 10px;
             backdrop-filter: blur(10px);
@@ -464,11 +485,11 @@
             transform: translateY(-3px);
         }
 
-/* Contact Form */
+        /* Contact Form */
         .contact-form {
             max-width: 600px;
             margin: 40px auto 0;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             padding: 30px;
             border-radius: 10px;
             backdrop-filter: blur(10px);
@@ -491,12 +512,13 @@
             font-weight: 600;
         }
 
-        .contact-form input, .contact-form textarea {
+        .contact-form input,
+        .contact-form textarea {
             padding: 12px;
             margin-bottom: 15px;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 8px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             color: white;
             font-size: 1rem;
         }
@@ -521,7 +543,7 @@
         .contact-form button:hover {
             background: #ffed4e;
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         /* Modal de Login */
@@ -532,9 +554,105 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.8);
             z-index: 1000;
             animation: fadeIn 0.3s ease;
+        }
+
+        /* Popup de Demo */
+        .demo-popup {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            animation: slideUp 0.5s ease;
+            overflow: hidden;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .demo-popup-header {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            padding: 15px 20px;
+            position: relative;
+        }
+
+        .demo-popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+
+        .demo-popup-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .demo-popup-content {
+            padding: 20px;
+        }
+
+        .demo-popup h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.3rem;
+            color: #333;
+        }
+
+        .demo-popup p {
+            margin: 0 0 15px 0;
+            color: #666;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .demo-popup .btn {
+            width: 100%;
+            margin-top: 10px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .demo-popup .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
+        }
+
+        @media (max-width: 480px) {
+            .demo-popup {
+                width: calc(100vw - 40px);
+                right: 10px;
+                bottom: 10px;
+            }
         }
 
         .modal-content {
@@ -544,18 +662,30 @@
             border-radius: 15px;
             width: 90%;
             max-width: 400px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             animation: slideIn 0.3s ease;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .close {
@@ -625,7 +755,9 @@
                 margin-bottom: 15px;
             }
 
-            .features-grid, .service-plans, .contact-info {
+            .features-grid,
+            .service-plans,
+            .contact-info {
                 grid-template-columns: 1fr;
             }
 
@@ -679,7 +811,9 @@
                 font-size: 0.95rem;
             }
 
-            .features h2, .services h2, .contact h2 {
+            .features h2,
+            .services h2,
+            .contact h2 {
                 font-size: 2rem;
             }
 
@@ -701,6 +835,7 @@
         }
     </style>
 </head>
+
 <body>
     <header>
         <nav class="container">
@@ -713,8 +848,12 @@
                 <li><a href="#faq">FAQ</a></li>
                 <li><a href="preguntas.html">Preguntas</a></li>
                 <li><a href="contacto.html">Contacto</a></li>
-                <li><a href="registro.html" style="background: linear-gradient(135deg, #e91e63, #f06292); color: white;">🎯 Demo Gratuita</a></li>
-                <li><a href="cliente-login.html" class="admin-btn" style="background: linear-gradient(135deg, #9c27b0, #673ab7); color: white;">Acceso Cliente</a></li>
+                <li><a href="registro.html"
+                        style="background: linear-gradient(135deg, #e91e63, #f06292); color: white;">🎯 Demo
+                        Gratuita</a></li>
+                <li><a href="cliente-login.html" class="admin-btn"
+                        style="background: linear-gradient(135deg, #9c27b0, #673ab7); color: white;">Acceso Cliente</a>
+                </li>
                 <li><a href="admin-login.html" class="admin-btn">Acceso Admin</a></li>
             </ul>
         </nav>
@@ -723,7 +862,8 @@
     <section class="hero">
         <div class="container">
             <h1>Captura los Momentos Más Importantes de tu Evento</h1>
-            <p>Sistema profesional de captura fotográfica en tiempo real desarrollado por <strong>Masamune Code</strong> para bodas, fiestas y eventos corporativos</p>
+            <p>Sistema profesional de captura fotográfica en tiempo real desarrollado por <strong>Masamune Code</strong>
+                para bodas, fiestas y eventos corporativos</p>
             <div class="cta-buttons">
                 <a href="#services" class="btn btn-primary">Más Información</a>
                 <a href="#contact" class="btn btn-secondary">Contactar</a>
@@ -731,25 +871,35 @@
         </div>
     </section>
 
-    <section id="about" class="features" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <section id="about" class="features"
+        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
         <div class="container">
             <div style="max-width: 700px; margin: 0 auto; text-align: center;">
                 <h2 style="margin-bottom: 30px; font-size: 2.2rem;">¿Quiénes Somos?</h2>
-                <div style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
+                <div
+                    style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
                     <div style="font-size: 1.1rem; margin-bottom: 15px; opacity: 0.9;">
-                        <i class="fas fa-user-circle" style="font-size: 2.5rem; margin-bottom: 15px; color: #ffd700;"></i>
+                        <i class="fas fa-user-circle"
+                            style="font-size: 2.5rem; margin-bottom: 15px; color: #ffd700;"></i>
                     </div>
                     <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 20px; font-weight: 300;">
-                        Hola, soy <strong>Jorge Romero</strong>. Mi pasión por la tecnología y la búsqueda constante de nuevos desafíos son el motor detrás de este proyecto.
+                        Hola, soy <strong>Jorge Romero</strong>. Mi pasión por la tecnología y la búsqueda constante de
+                        nuevos desafíos son el motor detrás de este proyecto.
                     </p>
                     <p style="font-size: 1rem; line-height: 1.6; margin-bottom: 20px; font-style: italic;">
-                        La idea de "Momentos en Vivo" nació de la mejor manera: entre charlas con amigos y una chispa de curiosidad. Impulsado por sus sugerencias y una profunda investigación, me animé a transformar esa inspiración en una realidad tangible.
+                        La idea de "Momentos en Vivo" nació de la mejor manera: entre charlas con amigos y una chispa de
+                        curiosidad. Impulsado por sus sugerencias y una profunda investigación, me animé a transformar
+                        esa inspiración en una realidad tangible.
                     </p>
                     <p style="font-size: 1rem; line-height: 1.6; margin-bottom: 20px;">
-                        Este no es solo un software, es un proyecto personal construido desde cero con enorme esfuerzo y dedicación. Cada detalle ha sido pensado para ofrecer una experiencia única, interactiva y divertida en tus eventos.
+                        Este no es solo un software, es un proyecto personal construido desde cero con enorme esfuerzo y
+                        dedicación. Cada detalle ha sido pensado para ofrecer una experiencia única, interactiva y
+                        divertida en tus eventos.
                     </p>
                     <p style="font-size: 1rem; line-height: 1.6; margin-bottom: 0;">
-                        Espero que "Momentos en Vivo" sea el puntapié inicial de muchos otros proyectos innovadores a futuro, siempre con el objetivo de conectar a las personas a través de la tecnología. <strong>Gracias por ser parte de este comienzo.</strong>
+                        Espero que "Momentos en Vivo" sea el puntapié inicial de muchos otros proyectos innovadores a
+                        futuro, siempre con el objetivo de conectar a las personas a través de la tecnología.
+                        <strong>Gracias por ser parte de este comienzo.</strong>
                     </p>
                 </div>
             </div>
@@ -765,42 +915,48 @@
                         <i class="fas fa-bolt"></i>
                     </div>
                     <h3>Captura en Tiempo Real</h3>
-                    <p>Fotos tomadas al instante por los invitados, sin interrupciones en el evento. Cada momento queda registrado automáticamente.</p>
+                    <p>Fotos tomadas al instante por los invitados, sin interrupciones en el evento. Cada momento queda
+                        registrado automáticamente.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-users"></i>
                     </div>
                     <h3>Participación Activa</h3>
-                    <p>Involucra a todos tus invitados. Cada persona puede contribuir con sus fotos, creando un álbum colaborativo único.</p>
+                    <p>Involucra a todos tus invitados. Cada persona puede contribuir con sus fotos, creando un álbum
+                        colaborativo único.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-shield-alt"></i>
                     </div>
                     <h3>Moderación Profesional</h3>
-                    <p>Sistema de aprobación automática y manual para mantener la calidad y el contenido apropiado en tu evento.</p>
+                    <p>Sistema de aprobación automática y manual para mantener la calidad y el contenido apropiado en tu
+                        evento.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-cloud-download-alt"></i>
                     </div>
                     <h3>Descarga Instantánea</h3>
-                    <p>Recibe todas las fotos en un archivo ZIP comprimido al finalizar el evento. Sin complicaciones técnicas.</p>
+                    <p>Recibe todas las fotos en un archivo ZIP comprimido al finalizar el evento. Sin complicaciones
+                        técnicas.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-mobile-alt"></i>
                     </div>
                     <h3>100% Móvil</h3>
-                    <p>Compatible con smartphones y tablets. Funciona en cualquier dispositivo con cámara y conexión a internet.</p>
+                    <p>Compatible con smartphones y tablets. Funciona en cualquier dispositivo con cámara y conexión a
+                        internet.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-cogs"></i>
                     </div>
                     <h3>Soporte Técnico</h3>
-                    <p>Asistencia técnica completa durante el evento. Nuestro equipo está disponible para resolver cualquier inconveniente.</p>
+                    <p>Asistencia técnica completa durante el evento. Nuestro equipo está disponible para resolver
+                        cualquier inconveniente.</p>
                 </div>
             </div>
         </div>
@@ -811,12 +967,14 @@
             <h2>¿Interesado en Nuestros Servicios?</h2>
             <div class="service-plans">
                 <div class="plan-card featured" style="max-width: 600px; margin: 0 auto;">
-                    <div style="background: linear-gradient(135deg, #25D366, #128C7E); color: white; padding: 15px; border-radius: 15px 15px 0 0; margin: -40px -30px 30px -30px;">
+                    <div
+                        style="background: linear-gradient(135deg, #25D366, #128C7E); color: white; padding: 15px; border-radius: 15px 15px 0 0; margin: -40px -30px 30px -30px;">
                         <h3 style="margin: 0; color: white; font-size: 1.5rem;">💬 Contactanos por WhatsApp</h3>
                         <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 0.9rem;">Conversemos sobre tu evento</p>
                     </div>
                     <h3 style="font-size: 2rem; margin-bottom: 10px;">Sistema Profesional de Fotografía</h3>
-                    <div style="background: rgba(37, 211, 102, 0.1); border: 2px solid #25D366; border-radius: 10px; padding: 20px; margin: 20px 0; text-align: center;">
+                    <div
+                        style="background: rgba(37, 211, 102, 0.1); border: 2px solid #25D366; border-radius: 10px; padding: 20px; margin: 20px 0; text-align: center;">
                         <p style="color: #128C7E; font-weight: bold; margin: 0; font-size: 1.1rem;">
                             📱 <strong>WhatsApp: 3764105310</strong>
                         </p>
@@ -825,14 +983,18 @@
                         </p>
                     </div>
                     <div style="text-align: center; margin: 30px 0;">
-                        <a href="https://wa.me/543764105310?text=Hola,%20me%20gustaría%20información%20sobre%20el%20sistema%20de%20fotografía%20para%20eventos" target="_blank" class="btn btn-primary" style="background: linear-gradient(135deg, #25D366, #128C7E); color: white; padding: 15px 30px; font-size: 1.1rem;">
+                        <a href="https://wa.me/543764105310?text=Hola,%20me%20gustaría%20información%20sobre%20el%20sistema%20de%20fotografía%20para%20eventos"
+                            target="_blank" class="btn btn-primary"
+                            style="background: linear-gradient(135deg, #25D366, #128C7E); color: white; padding: 15px 30px; font-size: 1.1rem;">
                             <i class="fab fa-whatsapp"></i> Escribir por WhatsApp
                         </a>
                     </div>
-                    <div style="margin-top: 20px; padding: 20px; background: rgba(37, 211, 102, 0.05); border-radius: 10px; border: 1px solid rgba(37, 211, 102, 0.2);">
+                    <div
+                        style="margin-top: 20px; padding: 20px; background: rgba(37, 211, 102, 0.05); border-radius: 10px; border: 1px solid rgba(37, 211, 102, 0.2);">
                         <p style="font-size: 0.9rem; color: #333; margin: 0; text-align: center;">
                             <i class="fas fa-clock" style="margin-right: 8px; color: #25D366;"></i>
-                            <strong>Respuesta inmediata:</strong> Te atendemos personalmente para entender tus necesidades específicas.
+                            <strong>Respuesta inmediata:</strong> Te atendemos personalmente para entender tus
+                            necesidades específicas.
                         </p>
                     </div>
                     <div style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.05); border-radius: 10px;">
@@ -850,50 +1012,83 @@
         <div class="container">
             <h2 style="text-align: center; margin-bottom: 50px; color: #333;">Preguntas Frecuentes</h2>
             <div class="features-grid" style="max-width: 1000px; margin: 0 auto;">
-                <div class="faq-item" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
-                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Cómo funciona el sistema de captura de fotos?</h3>
-                    <p style="color: #666; line-height: 1.6;">Es muy simple: compartes el enlace único de tu evento con tus invitados. Cada persona puede tomar hasta 10 fotos usando su smartphone y enviarlas instantáneamente al sistema. Todas las fotos se moderan automáticamente y se proyectan en tiempo real.</p>
+                <div class="faq-item"
+                    style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Cómo funciona el sistema de
+                        captura de fotos?</h3>
+                    <p style="color: #666; line-height: 1.6;">Es muy simple: compartes el enlace único de tu evento con
+                        tus invitados. Cada persona puede tomar hasta 10 fotos usando su smartphone y enviarlas
+                        instantáneamente al sistema. Todas las fotos se moderan automáticamente y se proyectan en tiempo
+                        real.</p>
                 </div>
 
-                <div class="faq-item" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
-                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Cuánto tiempo toma configurar un evento?</h3>
-                    <p style="color: #666; line-height: 1.6;">La configuración toma solo 5-10 minutos. Solo necesitas elegir el nombre del evento, la fecha y compartir el enlace generado con tus invitados. El sistema se encarga del resto automáticamente.</p>
+                <div class="faq-item"
+                    style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Cuánto tiempo toma configurar
+                        un evento?</h3>
+                    <p style="color: #666; line-height: 1.6;">La configuración toma solo 5-10 minutos. Solo necesitas
+                        elegir el nombre del evento, la fecha y compartir el enlace generado con tus invitados. El
+                        sistema se encarga del resto automáticamente.</p>
                 </div>
 
-                <div class="faq-item" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
-                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Qué necesito para usar el servicio?</h3>
-                    <p style="color: #666; line-height: 1.6;">Solo necesitas un dispositivo con conexión a internet para acceder al panel de administración. Tus invitados solo necesitan un smartphone con cámara. No se requieren instalaciones ni equipos especiales.</p>
+                <div class="faq-item"
+                    style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Qué necesito para usar el
+                        servicio?</h3>
+                    <p style="color: #666; line-height: 1.6;">Solo necesitas un dispositivo con conexión a internet para
+                        acceder al panel de administración. Tus invitados solo necesitan un smartphone con cámara. No se
+                        requieren instalaciones ni equipos especiales.</p>
                 </div>
 
-                <div class="faq-item" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                <div class="faq-item"
+                    style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
                     <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Hay límite de invitados?</h3>
-                    <p style="color: #666; line-height: 1.6;">No, puedes invitar a tantas personas como quieras. El sistema es completamente escalable y puede manejar eventos de cualquier tamaño, desde pequeñas reuniones hasta grandes bodas o conferencias.</p>
+                    <p style="color: #666; line-height: 1.6;">No, puedes invitar a tantas personas como quieras. El
+                        sistema es completamente escalable y puede manejar eventos de cualquier tamaño, desde pequeñas
+                        reuniones hasta grandes bodas o conferencias.</p>
                 </div>
 
-                <div class="faq-item" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
-                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Qué pasa si hay problemas técnicos durante el evento?</h3>
-                    <p style="color: #666; line-height: 1.6;">Contamos con soporte técnico completo durante todo el evento. Nuestro equipo está disponible para resolver cualquier inconveniente de inmediato. Además, el sistema tiene respaldo automático para garantizar que no se pierdan fotos.</p>
+                <div class="faq-item"
+                    style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Qué pasa si hay problemas
+                        técnicos durante el evento?</h3>
+                    <p style="color: #666; line-height: 1.6;">Contamos con soporte técnico completo durante todo el
+                        evento. Nuestro equipo está disponible para resolver cualquier inconveniente de inmediato.
+                        Además, el sistema tiene respaldo automático para garantizar que no se pierdan fotos.</p>
                 </div>
 
-                <div class="faq-item" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
-                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Puedo personalizar el aspecto del evento?</h3>
-                    <p style="color: #666; line-height: 1.6;">Sí, puedes elegir entre diferentes temas visuales y personalizar colores, logos y mensajes para que coincida con el estilo de tu evento. Todo esto está incluido en el precio.</p>
+                <div class="faq-item"
+                    style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Puedo personalizar el aspecto
+                        del evento?</h3>
+                    <p style="color: #666; line-height: 1.6;">Sí, puedes elegir entre diferentes temas visuales y
+                        personalizar colores, logos y mensajes para que coincida con el estilo de tu evento. Todo esto
+                        está incluido en el precio.</p>
                 </div>
 
-                <div class="faq-item" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
-                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Cómo recibo las fotos al final del evento?</h3>
-                    <p style="color: #666; line-height: 1.6;">Al finalizar el evento, recibirás automáticamente un enlace para descargar todas las fotos aprobadas en un archivo ZIP comprimido. También puedes acceder a ellas desde tu panel de administración en cualquier momento.</p>
+                <div class="faq-item"
+                    style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿Cómo recibo las fotos al final
+                        del evento?</h3>
+                    <p style="color: #666; line-height: 1.6;">Al finalizar el evento, recibirás automáticamente un
+                        enlace para descargar todas las fotos aprobadas en un archivo ZIP comprimido. También puedes
+                        acceder a ellas desde tu panel de administración en cualquier momento.</p>
                 </div>
 
-                <div class="faq-item" style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
-                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿El servicio funciona sin conexión a internet?</h3>
-                    <p style="color: #666; line-height: 1.6;">Se requiere conexión a internet para la captura y subida de fotos en tiempo real. Si hay problemas de conectividad, las fotos se almacenan localmente y se suben automáticamente cuando se restaura la conexión.</p>
+                <div class="faq-item"
+                    style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">¿El servicio funciona sin
+                        conexión a internet?</h3>
+                    <p style="color: #666; line-height: 1.6;">Se requiere conexión a internet para la captura y subida
+                        de fotos en tiempo real. Si hay problemas de conectividad, las fotos se almacenan localmente y
+                        se suben automáticamente cuando se restaura la conexión.</p>
                 </div>
             </div>
 
             <div style="text-align: center; margin-top: 40px;">
                 <p style="color: #666; font-size: 1.1rem; margin-bottom: 20px;">¿Tienes más preguntas? ¡Contáctanos!</p>
-                <a href="#contact" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                <a href="#contact" class="btn btn-primary"
+                    style="background: linear-gradient(135deg, #667eea, #764ba2);">
                     <i class="fas fa-envelope"></i> Hacer una Consulta
                 </a>
             </div>
@@ -907,13 +1102,16 @@
                 Próximamente aquí encontrarás los testimonios reales de nuestros clientes satisfechos
             </p>
             <div class="features-grid" style="max-width: 1200px; margin: 0 auto;">
-                <div class="feature-card" style="text-align: center; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #dee2e6; position: relative;">
-                    <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); background: #667eea; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
+                <div class="feature-card"
+                    style="text-align: center; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #dee2e6; position: relative;">
+                    <div
+                        style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); background: #667eea; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
                         <i class="fas fa-heart" style="font-size: 25px; color: white;"></i>
                     </div>
                     <div style="padding-top: 40px;">
                         <div style="font-size: 3rem; margin-bottom: 15px; color: #667eea; opacity: 0.7;">💭</div>
-                        <p style="font-size: 1.2rem; line-height: 1.6; margin-bottom: 20px; font-style: italic; color: #666;">
+                        <p
+                            style="font-size: 1.2rem; line-height: 1.6; margin-bottom: 20px; font-style: italic; color: #666;">
                             "Este comentario puede ser el tuyo"
                         </p>
                         <div style="border-top: 1px solid #dee2e6; padding-top: 15px;">
@@ -923,13 +1121,16 @@
                     </div>
                 </div>
 
-                <div class="feature-card" style="text-align: center; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #dee2e6; position: relative;">
-                    <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); background: #667eea; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
+                <div class="feature-card"
+                    style="text-align: center; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #dee2e6; position: relative;">
+                    <div
+                        style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); background: #667eea; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
                         <i class="fas fa-star" style="font-size: 25px; color: white;"></i>
                     </div>
                     <div style="padding-top: 40px;">
                         <div style="font-size: 3rem; margin-bottom: 15px; color: #667eea; opacity: 0.7;">⭐</div>
-                        <p style="font-size: 1.2rem; line-height: 1.6; margin-bottom: 20px; font-style: italic; color: #666;">
+                        <p
+                            style="font-size: 1.2rem; line-height: 1.6; margin-bottom: 20px; font-style: italic; color: #666;">
                             "Este comentario puede ser el tuyo"
                         </p>
                         <div style="border-top: 1px solid #dee2e6; padding-top: 15px;">
@@ -939,13 +1140,16 @@
                     </div>
                 </div>
 
-                <div class="feature-card" style="text-align: center; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #dee2e6; position: relative;">
-                    <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); background: #667eea; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
+                <div class="feature-card"
+                    style="text-align: center; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #dee2e6; position: relative;">
+                    <div
+                        style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); background: #667eea; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
                         <i class="fas fa-camera" style="font-size: 25px; color: white;"></i>
                     </div>
                     <div style="padding-top: 40px;">
                         <div style="font-size: 3rem; margin-bottom: 15px; color: #667eea; opacity: 0.7;">📸</div>
-                        <p style="font-size: 1.2rem; line-height: 1.6; margin-bottom: 20px; font-style: italic; color: #666;">
+                        <p
+                            style="font-size: 1.2rem; line-height: 1.6; margin-bottom: 20px; font-style: italic; color: #666;">
                             "Este comentario puede ser el tuyo"
                         </p>
                         <div style="border-top: 1px solid #dee2e6; padding-top: 15px;">
@@ -956,23 +1160,28 @@
                 </div>
             </div>
 
-            <div style="text-align: center; margin-top: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; padding: 30px; color: white;">
-                <h3 style="margin-bottom: 15px; font-size: 1.5rem;">¿Quieres ser el próximo en compartir tu experiencia?</h3>
+            <div
+                style="text-align: center; margin-top: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; padding: 30px; color: white;">
+                <h3 style="margin-bottom: 15px; font-size: 1.5rem;">¿Quieres ser el próximo en compartir tu experiencia?
+                </h3>
                 <p style="margin-bottom: 25px; opacity: 0.9; font-size: 1.1rem;">
                     Contrata nuestros servicios y tu testimonio podría aparecer aquí próximamente
                 </p>
-                <a href="#contact" class="btn btn-primary" style="background: white; color: #667eea; border: none; padding: 15px 30px;">
+                <a href="#contact" class="btn btn-primary"
+                    style="background: white; color: #667eea; border: none; padding: 15px 30px;">
                     <i class="fas fa-rocket"></i> ¡Comenzar Ahora!
                 </a>
             </div>
 
             <div style="background: #f8f9fa; border-radius: 20px; padding: 40px; margin-top: 40px; text-align: center;">
                 <h3 style="color: #333; margin-bottom: 30px;">Momentos en Vivo en Números</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; max-width: 800px; margin: 0 auto;">
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; max-width: 800px; margin: 0 auto;">
                     <div>
                         <div style="font-size: 3rem; font-weight: bold; color: #667eea; margin-bottom: 10px;">0</div>
                         <div style="color: #666; font-size: 1.1rem;">Eventos Realizados</div>
-                        <div style="color: #999; font-size: 0.9rem; margin-top: 5px;">¡El primero puede ser el tuyo!</div>
+                        <div style="color: #999; font-size: 0.9rem; margin-top: 5px;">¡El primero puede ser el tuyo!
+                        </div>
                     </div>
                     <div>
                         <div style="font-size: 3rem; font-weight: bold; color: #667eea; margin-bottom: 10px;">0</div>
@@ -1033,7 +1242,8 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <h3>Masamune Code</h3>
-                    <p>Sistema profesional de captura fotográfica para eventos. Desarrollamos tecnología innovadora para hacer que cada momento cuente.</p>
+                    <p>Sistema profesional de captura fotográfica para eventos. Desarrollamos tecnología innovadora para
+                        hacer que cada momento cuente.</p>
                 </div>
                 <div class="footer-section">
                     <h3>Enlaces Rápidos</h3>
@@ -1055,7 +1265,8 @@
                         <li><a href="https://www.linkedin.com/in/masamunecode/">LinkedIn</a></li>
                     </ul>
                 </div>
-                <div class="footer-copyright" style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #555; color: #ccc;">
+                <div class="footer-copyright"
+                    style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #555; color: #ccc;">
                     <p>&copy; 2024 Momentos en Vivo. Todos los derechos reservados.</p>
                 </div>
             </div>
@@ -1063,14 +1274,43 @@
     </footer>
 
     <div id="loginModal" class="modal" style="display: none;">
-            <span class="close" onclick="closeLoginModal()">&times;</span>
-            <h2 style="text-align: center; margin-bottom: 30px; color: #333;">
-                <i class="fas fa-lock" style="color: #667eea; margin-right: 10px;"></i>
-                Acceso Administrativo
-            </h2>
-            <p style="text-align: center; color: #666; margin-bottom: 20px;">
-                Serás redirigido a la página de inicio de sesión.
+        <span class="close" onclick="closeLoginModal()">&times;</span>
+        <h2 style="text-align: center; margin-bottom: 30px; color: #333;">
+            <i class="fas fa-lock" style="color: #667eea; margin-right: 10px;"></i>
+            Acceso Administrativo
+        </h2>
+        <p style="text-align: center; color: #666; margin-bottom: 20px;">
+            Serás redirigido a la página de inicio de sesión.
+        </p>
+    </div>
+
+    <!-- Popup de Demo -->
+    <div id="demoPopup" class="demo-popup">
+        <div class="demo-popup-header">
+            <button class="demo-popup-close" onclick="closeDemoPopup()">&times;</button>
+            <h3 style="margin: 0; font-size: 1.2rem;">
+                <i class="fab fa-whatsapp" style="margin-right: 8px;"></i>
+                ¿Quieres Probar Nuestro Sistema?
+            </h3>
+        </div>
+        <div class="demo-popup-content">
+            <p style="margin-bottom: 15px;">
+                <strong>¡Descubre cómo funciona Momentos en Vivo!</strong>
             </p>
+            <p style="font-size: 0.9rem; margin-bottom: 15px;">
+                Solicita una demo personalizada y te mostraremos todas las funcionalidades de nuestro sistema de captura
+                fotográfica para eventos.
+            </p>
+            <div style="background: rgba(37, 211, 102, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                <p style="font-size: 0.85rem; margin: 0; color: #128C7E;">
+                    <i class="fas fa-clock" style="margin-right: 5px;"></i>
+                    <strong>Respuesta inmediata</strong> - Te atendemos personalmente
+                </p>
+            </div>
+            <a href="https://wa.me/5493764105310?text=Hola,%20quisiera%20solicitar%20una%20demo%20personalizada%20de%20Momentos%20en%20Vivo"
+                class="btn" target="_blank" onclick="closeDemoPopup()">
+                <i class="fab fa-whatsapp"></i> Solicitar Demo por WhatsApp
+            </a>
         </div>
     </div>
 
@@ -1349,7 +1589,7 @@
         }
 
         // Inicializar cuando se carga la página
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Verificar si hay evento en la URL
             const hasEvent = checkEventParameters();
 
@@ -1364,13 +1604,39 @@
             // Cerrar menú móvil al hacer clic en un enlace
             const navLinks = document.querySelectorAll('#navMenu a');
             navLinks.forEach(link => {
-                link.addEventListener('click', function() {
+                link.addEventListener('click', function () {
                     const navMenu = document.getElementById('navMenu');
                     if (navMenu.classList.contains('active')) {
                         navMenu.classList.remove('active');
                     }
                 });
             });
+
+            // Mostrar popup de demo después de 5 segundos
+            setTimeout(() => {
+                showDemoPopup();
+            }, 5000);
+        }
+
+        // Mostrar popup de demo
+        function showDemoPopup() {
+            // Verificar si el usuario ya cerró el popup anteriormente
+            const popupClosed = localStorage.getItem('demoPopupClosed');
+            if (popupClosed) {
+                return; // No mostrar si ya fue cerrado
+            }
+
+            const popup = document.getElementById('demoPopup');
+            popup.style.display = 'block';
+        }
+
+        // Cerrar popup de demo
+        function closeDemoPopup() {
+            const popup = document.getElementById('demoPopup');
+            popup.style.display = 'none';
+
+            // Recordar que el usuario cerró el popup
+            localStorage.setItem('demoPopupClosed', 'true');
         }
 
         // Función del modal de login (simplificadas)
@@ -1463,4 +1729,5 @@
         trackPageVisit();
     </script>
 </body>
+
 </html>

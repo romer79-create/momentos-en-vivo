@@ -35,12 +35,12 @@
         }
 
         .demo-container::before {
-            content: '🎯 DEMO GRATUITA';
+            content: '🚫 DEMO DESHABILITADA';
             position: absolute;
             top: -10px;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            background: linear-gradient(135deg, #dc3545, #6c757d);
             color: white;
             padding: 8px 20px;
             border-radius: 20px;
@@ -234,6 +234,19 @@
             color: #764ba2;
         }
 
+        /* Animaciones para destacar el botón */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-5px); }
+            60% { transform: translateY(-3px); }
+        }
+
         @media (max-width: 600px) {
             .demo-container {
                 margin: 20px;
@@ -254,65 +267,72 @@
 <body>
     <div class="demo-container">
         <div class="logo">
-            <i class="fas fa-camera"></i>
+            <i class="fas fa-info-circle"></i>
         </div>
-        <h1>Demo Gratuita</h1>
-        <p class="subtitle">Prueba todas las funcionalidades de Momentos en Vivo por 3 días completamente gratis</p>
+        <h1>Demo No Disponible</h1>
+        <p class="subtitle">La demo pública ha sido deshabilitada. Para probar Momentos en Vivo, solicita una demo personalizada.</p>
 
-        <div class="features">
-            <h3>🚀 Lo que puedes probar:</h3>
-            <ul>
-                <li>Crear un evento personalizado</li>
-                <li>Generar códigos QR automáticamente</li>
-                <li>Capturar fotos en tiempo real</li>
-                <li>Moderar fotos enviadas</li>
-                <li>Ver slideshow de fotos aprobadas</li>
-                <li>Todas las funcionalidades básicas</li>
-            </ul>
-        </div>
-
-        <div class="limitations">
-            <h4>⚠️ Limitaciones de la demo:</h4>
-            <ul>
-                <li>Máximo 2 fotos por evento</li>
-                <li>No se pueden descargar fotos</li>
-                <li>No hay personalización de colores/temas</li>
-                <li>Datos se eliminan automáticamente en 3 días</li>
-                <li>Funcionalidad limitada para testing</li>
-            </ul>
-        </div>
-
-        <div class="timer">
-            <h3>⏰ Tu demo expira en:</h3>
-            <div class="countdown" id="countdown">3 días 00:00:00</div>
-        </div>
-
-        <div class="demo-form">
-            <div class="form-group">
-                <label for="eventName">Nombre del Evento de Prueba</label>
-                <input type="text" id="eventName" placeholder="Ej: Demo Boda María y Juan" required>
-            </div>
-            <div class="form-group">
-                <label for="userEmail">Email (para recordatorios)</label>
-                <input type="email" id="userEmail" placeholder="tu@email.com" required>
+        <div style="background: #e3f2fd; border: 1px solid #2196f3; padding: 20px; border-radius: 15px; margin: 20px 0; text-align: left;">
+            <h3 style="color: #1976d2; margin-bottom: 15px;">📩 Solicitar Demo Personalizada</h3>
+            <p style="color: #424242; margin-bottom: 15px; line-height: 1.5;">
+                Para obtener una demo personalizada de Momentos en Vivo con todas las funcionalidades activas,
+                envíanos un mensaje y te proporcionaremos acceso temporal completo.
+            </p>
+            <div style="background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #2196f3;">
+                <strong>Información a incluir:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px; color: #666;">
+                    <li>Nombre completo</li>
+                    <li>Email de contacto</li>
+                    <li>Tipo de evento (boda, fiesta, etc.)</li>
+                    <li>Cantidad aproximada de invitados</li>
+                </ul>
             </div>
         </div>
 
-        <div>
-            <button class="btn btn-primary" onclick="startDemo()">
-                <i class="fas fa-play"></i>
-                Comenzar Demo
-            </button>
-            <button class="btn btn-secondary" onclick="goHome()">
+        <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 20px; border-radius: 15px; margin: 20px 0;">
+            <h4 style="color: #856404; margin-bottom: 10px;">💡 ¿Por qué este cambio?</h4>
+            <ul style="color: #856404; margin: 0; padding-left: 20px; line-height: 1.6;">
+                <li>Mejor control de calidad en las demos</li>
+                <li>Atención personalizada a cada cliente</li>
+                <li>Configuración específica según necesidades</li>
+                <li>Resolución inmediata de dudas técnicas</li>
+            </ul>
+        </div>
+
+        <div style="margin: 30px 0; text-align: center;">
+            <!-- Botón principal más grande y destacado -->
+            <div style="margin-bottom: 20px;">
+                <a href="https://wa.me/5493764105310?text=Hola,%20quisiera%20solicitar%20una%20demo%20personalizada%20de%20Momentos%20en%20Vivo"
+                   class="btn btn-primary" target="_blank"
+                   style="text-decoration: none; display: inline-block; font-size: 1.3rem; padding: 20px 40px; box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4); animation: pulse 2s infinite;">
+                    <i class="fab fa-whatsapp" style="font-size: 1.5rem; margin-right: 10px;"></i>
+                    🚀 SOLICITAR DEMO PERSONALIZADA
+                </a>
+            </div>
+
+            <!-- Indicador visual -->
+            <div style="margin: 20px 0;">
+                <div style="display: inline-flex; align-items: center; background: #25d366; color: white; padding: 10px 20px; border-radius: 25px; font-weight: bold; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);">
+                    <i class="fab fa-whatsapp" style="margin-right: 8px;"></i>
+                    ¡Haz clic aquí para comenzar!
+                    <div style="margin-left: 10px; animation: bounce 1s infinite;">
+                        👆
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="goHome()" style="margin-top: 15px;">
                 <i class="fas fa-home"></i>
                 Volver al Inicio
             </button>
         </div>
 
-        <a href="home.html" class="back-link">
-            <i class="fas fa-arrow-left"></i>
-            Página principal
-        </a>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-top: 20px;">
+            <p style="color: #666; margin: 0; font-size: 0.9rem;">
+                <strong>📞 Contacto alternativo:</strong> Cel. 3764105310
+            </p>
+        </div>
+
     </div>
 
     <script>
@@ -393,7 +413,7 @@
 
         // Función para volver al inicio
         function goHome() {
-            window.location.href = 'home.html';
+            window.location.href = 'index.html';
         }
 
         // Verificar si ya hay una demo activa

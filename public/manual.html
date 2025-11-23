@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual del Cliente Premium - Momentos en Vivo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+
+        .nav-tab:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .nav-tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Content */
+        .content-section {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .section-header {
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .section-header h2 {
+            color: #333;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header h2 i {
+            color: #667eea;
+        }
+
+        /* Steps */
+        .steps-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .step {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+
+        .step:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .step h3 {
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .step p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        /* Tips */
+        .tip {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .tip.warning {
+            background: #fff3cd;
+            border-color: #ffeaa7;
+        }
+
+        .tip.danger {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .tip h4 {
+            color: #155724;
+            margin-bottom: 5px;
+        }
+
+        .tip.warning h4 {
+            color: #856404;
+        }
+
+        .tip.danger h4 {
+            color: #721c24;
+        }
+
+        /* FAQ */
+        .faq-item {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-question:hover {
+            background: #e9ecef;
+        }
+
+        .faq-answer {
+            padding: 0 20px 20px;
+            display: none;
+            color: #666;
+        }
+
+        .faq-answer.show {
+            display: block;
+        }
+
+        .faq-toggle {
+            transition: transform 0.3s ease;
+        }
+
+        .faq-toggle.active {
+            transform: rotate(180deg);
+        }
+
+        /* Back to top */
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #667eea;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .nav-tab {
+                text-align: left;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .content-section {
+                padding: 20px;
+            }
+
+            .step {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px 0;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-book"></i> Manual del Cliente Premium</h1>
+            <p>Guía completa para gestionar tus eventos con Momentos en Vivo</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('intro')">
+                <i class="fas fa-home"></i> Introducción
+            </button>
+            <button class="nav-tab" onclick="showSection('panel')">
+                <i class="fas fa-tachometer-alt"></i> Panel Principal
+            </button>
+            <button class="nav-tab" onclick="showSection('eventos')">
+                <i class="fas fa-calendar-alt"></i> Gestión de Eventos
+            </button>
+            <button class="nav-tab" onclick="showSection('moderacion')">
+                <i class="fas fa-check-circle"></i> Moderación
+            </button>
+            <button class="nav-tab" onclick="showSection('proyeccion')">
+                <i class="fas fa-tv"></i> Proyección
+            </button>
+            <button class="nav-tab" onclick="showSection('faq')">
+                <i class="fas fa-question-circle"></i> Preguntas
+            </button>
+        </div>
+
+        <!-- Introduction Section -->
+        <div id="intro-section" class="content-section active">
+            <div class="section-header">
+                <h2><i class="fas fa-info-circle"></i> Bienvenido a tu Panel Premium</h2>
+            </div>
+
+            <div class="steps-container">
+                <div class="step">
+                    <h3><i class="fas fa-star"></i> ¿Qué puedes hacer con tu cuenta Premium?</h3>
+                    <p>Tu cuenta premium te da acceso completo a todas las funcionalidades de Momentos en Vivo. Puedes crear eventos ilimitados (según tu plan), gestionar fotos en tiempo real, moderar contenido y proyectar imágenes durante tus eventos.</p>
+                </div>
+
+                <div class="step">
+                    <h3><i class="fas fa-shield-alt"></i> Seguridad y Privacidad</h3>
+                    <p>Cada evento es completamente privado. Solo tú y las personas con el enlace específico pueden acceder a las fotos de tu evento. Todas las imágenes se almacenan de forma segura en la nube.</p>
+                </div>
+
+                <div class="step">
+                    <h3><i class="fas fa-clock"></i> Funcionamiento en Tiempo Real</h3>
+                    <p>Las fotos subidas por tus invitados aparecen inmediatamente en tu panel. Puedes moderarlas, proyectarlas o descargarlas al instante, sin demoras técnicas.</p>
+                </div>
+
+                <div class="step">
+                    <h3><i class="fas fa-users"></i> Gestión de Eventos</h3>
+                    <p>Dependiendo de tu plan, puedes crear múltiples eventos. Cada evento que creas cuenta permanentemente hacia tu límite, incluso si lo eliminas después.</p>
+                </div>
+            </div>
+
+            <div class="tip">
+                <h4><i class="fas fa-lightbulb"></i> Consejos para Empezar</h4>
+                <ul>
+                    <li>Planifica tus eventos con anticipación para compartir los enlaces a tiempo</li>
+                    <li>Revisa regularmente las fotos durante el evento para moderar contenido</li>
+                    <li>Comparte el enlace de captura con todos tus invitados al inicio</li>
+                    <li>Las fotos se mantienen disponibles indefinidamente para descarga</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Panel Principal Section -->
+        <div id="panel-section" class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-tachometer-alt"></i> Panel Principal - Tu Centro de Control</h2>
+            </div>
+
+            <div class="steps-container">
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h3>Estadísticas Generales</h3>
+                    <p>En la parte superior verás tarjetas con estadísticas importantes:</p>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>Eventos Totales:</strong> Muestra "X/Y" donde X es el número de eventos creados y Y es tu límite total</li>
+                        <li><strong>Fotos Totales:</strong> Número total de fotos en todos tus eventos</li>
+                        <li><strong>Eventos Activos:</strong> Eventos que están actualmente en curso</li>
+                        <li><strong>Plan Actual:</strong> Tu tipo de plan (Premium)</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h3>Información de tu Cuenta</h3>
+                    <p>En la esquina superior derecha encontrarás:</p>
+                    <ul style="margin-top: 10px;">
+                        <li>Tu nombre completo</li>
+                        <li>Tu dirección de email</li>
+                        <li>Insignia de "CLIENTE PREMIUM"</li>
+                        <li>Botón para cerrar sesión</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h3>Lista de Eventos</h3>
+                    <p>La sección principal muestra todos tus eventos en tarjetas:</p>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>Nombre del evento</strong> y fecha</li>
+                        <li><strong>Estado:</strong> Activo o Finalizado</li>
+                        <li><strong>Estadísticas:</strong> Número de fotos y estado</li>
+                        <li><strong>Botones de acción:</strong> Captura, Moderar, Proyectar, Gestionar</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <h3>Crear Nuevo Evento</h3>
+                    <p>En la parte inferior encontrarás el formulario para crear eventos:</p>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>Nombre del evento:</strong> Un título descriptivo</li>
+                        <li><strong>Fecha y hora:</strong> Cuándo ocurrirá el evento</li>
+                        <li><strong>Indicador de límite:</strong> Muestra cuántos eventos puedes crear</li>
+                        <li><strong>Botón "Crear Evento":</strong> Para crear el evento</li>
+                    </ul>
+                    <div class="tip warning">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Límite de Eventos</h4>
+                        <p>Si alcanzas tu límite, necesitarás un código de habilitación adicional del administrador para crear más eventos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gestión de Eventos Section -->
+        <div id="eventos-section" class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-calendar-alt"></i> Gestión de Eventos</h2>
+            </div>
+
+            <div class="steps-container">
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h3>Crear un Nuevo Evento</h3>
+                    <p>Para crear un evento, completa el formulario en la parte inferior del panel:</p>
+                    <ol style="margin-top: 10px;">
+                        <li>Ingresa un <strong>nombre descriptivo</strong> para el evento (ej: "Boda Ana y Carlos")</li>
+                        <li>Selecciona la <strong>fecha y hora</strong> del evento</li>
+                        <li>Verifica que no hayas alcanzado tu límite de eventos</li>
+                        <li>Haz clic en <strong>"Crear Evento"</strong></li>
+                    </ol>
+                    <div class="tip">
+                        <h4><i class="fas fa-calendar-alt"></i> Planificación</h4>
+                        <p>Crea el evento con anticipación. Los invitados podrán acceder desde el momento de creación.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h3>Acciones Disponibles por Evento</h3>
+                    <p>Cada evento tiene varios botones de acción:</p>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>🎥 Captura:</strong> Abre la página donde los invitados subirán fotos</li>
+                        <li><strong>✅ Moderar:</strong> Revisa y aprueba las fotos enviadas</li>
+                        <li><strong>📺 Proyectar:</strong> Muestra las fotos en pantalla grande</li>
+                        <li><strong>⚙️ Gestionar:</strong> Accede a opciones avanzadas del evento</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h3>Compartir el Enlace de Captura</h3>
+                    <p>Una vez creado el evento:</p>
+                    <ol style="margin-top: 10px;">
+                        <li>Haz clic en <strong>"Captura"</strong> para abrir la página</li>
+                        <li>Copia la URL del navegador</li>
+                        <li>Comparte este enlace con todos tus invitados</li>
+                        <li>Los invitados podrán acceder desde sus teléfonos</li>
+                    </ol>
+                    <div class="tip">
+                        <h4><i class="fas fa-share-alt"></i> Distribución</h4>
+                        <p>Envía el enlace por WhatsApp, email o redes sociales. Cuantos más invitados lo tengan, más fotos recibirás.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <h3>Gestionar Evento (Opciones Avanzadas)</h3>
+                    <p>Al hacer clic en "Gestionar" verás:</p>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>Información del evento:</strong> ID, fecha, estado, número de fotos</li>
+                        <li><strong>Acciones rápidas:</strong> Capturar, Moderar, Proyectar</li>
+                        <li><strong>Eliminar evento:</strong> Opción para borrar el evento (irreversible)</li>
+                    </ul>
+                    <div class="tip danger">
+                        <h4><i class="fas fa-trash-alt"></i> Eliminar Evento</h4>
+                        <p>Eliminar un evento borra todas las fotos y datos asociados. Esta acción no se puede deshacer.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">5</span>
+                    <h3>Expandir tu Límite de Eventos</h3>
+                    <p>Si necesitas crear más eventos:</p>
+                    <ol style="margin-top: 10px;">
+                        <li>Contacta al administrador del sistema</li>
+                        <li>Solicita un código de evento adicional</li>
+                        <li>Cuando intentes crear un evento nuevo, aparecerá un modal</li>
+                        <li>Ingresa el código proporcionado</li>
+                        <li>Tu límite se incrementará permanentemente</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Moderación Section -->
+        <div id="moderacion-section" class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-check-circle"></i> Moderación de Fotos</h2>
+            </div>
+
+            <div class="steps-container">
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h3>Acceder a la Moderación</h3>
+                    <p>Desde el panel principal, haz clic en <strong>"Moderar"</strong> en cualquier evento:</p>
+                    <ul style="margin-top: 10px;">
+                        <li>Se abrirá una nueva pestaña con la página de moderación</li>
+                        <li>Verás todas las fotos enviadas por los invitados</li>
+                        <li>Las fotos aparecen en tiempo real a medida que se suben</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h3>Revisar Fotos Pendientes</h3>
+                    <p>En la página de moderación encontrarás:</p>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>Lista de fotos:</strong> Todas las imágenes enviadas</li>
+                        <li><strong>Estado de cada foto:</strong> Pendiente, Aprobada o Rechazada</li>
+                        <li><strong>Información:</strong> Fecha de subida y nombre del archivo</li>
+                        <li><strong>Botones de acción:</strong> Aprobar o Rechazar</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h3>Aprobar Fotos</h3>
+                    <p>Para aprobar una foto:</p>
+                    <ol style="margin-top: 10px;">
+                        <li>Revisa la imagen haciendo clic en ella</li>
+                        <li>Si cumple con tus estándares, haz clic en <strong>"Aprobar"</strong></li>
+                        <li>La foto se moverá a la sección de "Aprobadas"</li>
+                        <li>Quedará disponible para proyección y descarga</li>
+                    </ol>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <h3>Rechazar Fotos</h3>
+                    <p>Para rechazar una foto:</p>
+                    <ol style="margin-top: 10px;">
+                        <li>Si la foto no cumple con tus normas, haz clic en <strong>"Rechazar"</strong></li>
+                        <li>La foto será eliminada permanentemente</li>
+                        <li>El invitado no será notificado automáticamente</li>
+                    </ol>
+                    <div class="tip warning">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Consideraciones</h4>
+                        <p>Rechaza solo fotos que realmente no cumplan con tus estándares. Una vez rechazada, la foto se elimina permanentemente.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">5</span>
+                    <h3>Moderación Continua</h3>
+                    <p>Durante el evento:</p>
+                    <ul style="margin-top: 10px;">
+                        <li>Revisa periódicamente las fotos nuevas</li>
+                        <li>Las fotos aparecen en tiempo real</li>
+                        <li>Puedes moderar desde cualquier dispositivo con internet</li>
+                        <li>Las fotos aprobadas se proyectan automáticamente</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">6</span>
+                    <h3>Descargar Fotos Moderadas</h3>
+                    <p>Para descargar todas las fotos aprobadas:</p>
+                    <ol style="margin-top: 10px;">
+                        <li>Ve al panel de gestión del evento</li>
+                        <li>Haz clic en <strong>"Descargar Fotos"</strong></li>
+                        <li>Se generará un archivo ZIP con todas las fotos</li>
+                        <li>La descarga comenzará automáticamente</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="tip">
+                <h4><i class="fas fa-lightbulb"></i> Mejores Prácticas de Moderación</h4>
+                <ul>
+                    <li>Revisa las fotos cada 15-30 minutos durante el evento</li>
+                    <li>Aprueba rápidamente las fotos de buena calidad</li>
+                    <li>Rechaza solo contenido inapropiado o de baja calidad</li>
+                    <li>Descarga las fotos al final del evento para tener un respaldo</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Proyección Section -->
+        <div id="proyeccion-section" class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-tv"></i> Proyección de Fotos</h2>
+            </div>
+
+            <div class="steps-container">
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h3>Iniciar Proyección</h3>
+                    <p>Para mostrar las fotos en pantalla grande:</p>
+                    <ol style="margin-top: 10px;">
+                        <li>Desde el panel principal, haz clic en <strong>"Proyectar"</strong> en tu evento</li>
+                        <li>Se abrirá una nueva pestaña con la pantalla de proyección</li>
+                        <li>Conecta tu dispositivo a un proyector o pantalla grande</li>
+                        <li>Las fotos aprobadas comenzarán a mostrarse automáticamente</li>
+                    </ol>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h3>Configuración de la Pantalla</h3>
+                    <p>En la página de proyección verás:</p>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>Presentación automática:</strong> Las fotos cambian cada pocos segundos</li>
+                        <li><strong>Pantalla completa:</strong> Ocupa toda la pantalla del dispositivo</li>
+                        <li><strong>Controles ocultos:</strong> Aparecen al mover el mouse</li>
+                        <li><strong>Indicador de progreso:</strong> Muestra cuántas fotos hay</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h3>Controles de Proyección</h3>
+                    <p>Los controles disponibles incluyen:</p>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>Play/Pause:</strong> Detener o reanudar la presentación</li>
+                        <li><strong>Foto anterior/siguiente:</strong> Navegar manualmente</li>
+                        <li><strong>Velocidad:</strong> Cambiar el tiempo entre fotos</li>
+                        <li><strong>Pantalla completa:</strong> Maximizar la visualización</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <h3>Proyección en Tiempo Real</h3>
+                    <p>Durante el evento:</p>
+                    <ul style="margin-top: 10px;">
+                        <li>Las fotos nuevas aparecen automáticamente en la proyección</li>
+                        <li>No necesitas refrescar la página</li>
+                        <li>Las fotos rechazadas no aparecen</li>
+                        <li>La proyección continúa hasta que la detengas</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">5</span>
+                    <h3>Configuración del Dispositivo</h3>
+                    <p>Para mejores resultados:</p>
+                    <ol style="margin-top: 10px;">
+                        <li>Usa un dispositivo conectado a internet estable</li>
+                        <li>Conecta a un proyector o TV grande</li>
+                        <li>Asegúrate de que el navegador esté actualizado</li>
+                        <li>Cierra otras pestañas para mejor rendimiento</li>
+                    </ol>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">6</span>
+                    <h3>Finalizar Proyección</h3>
+                    <p>Cuando termine el evento:</p>
+                    <ul style="margin-top: 10px;">
+                        <li>Simplemente cierra la pestaña de proyección</li>
+                        <li>Las fotos permanecen disponibles en tu panel</li>
+                        <li>Puedes descargar todas las fotos cuando quieras</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tip">
+                <h4><i class="fas fa-magic"></i> Consejos para Proyección</h4>
+                <ul>
+                    <li>Configura la proyección antes de que lleguen los invitados</li>
+                    <li>Prueba el sonido y la conexión del proyector</li>
+                    <li>Ajusta la velocidad según el ritmo del evento</li>
+                    <li>Tiene controles de navegación manual si necesitas pausar en una foto especial</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div id="faq-section" class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-question-circle"></i> Preguntas Frecuentes</h2>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>¿Cuántos eventos puedo crear con mi cuenta premium?</span>
+                    <i class="fas fa-chevron-down faq-toggle"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>El número de eventos depende del plan que adquiriste. Cada evento que creas cuenta permanentemente hacia tu límite, incluso si lo eliminas después. Si necesitas más eventos, contacta al administrador para obtener un código de habilitación adicional.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>¿Las fotos se guardan automáticamente?</span>
+                    <i class="fas fa-chevron-down faq-toggle"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Sí, todas las fotos subidas por los invitados se almacenan automáticamente en la nube. Las fotos pasan por un proceso de moderación antes de estar disponibles para proyección y descarga.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>¿Puedo descargar todas las fotos del evento?</span>
+                    <i class="fas fa-chevron-down faq-toggle"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Sí, como cliente premium puedes descargar todas las fotos aprobadas en un archivo ZIP comprimido. Esta función está disponible en el panel de gestión del evento.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>¿Las fotos son privadas?</span>
+                    <i class="fas fa-chevron-down faq-toggle"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Sí, cada evento es completamente privado. Solo el organizador y las personas con el enlace específico del evento pueden acceder a las fotos. Los eventos no son visibles para otros usuarios del sistema.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>¿Cuánto tiempo se almacenan las fotos?</span>
+                    <i class="fas fa-chevron-down faq-toggle"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Las fotos se almacenan indefinidamente en la nube. Puedes acceder a ellas y descargarlas en cualquier momento desde el panel de gestión del evento.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>¿Puedo moderar fotos durante el evento?</span>
+                    <i class="fas fa-chevron-down faq-toggle"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Sí, puedes acceder a la página de moderación desde cualquier dispositivo con internet. Las fotos aparecen en tiempo real y puedes aprobarlas o rechazarlas inmediatamente.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>¿Qué navegadores son compatibles?</span>
+                    <i class="fas fa-chevron-down faq-toggle"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>El sistema funciona mejor en navegadores modernos: Chrome, Safari, Firefox y Edge. Se recomienda usar la versión más reciente del navegador para mejor compatibilidad.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>¿Hay límite de fotos por evento?</span>
+                    <i class="fas fa-chevron-down faq-toggle"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>No hay límite de fotos por evento para usuarios premium. Los invitados pueden subir tantas fotos como quieran durante el evento.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>¿Cómo contacto al soporte técnico?</span>
+                    <i class="fas fa-chevron-down faq-toggle"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Puedes contactar al soporte técnico a través de WhatsApp al número +54 9 3764 105310 o por email a romer79@gmail.com. El horario de atención es de lunes a viernes de 8:00 a 18:00 hs.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <div class="back-to-top" onclick="scrollToTop()" style="display: none;">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <script>
+        // Show/hide sections
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById(sectionName + '-section').classList.add('active');
+
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+
+            // Scroll to top of content
+            document.querySelector('.content-section.active').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Toggle FAQ answers
+        function toggleFAQ(questionElement) {
+            const answer = questionElement.nextElementSibling;
+            const toggle = questionElement.querySelector('.faq-toggle');
+
+            if (answer.classList.contains('show')) {
+                answer.classList.remove('show');
+                toggle.classList.remove('active');
+            } else {
+                answer.classList.add('show');
+                toggle.classList.add('active');
+            }
+        }
+
+        // Back to top functionality
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Show/hide back to top button
+        window.addEventListener('scroll', function() {
+            const backToTop = document.querySelector('.back-to-top');
+            if (window.pageYOffset > 300) {
+                backToTop.style.display = 'flex';
+            } else {
+                backToTop.style.display = 'none';
+            }
+        });
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers to nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const sectionName = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+                    showSection(sectionName);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

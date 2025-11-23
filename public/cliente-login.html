@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +26,7 @@
             background: white;
             padding: 40px;
             border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
             width: 100%;
             max-width: 400px;
             text-align: center;
@@ -103,7 +104,7 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .btn:disabled {
@@ -156,8 +157,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .register-link {
@@ -188,6 +194,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="login-container">
         <div class="logo">
@@ -228,11 +235,25 @@
         </a>
     </div>
 
+    <!-- Firebase SDKs -->
+    <script src="/__/firebase/10.8.0/firebase-app-compat.js"></script>
+    <script src="/__/firebase/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="/__/firebase/init.js"></script>
+
     <script>
-        document.getElementById('premiumLoginForm').addEventListener('submit', async function(e) {
+        // Initialize Firestore
+        let db;
+        try {
+            db = firebase.firestore();
+            console.log("Firestore initialized in client login");
+        } catch (e) {
+            console.error("Error initializing Firestore", e);
+        }
+
+        document.getElementById('premiumLoginForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const email = document.getElementById('email').value.trim();
+            const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
             const loginBtn = document.getElementById('loginBtn');
             const messageDiv = document.getElementById('message');
@@ -246,216 +267,107 @@
             messageDiv.className = 'message';
 
             try {
-                // Verificar credenciales
-                console.log('=== INICIANDO VERIFICACIÓN DE LOGIN ===');
+                console.log('=== INICIANDO VERIFICACIÓN DE LOGIN (FIRESTORE) ===');
+                console.log('Email:', email);
 
-                const registeredUser = JSON.parse(localStorage.getItem('registeredUser') || 'null');
-                console.log('Usuario registrado encontrado:', registeredUser);
+                let user = null;
 
-                if (!registeredUser) {
-                    console.error('ERROR: No se encontró ningún usuario registrado en localStorage');
-                    throw new Error('Usuario no encontrado. Regístrate primero.');
+                // 1. Buscar en Firestore
+                if (db) {
+                    const snapshot = await db.collection('users')
+                        .where('email', '==', email)
+                        .where('password', '==', password)
+                        .get();
+
+                    if (!snapshot.empty) {
+                        const doc = snapshot.docs[0];
+                        user = { id: doc.id, ...doc.data() };
+                        console.log('Usuario encontrado en Firestore:', user.id);
+                    }
                 }
 
-                console.log('Comparando emails:');
-                console.log('- Email ingresado:', email);
-                console.log('- Email registrado:', registeredUser.email);
-                console.log('- Coinciden:', registeredUser.email === email);
+                // 2. Fallback a LocalStorage (Legacy)
+                if (!user) {
+                    console.log('Usuario no encontrado en Firestore, buscando en LocalStorage...');
+                    const allUsers = JSON.parse(localStorage.getItem('demoUsers') || '[]');
+                    user = allUsers.find(u => u.email === email && u.password === password);
 
-                if (registeredUser.email !== email) {
-                    console.error('ERROR: Email no coincide');
-                    throw new Error('Correo electrónico no registrado.');
+                    if (!user) {
+                        const registeredUser = JSON.parse(localStorage.getItem('registeredUser') || 'null');
+                        if (registeredUser && registeredUser.email === email && registeredUser.password === password) {
+                            user = registeredUser;
+                        }
+                    }
                 }
 
-                console.log('Comparando contraseñas...');
-                if (registeredUser.password !== password) {
-                    console.error('ERROR: Contraseña incorrecta');
-                    throw new Error('Contraseña incorrecta.');
+                if (!user) {
+                    throw new Error('Correo electrónico no registrado o contraseña incorrecta.');
                 }
 
                 console.log('Verificando si es premium...');
-                if (!registeredUser.isPremium) {
-                    // Mostrar error y redirigir
+                if (!user.isPremium) {
                     messageDiv.textContent = 'Esta cuenta no tiene acceso premium. Completa tu compra primero.';
                     messageDiv.className = 'message error';
                     messageDiv.style.display = 'block';
-
-                    setTimeout(() => {
-                        window.location.href = 'home.html';
-                    }, 3000);
+                    setTimeout(() => { window.location.href = 'home.html'; }, 3000);
                     return;
                 }
 
-                console.log('✅ LOGIN EXITOSO - Todas las verificaciones pasaron');
-                console.log('=== FIN VERIFICACIÓN LOGIN ===');
+                console.log('✅ LOGIN EXITOSO');
 
                 // Login exitoso
                 messageDiv.textContent = '¡Bienvenido de vuelta! Redirigiendo...';
                 messageDiv.className = 'message success';
                 messageDiv.style.display = 'block';
 
-                // Crear sesión segura con tiempo de expiración (24 horas)
+                // Crear sesión segura
                 const sessionData = {
-                    userId: registeredUser.id,
-                    email: registeredUser.email,
+                    userId: user.id,
+                    email: user.email,
+                    user: user,
                     loginTime: new Date().getTime(),
                     expiresAt: new Date().getTime() + (24 * 60 * 60 * 1000) // 24 horas
                 };
 
-                // Guardar sesión en sessionStorage (más seguro que localStorage)
                 sessionStorage.setItem('premiumSession', JSON.stringify(sessionData));
+                localStorage.setItem('lastPremiumLogin', user.email);
 
-                // También guardar en localStorage para recordar último usuario (opcional)
-                localStorage.setItem('lastPremiumLogin', registeredUser.email);
-
-                // Redirigir al panel de cliente
-                setTimeout(() => {
-                    window.location.href = 'cliente-panel.html';
-                }, 1500);
+                // Redirigir
+                window.location.href = 'cliente-panel.html';
 
             } catch (error) {
+                console.error('Login error:', error);
                 messageDiv.textContent = error.message;
                 messageDiv.className = 'message error';
                 messageDiv.style.display = 'block';
-
-                // Restaurar botón
+            } finally {
                 loginBtn.disabled = false;
                 loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Acceder a Mi Panel';
             }
         });
 
-        // Verificar sesión existente y manejar auto-fill
-        window.onload = function() {
-            console.log('=== INICIANDO CARGA DE PÁGINA ===');
+        // Verificar sesión existente
+        window.onload = function () {
+            // Auto-fill email
+            const lastLogin = localStorage.getItem('lastPremiumLogin');
+            if (lastLogin) {
+                document.getElementById('email').value = lastLogin;
+            }
 
-            // Limpiar datos antiguos primero
-            clearOldUserData();
-
-            // Crear usuario de prueba si no existe
-            createTestUserIfNeeded();
-
-            // Verificar si hay una sesión activa
+            // Check session
             const currentSession = sessionStorage.getItem('premiumSession');
             if (currentSession) {
                 try {
                     const sessionData = JSON.parse(currentSession);
-                    const now = new Date().getTime();
-
-                    // Verificar si la sesión no ha expirado
-                    if (now < sessionData.expiresAt) {
-                        // Sesión válida - redirigir automáticamente
-                        console.log('Sesión premium activa encontrada, redirigiendo...');
+                    if (new Date().getTime() < sessionData.expiresAt) {
                         window.location.href = 'cliente-panel.html';
-                        return;
-                    } else {
-                        // Sesión expirada - limpiar
-                        sessionStorage.removeItem('premiumSession');
-                        console.log('Sesión premium expirada, limpiada');
                     }
-                } catch (error) {
-                    // Sesión corrupta - limpiar
+                } catch (e) {
                     sessionStorage.removeItem('premiumSession');
                 }
             }
-
-            // Recordar último usuario logueado (opcional, solo para comodidad)
-            const lastLogin = localStorage.getItem('lastPremiumLogin');
-            if (lastLogin) {
-                // No autocompletar por seguridad, solo mostrar placeholder
-                document.getElementById('email').placeholder = `Último: ${lastLogin}`;
-            }
-
-            console.log('=== CARGA DE PÁGINA COMPLETADA ===');
         };
-
-        // Crear usuario de prueba limpio
-        function createTestUserIfNeeded() {
-            console.log('=== VERIFICANDO USUARIO DE PRUEBA ===');
-
-            // Limpiar cualquier dato antiguo primero
-            clearOldUserData();
-
-            // Pequeña pausa para asegurar que la limpieza se complete
-            setTimeout(() => {
-                const existingUser = localStorage.getItem('registeredUser');
-                console.log('Usuario existente DESPUÉS de limpieza:', existingUser);
-
-                if (!existingUser || existingUser === 'null') {
-                    console.log('Creando NUEVO usuario de prueba...');
-
-                    // Crear usuario premium de prueba completamente nuevo
-                    const testUser = {
-                        id: 'test_user_' + Date.now(),
-                        fullName: 'Usuario de Prueba',
-                        email: 'test@prueba.com',
-                        password: 'test123',
-                        company: 'Empresa de Prueba',
-                        isPremium: true,
-                        eventLimit: 2,
-                        createdAt: new Date().toISOString(),
-                        usedCodes: []
-                    };
-
-                    // Forzar guardado
-                    localStorage.setItem('registeredUser', JSON.stringify(testUser));
-                    console.log('Usuario de prueba creado exitosamente:', testUser);
-                    console.log('Guardado en localStorage con clave: registeredUser');
-
-                    // Verificar inmediatamente que se guardó correctamente
-                    const savedUser = localStorage.getItem('registeredUser');
-                    if (savedUser) {
-                        const parsedUser = JSON.parse(savedUser);
-                        console.log('✅ VERIFICACIÓN EXITOSA - Usuario guardado:', parsedUser.email);
-                        console.log('Datos completos:', parsedUser);
-                    } else {
-                        console.error('❌ ERROR: Usuario no se guardó correctamente');
-                    }
-
-                } else {
-                    console.log('Usuario ya existe después de limpieza:', JSON.parse(existingUser));
-                }
-
-                console.log('=== FIN VERIFICACIÓN USUARIO ===');
-            }, 100);
-        }
-
-        // Limpiar datos antiguos de usuarios y eventos
-        function clearOldUserData() {
-            try {
-                console.log('=== INICIANDO LIMPIEZA DE DATOS ANTIGUOS ===');
-
-                // Limpiar sesiones antiguas
-                sessionStorage.removeItem('premiumSession');
-                sessionStorage.removeItem('clientLoginTime');
-                localStorage.removeItem('lastPremiumLogin');
-                localStorage.removeItem('clientLoginTime');
-
-                // Forzar eliminación del usuario registrado anterior
-                console.log('Eliminando usuario registrado anterior...');
-                localStorage.removeItem('registeredUser');
-
-                // Verificar que se eliminó
-                const checkOldUser = localStorage.getItem('registeredUser');
-                console.log('Usuario anterior eliminado:', checkOldUser === null ? 'SÍ' : 'NO');
-
-                // Limpiar eventos antiguos (excepto si hay eventos del admin)
-                const allEvents = JSON.parse(localStorage.getItem('premiumEvents') || '[]');
-                console.log('Eventos encontrados antes de limpieza:', allEvents.length);
-
-                const cleanEvents = allEvents.filter(event =>
-                    event.userId && event.userId.includes('admin')
-                );
-
-                if (cleanEvents.length !== allEvents.length) {
-                    localStorage.setItem('premiumEvents', JSON.stringify(cleanEvents));
-                    console.log('Eventos antiguos limpiados. Eventos restantes:', cleanEvents.length);
-                }
-
-                console.log('=== LIMPIEZA DE DATOS COMPLETADA ===');
-            } catch (error) {
-                console.error('Error limpiando datos antiguos:', error);
-            }
-        }
     </script>
 </body>
+
 </html>

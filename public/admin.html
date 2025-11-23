@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,7 +23,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .admin-header h1 {
@@ -51,7 +52,7 @@
             background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
 
@@ -72,7 +73,7 @@
             background: white;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .tab-button {
@@ -95,7 +96,7 @@
             display: none;
             background: white;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
         }
 
@@ -236,7 +237,7 @@
             background: white;
             border-radius: 5px;
             margin-bottom: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .code-text {
@@ -272,7 +273,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             align-items: center;
             justify-content: center;
@@ -332,6 +333,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="admin-header">
         <h1><i class="fas fa-cog"></i> Panel Administrador</h1>
@@ -375,6 +377,9 @@
             <button class="tab-button active" onclick="showTab('users')">
                 <i class="fas fa-users"></i> Usuarios
             </button>
+            <button class="tab-button" onclick="showTab('create-premium')">
+                <i class="fas fa-crown"></i> Crear Premium
+            </button>
             <button class="tab-button" onclick="showTab('codes')">
                 <i class="fas fa-key"></i> Códigos
             </button>
@@ -403,6 +408,62 @@
                     <!-- Los usuarios se cargan dinámicamente -->
                 </tbody>
             </table>
+        </div>
+
+        <!-- Contenido de Crear Premium -->
+        <div id="create-premium-tab" class="tab-content">
+            <h2><i class="fas fa-crown"></i> Crear Cuenta Premium</h2>
+            <p>Crea nuevas cuentas premium con acceso completo al sistema.</p>
+
+            <div class="code-generator">
+                <h3>Crear Nueva Cuenta Premium</h3>
+                <div class="form-group">
+                    <label for="premiumFullName">Nombre Completo:</label>
+                    <input type="text" id="premiumFullName" placeholder="Ej: María González" required>
+                </div>
+                <div class="form-group">
+                    <label for="premiumEmail">Correo Electrónico:</label>
+                    <input type="email" id="premiumEmail" placeholder="usuario@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="premiumCompany">Empresa (Opcional):</label>
+                    <input type="text" id="premiumCompany" placeholder="Nombre de la empresa">
+                </div>
+                <div class="form-group">
+                    <label for="premiumEventLimit">Límite de Eventos:</label>
+                    <select id="premiumEventLimit">
+                        <option value="2">2 eventos</option>
+                        <option value="5">5 eventos</option>
+                        <option value="10">10 eventos</option>
+                        <option value="20">20 eventos</option>
+                        <option value="50">50 eventos</option>
+                        <option value="100">100 eventos</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="premiumPassword">Contraseña Temporal:</label>
+                    <input type="password" id="premiumPassword" placeholder="Contraseña para el usuario" required>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="sendWelcomeEmail" checked>
+                        Enviar email de bienvenida con credenciales
+                    </label>
+                </div>
+                <button class="generate-btn" onclick="createPremiumAccount()">
+                    <i class="fas fa-user-plus"></i> Crear Cuenta Premium
+                </button>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <h3>Cuentas Premium Creadas Recientemente</h3>
+                <div id="recentPremiumAccounts">
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-crown" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                        <p>No hay cuentas premium creadas recientemente.</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Contenido de Códigos -->
@@ -469,8 +530,10 @@
 
             <!-- Gráfico de Visitas por Día -->
             <div style="margin-bottom: 30px;">
-                <h3 style="margin-bottom: 15px; color: #333;"><i class="fas fa-calendar-day"></i> Visitas por Día (Últimos 7 días)</h3>
-                <div id="visitsChart" style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h3 style="margin-bottom: 15px; color: #333;"><i class="fas fa-calendar-day"></i> Visitas por Día
+                    (Últimos 7 días)</h3>
+                <div id="visitsChart"
+                    style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                     <div style="text-align: center; color: #666; padding: 40px;">
                         <i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 20px;"></i>
                         <p>Cargando gráfico de visitas...</p>
@@ -480,7 +543,8 @@
 
             <!-- Estadísticas Generales -->
             <div>
-                <h3 style="margin-bottom: 15px; color: #333;"><i class="fas fa-users-cog"></i> Estadísticas de Usuarios</h3>
+                <h3 style="margin-bottom: 15px; color: #333;"><i class="fas fa-users-cog"></i> Estadísticas de Usuarios
+                </h3>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <h3 id="totalRevenue">0</h3>
@@ -514,7 +578,54 @@
         </div>
     </div>
 
+    <!-- Modal para eliminar usuario -->
+    <div id="deleteUserModal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i> Eliminar Usuario</h3>
+            <p>¿Estás seguro de que quieres eliminar al usuario <strong id="deleteUserEmail"></strong>?</p>
+            <p style="color: #dc3545; font-size: 0.9rem;"><strong>Esta acción no se puede deshacer.</strong></p>
+            <p style="color: #dc3545; font-size: 0.9rem;">Se eliminarán todos los eventos y datos asociados al usuario.
+            </p>
+
+            <div style="margin: 20px 0;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                    <i class="fas fa-lock"></i> Código de Confirmación:
+                </label>
+                <input type="password" id="deleteCode" placeholder="Ingresa el código secreto"
+                    style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;">
+                <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                    Ingresa el código secreto para confirmar la eliminación.
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="closeModal()"
+                    style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                    Cancelar
+                </button>
+                <button onclick="confirmDeleteUser()"
+                    style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-trash"></i> Eliminar Usuario
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="/__/firebase/10.8.0/firebase-app-compat.js"></script>
+    <script src="/__/firebase/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="/__/firebase/init.js"></script>
+
     <script>
+        // Initialize Firestore
+        let db;
+        try {
+            db = firebase.firestore();
+            console.log("Firestore initialized");
+        } catch (e) {
+            console.error("Error initializing Firestore. Make sure you are running on Firebase Hosting or have configured it manually.", e);
+        }
+
         let currentUser = null;
         let allUsers = [];
         let allCodes = [];
@@ -575,16 +686,41 @@
             loadVisitStats();
         }
 
-        // Cargar usuarios
+        // Cargar usuarios desde Firestore
         function loadUsers() {
-            const registeredUser = JSON.parse(localStorage.getItem('registeredUser') || 'null');
-            if (registeredUser) {
-                allUsers = [registeredUser];
-            } else {
-                allUsers = [];
+            if (!db) {
+                console.warn("Firestore no está disponible, cargando de localStorage como respaldo...");
+                loadUsersLocal();
+                return;
             }
 
-            renderUsersTable();
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Cargando usuarios...</td></tr>';
+
+            db.collection("users").onSnapshot((querySnapshot) => {
+                allUsers = [];
+                querySnapshot.forEach((doc) => {
+                    allUsers.push({ id: doc.id, ...doc.data() });
+                });
+                console.log('Usuarios cargados de Firestore:', allUsers.length);
+                renderUsersTable();
+                updateStats(); // Actualizar contadores
+            }, (error) => {
+                console.error("Error obteniendo usuarios:", error);
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Error cargando usuarios.</td></tr>';
+            });
+        }
+
+        // Fallback a localStorage (Legacy)
+        function loadUsersLocal() {
+            try {
+                const demoUsersData = localStorage.getItem('demoUsers');
+                const demoUsers = demoUsersData ? JSON.parse(demoUsersData) : [];
+                allUsers = [...demoUsers];
+                renderUsersTable();
+            } catch (error) {
+                console.error('Error cargando usuarios locales:', error);
+            }
         }
 
         // Renderizar tabla de usuarios
@@ -628,6 +764,9 @@
                         <button class="action-button secondary" onclick="generateCodeForUser('${user.id}')">
                             <i class="fas fa-key"></i> Código
                         </button>
+                        <button class="action-button" style="background: #dc3545; color: white;" onclick="deleteUser('${user.id}', '${user.email}')">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -664,14 +803,14 @@
                 <div>
                     <h4>Eventos Recientes</h4>
                     ${userEvents.length > 0 ?
-                        userEvents.slice(0, 3).map(event => `
+                    userEvents.slice(0, 3).map(event => `
                             <div style="background: #f8f9fa; padding: 10px; margin-bottom: 8px; border-radius: 5px;">
                                 <strong>${event.name}</strong><br>
                                 <small>${new Date(event.date).toLocaleDateString()}</small>
                             </div>
                         `).join('') :
-                        '<p>No ha creado eventos aún.</p>'
-                    }
+                    '<p>No ha creado eventos aún.</p>'
+                }
                 </div>
             `;
 
@@ -680,7 +819,8 @@
 
         // Cerrar modal
         function closeModal() {
-            document.getElementById('userModal').classList.remove('show');
+            document.getElementById('userModal').style.display = 'none';
+            document.getElementById('deleteUserModal').style.display = 'none';
         }
 
         // Cargar códigos
@@ -797,7 +937,10 @@
             const select = document.getElementById('userSelect');
             select.innerHTML = '<option value="">-- Seleccionar usuario --</option>';
 
-            allUsers.forEach(user => {
+            // Filtrar solo usuarios premium para generar códigos
+            const premiumUsers = allUsers.filter(user => user.isPremium);
+
+            premiumUsers.forEach(user => {
                 const option = document.createElement('option');
                 option.value = user.id;
                 option.textContent = `${user.fullName} (${user.email})`;
@@ -950,23 +1093,281 @@
             document.getElementById('activeThisMonth').textContent = premiumUsers; // Placeholder
         }
 
+        // Crear cuenta premium
+        async function createPremiumAccount() {
+            const fullName = document.getElementById('premiumFullName').value.trim();
+            const email = document.getElementById('premiumEmail').value.trim().toLowerCase();
+            const company = document.getElementById('premiumCompany').value.trim();
+            const eventLimit = parseInt(document.getElementById('premiumEventLimit').value);
+            const password = document.getElementById('premiumPassword').value;
+            const sendEmail = document.getElementById('sendWelcomeEmail').checked;
+
+            // Validaciones
+            if (!fullName) {
+                alert('Por favor ingresa el nombre completo.');
+                return;
+            }
+
+            if (!email || !email.includes('@')) {
+                alert('Por favor ingresa un email válido.');
+                return;
+            }
+
+            if (!password || password.length < 6) {
+                alert('La contraseña debe tener al menos 6 caracteres.');
+                return;
+            }
+
+            try {
+                console.log('Creando cuenta premium para:', email);
+                const generateBtn = document.querySelector('.generate-btn');
+                generateBtn.disabled = true;
+                generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
+
+                // Verificar si el email ya existe en Firestore
+                if (db) {
+                    const snapshot = await db.collection('users').where('email', '==', email).get();
+                    if (!snapshot.empty) {
+                        alert('Ya existe un usuario con este email.');
+                        generateBtn.disabled = false;
+                        generateBtn.innerHTML = '<i class="fas fa-user-plus"></i> Crear Cuenta Premium';
+                        return;
+                    }
+                } else {
+                    // Fallback local check
+                    const existingUsers = JSON.parse(localStorage.getItem('demoUsers') || '[]');
+                    if (existingUsers.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+                        alert('Ya existe un usuario con este email (Local).');
+                        generateBtn.disabled = false;
+                        generateBtn.innerHTML = '<i class="fas fa-user-plus"></i> Crear Cuenta Premium';
+                        return;
+                    }
+                }
+
+                // Generar ID único
+                const userId = `premium_admin_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+
+                // Crear usuario premium
+                const newPremiumUser = {
+                    id: userId,
+                    fullName: fullName,
+                    email: email,
+                    company: company || null,
+                    password: password, // En producción esto debería estar hasheado
+                    isPremium: true,
+                    planType: 'Premium',
+                    eventLimit: eventLimit,
+                    eventsCreated: 0,
+                    subscriptionStatus: 'active',
+                    monthlyFee: 29990,
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'admin',
+                    welcomeEmailSent: sendEmail
+                };
+
+                // Guardar en Firestore
+                if (db) {
+                    await db.collection('users').doc(userId).set(newPremiumUser);
+                    console.log('Usuario guardado en Firestore:', userId);
+                } else {
+                    // Fallback LocalStorage
+                    const existingUsers = JSON.parse(localStorage.getItem('demoUsers') || '[]');
+                    existingUsers.push(newPremiumUser);
+                    localStorage.setItem('demoUsers', JSON.stringify(existingUsers));
+                    console.warn('Usuario guardado en LocalStorage (Firestore no disponible)');
+                }
+
+                // Limpiar formulario
+                document.getElementById('premiumFullName').value = '';
+                document.getElementById('premiumEmail').value = '';
+                document.getElementById('premiumCompany').value = '';
+                document.getElementById('premiumPassword').value = '';
+                document.getElementById('premiumEventLimit').selectedIndex = 0;
+
+                // Actualizar datos (loadUsers escucha cambios en Firestore, así que se actualizará solo)
+                if (!db) {
+                    loadUsers();
+                    updateStats();
+                }
+                loadRecentPremiumAccounts();
+
+                // Mostrar mensaje de éxito
+                const message = sendEmail ?
+                    `✅ Cuenta premium creada exitosamente!\n\nUsuario: ${fullName}\nEmail: ${email}\nLímite de eventos: ${eventLimit}\n\nSe enviará un email de bienvenida con las credenciales.` :
+                    `✅ Cuenta premium creada exitosamente!\n\nUsuario: ${fullName}\nEmail: ${email}\nLímite de eventos: ${eventLimit}\n\nCredenciales:\nEmail: ${email}\nContraseña: ${password}`;
+
+                alert(message);
+
+                // Copiar credenciales al portapapeles si no se envía email
+                if (!sendEmail) {
+                    const credentials = `Email: ${email}\nContraseña: ${password}`;
+                    navigator.clipboard.writeText(credentials).then(() => {
+                        alert('Credenciales copiadas al portapapeles.');
+                    }).catch(() => {
+                        alert('Credenciales creadas. Copia manualmente:\n' + credentials);
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error creando cuenta premium:', error);
+                alert('Error al crear la cuenta premium: ' + error.message);
+            } finally {
+                const generateBtn = document.querySelector('.generate-btn');
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-user-plus"></i> Crear Cuenta Premium';
+            }
+        }
+
+        // Cargar cuentas premium recientes
+        function loadRecentPremiumAccounts() {
+            const users = JSON.parse(localStorage.getItem('demoUsers') || '[]');
+            const recentPremium = users
+                .filter(user => user.isPremium && user.createdBy === 'admin')
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .slice(0, 5);
+
+            const container = document.getElementById('recentPremiumAccounts');
+
+            if (recentPremium.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-crown" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                        <p>No hay cuentas premium creadas recientemente.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const accountsHtml = recentPremium.map(user => `
+                <div class="code-item" style="margin-bottom: 10px;">
+                    <div>
+                        <div class="code-text">${user.fullName}</div>
+                        <div class="code-info">
+                            ${user.email} | ${user.eventLimit} eventos | Creado: ${new Date(user.createdAt).toLocaleDateString()}
+                        </div>
+                    </div>
+                    <button class="copy-btn" onclick="copyCredentials('${user.email}', '${user.password || 'N/A'}')">
+                        <i class="fas fa-copy"></i> Copiar
+                    </button>
+                </div>
+            `).join('');
+
+            container.innerHTML = accountsHtml;
+        }
+
+        // Copiar credenciales
+        function copyCredentials(email, password) {
+            const credentials = `Email: ${email}\nContraseña: ${password}`;
+            navigator.clipboard.writeText(credentials).then(() => {
+                alert('Credenciales copiadas al portapapeles.');
+            }).catch(() => {
+                alert('Credenciales:\n' + credentials);
+            });
+        }
+
+        // Eliminar usuario
+        function deleteUser(userId, userEmail) {
+            document.getElementById('deleteUserEmail').textContent = userEmail;
+            document.getElementById('deleteCode').value = '';
+            document.getElementById('deleteUserModal').style.display = 'flex';
+            // Store userId for confirmation
+            document.getElementById('deleteUserModal').dataset.userId = userId;
+        }
+
+        // Confirmar eliminación de usuario
+        async function confirmDeleteUser() {
+            const userId = document.getElementById('deleteUserModal').dataset.userId;
+            const enteredCode = document.getElementById('deleteCode').value.trim();
+            const secretCode = 'Lppadmlcl79!';
+
+            if (!enteredCode) {
+                alert('Por favor ingresa el código de confirmación.');
+                return;
+            }
+
+            if (enteredCode !== secretCode) {
+                alert('Código incorrecto. La eliminación ha sido cancelada.');
+                closeModal();
+                return;
+            }
+
+            // Código correcto - proceder con la eliminación
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) {
+                alert('Usuario no encontrado.');
+                closeModal();
+                return;
+            }
+
+            // Confirmación final
+            if (!confirm(`¿Estás completamente seguro de que quieres eliminar al usuario "${user.fullName}" (${user.email})?\n\nEsta acción eliminará:\n- La cuenta del usuario\n- Todos sus eventos\n- Todas sus fotos\n- Todos los códigos generados para este usuario`)) {
+                closeModal();
+                return;
+            }
+
+            try {
+                if (db) {
+                    // Eliminar de Firestore
+                    await db.collection('users').doc(userId).delete();
+                    console.log('Usuario eliminado de Firestore:', userId);
+
+                    // TODO: Eliminar eventos y códigos relacionados en Firestore
+                    // Por ahora solo eliminamos el usuario para MVP
+                } else {
+                    // Fallback LocalStorage
+                    const demoUsers = JSON.parse(localStorage.getItem('demoUsers') || '[]');
+                    const filteredDemoUsers = demoUsers.filter(u => u.id !== userId);
+                    localStorage.setItem('demoUsers', JSON.stringify(filteredDemoUsers));
+                }
+
+                // Limpiar datos locales relacionados (Legacy support)
+                const allEvents = JSON.parse(localStorage.getItem('premiumEvents') || '[]');
+                const filteredEvents = allEvents.filter(event => event.userId !== userId);
+                localStorage.setItem('premiumEvents', JSON.stringify(filteredEvents));
+
+                const allCodes = JSON.parse(localStorage.getItem('generatedCodes') || '[]');
+                const filteredCodes = allCodes.filter(code => code.userId !== userId);
+                localStorage.setItem('generatedCodes', JSON.stringify(filteredCodes));
+
+                const registeredUser = JSON.parse(localStorage.getItem('registeredUser') || 'null');
+                if (registeredUser && registeredUser.id === userId) {
+                    localStorage.removeItem('registeredUser');
+                }
+
+                // Actualizar UI
+                if (!db) {
+                    loadUsers();
+                    updateStats();
+                }
+
+                alert(`Usuario "${user.fullName}" eliminado exitosamente.`);
+                closeModal();
+
+            } catch (error) {
+                console.error('Error eliminando usuario:', error);
+                alert('Error al eliminar usuario: ' + error.message);
+            }
+        }
+
         // Inicializar
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             if (checkAdminAuth()) {
                 loadData();
+                loadRecentPremiumAccounts();
             }
         });
 
         // Cerrar modal al hacer clic fuera
-        document.getElementById('userModal').addEventListener('click', function(e) {
+        document.getElementById('userModal').addEventListener('click', function (e) {
             if (e.target === this) {
                 closeModal();
             }
         });
     </script>
-                Cel. 3764105310
-            </p>
-        </div>
+    Cel. 3764105310
+    </p>
+    </div>
     </footer>
 </body>
+
 </html>

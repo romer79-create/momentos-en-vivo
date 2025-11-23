@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,7 +32,7 @@
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 30px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -79,7 +80,7 @@
 
         .user-info {
             text-align: right;
-            color: rgba(255,255,255,0.9);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 0.9rem;
         }
 
@@ -105,7 +106,7 @@
             background: white;
             border-radius: 15px;
             padding: 25px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             text-align: center;
             transition: transform 0.3s ease;
         }
@@ -143,7 +144,7 @@
             background: white;
             border-radius: 15px;
             padding: 30px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
         }
 
         .section h2 {
@@ -321,7 +322,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             display: flex;
             align-items: center;
@@ -329,6 +330,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
@@ -419,11 +421,31 @@
         </div>
     </div>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqcCwQRLf0MHnOChKqWyassG7-70gd8ps",
+            authDomain: "momentos-en-vivo.firebaseapp.com",
+            projectId: "momentos-en-vivo",
+            storageBucket: "momentos-en-vivo.firebasestorage.app",
+            messagingSenderId: "403164580472",
+            appId: "1:403164580472:web:9451616b5c586e4d587b8d"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        console.log("Firebase & Firestore initialized in client panel");
+    </script>
+
     <script>
         let clientData = {};
 
         // Inicializar la página cuando se carga completamente
-        window.onload = function() {
+        window.onload = function () {
             console.log('=== INICIALIZANDO PANEL DE CLIENTE ===');
 
             // Verificar autenticación primero
@@ -483,9 +505,9 @@
                     return false;
                 }
 
-                // Verificar que el usuario existe y es premium
-                const registeredUser = JSON.parse(localStorage.getItem('registeredUser') || 'null');
-                if (!registeredUser || registeredUser.id !== sessionData.userId || !registeredUser.isPremium) {
+                // Verificar que el usuario existe y es premium usando datos de la sesión
+                const user = sessionData.user;
+                if (!user || !user.isPremium) {
                     alert('Usuario no autorizado o cuenta no premium.');
                     sessionStorage.removeItem('premiumSession');
                     window.location.href = 'cliente-login.html';
@@ -504,21 +526,36 @@
 
         // Cargar datos del cliente
         function loadClientData() {
-            const registeredUser = localStorage.getItem('registeredUser');
-            if (!registeredUser) {
-                alert('No se encontró información de cliente. Serás redirigido al registro.');
-                window.location.href = 'registro.html';
+            const sessionData = JSON.parse(sessionStorage.getItem('premiumSession') || '{}');
+            const user = sessionData.user;
+
+            if (!user) {
+                alert('No se encontró información de cliente. Serás redirigido al login.');
+                window.location.href = 'cliente-login.html';
                 return;
             }
 
-            clientData = JSON.parse(registeredUser);
+            clientData = user;
 
             // Inicializar contador de eventos creados si no existe
             if (!clientData.eventsCreated) {
                 const allEvents = JSON.parse(localStorage.getItem('premiumEvents') || '[]');
                 const userEvents = allEvents.filter(event => event.userId === clientData.id);
                 clientData.eventsCreated = userEvents.length;
-                localStorage.setItem('registeredUser', JSON.stringify(clientData));
+
+                // Actualizar el usuario en su ubicación correspondiente para persistencia
+                if (user.id.startsWith('premium_admin_')) {
+                    // Usuario creado por admin - actualizar en demoUsers
+                    const allUsers = JSON.parse(localStorage.getItem('demoUsers') || '[]');
+                    const userIndex = allUsers.findIndex(u => u.id === user.id);
+                    if (userIndex !== -1) {
+                        allUsers[userIndex] = clientData;
+                        localStorage.setItem('demoUsers', JSON.stringify(allUsers));
+                    }
+                } else {
+                    // Usuario registrado individual - actualizar en registeredUser
+                    localStorage.setItem('registeredUser', JSON.stringify(clientData));
+                }
             }
 
             // Mostrar información del usuario
@@ -548,9 +585,9 @@
                 console.log('Eventos filtrados para este usuario:', userEvents.length);
                 console.log('Eventos del usuario:', userEvents);
 
-                // Si no hay eventos para este usuario, crear eventos de muestra
-                if (userEvents.length === 0) {
-                    console.log('No hay eventos para este usuario, creando eventos de muestra...');
+                // Si no hay eventos para este usuario, crear eventos de muestra (solo para usuarios registrados, no admin)
+                if (userEvents.length === 0 && clientData.createdBy !== 'admin') {
+                    console.log('No hay eventos para este usuario registrado, creando eventos de muestra...');
 
                     // Crear eventos de muestra inmediatamente
                     createSampleEventsForUser(userId);
@@ -588,6 +625,9 @@
                             </button>
                             <button class="btn btn-primary" onclick="openEvent('${event.id}', 'projection')">
                                 <i class="fas fa-tv"></i> Proyectar
+                            </button>
+                            <button class="btn btn-success" onclick="downloadAllPhotos('${event.id}')">
+                                <i class="fas fa-download"></i> Descargar Fotos
                             </button>
                             <button class="btn btn-secondary" onclick="openEvent('${event.id}', 'admin')">
                                 <i class="fas fa-cog"></i> Gestionar
@@ -766,7 +806,7 @@
             document.body.appendChild(modal);
 
             // Agregar listener para cerrar modal al hacer clic fuera
-            modal.addEventListener('click', function(e) {
+            modal.addEventListener('click', function (e) {
                 if (e.target === modal) {
                     closeModal();
                 }
@@ -860,7 +900,7 @@
             document.body.appendChild(modal);
 
             // Agregar listener para cerrar modal al hacer clic fuera
-            modal.addEventListener('click', function(e) {
+            modal.addEventListener('click', function (e) {
                 if (e.target === modal) {
                     closeModal();
                 }
@@ -1005,6 +1045,83 @@
 
             console.log('Eventos de muestra creados:', sampleEvents);
         }
+
+        // Download all approved photos from an event
+        async function downloadAllPhotos(eventId) {
+            if (!db) {
+                alert('Error: Base de datos no disponible');
+                return;
+            }
+
+            try {
+                // Show loading message
+                const loadingDiv = document.createElement('div');
+                loadingDiv.id = 'download-loader';
+                loadingDiv.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.8); z-index: 9999;
+                    display: flex; align-items: center; justify-content: center;
+                    color: white; font-size: 1.2rem; flex-direction: column; gap: 20px;
+                `;
+                loadingDiv.innerHTML = `
+                    <i class="fas fa-spinner fa-spin" style="font-size: 3rem;"></i>
+                    <p>Descargando fotos aprobadas...</p>
+                    <p id="download-progress" style="font-size: 0.9rem;"></p>
+                `;
+                document.body.appendChild(loadingDiv);
+
+                const progressEl = document.getElementById('download-progress');
+
+                // Get approved photos from Firestore
+                const snapshot = await db.collection('photos')
+                    .where('eventId', '==', eventId)
+                    .where('status', '==', 'approved')
+                    .get();
+
+                if (snapshot.empty) {
+                    alert('No hay fotos aprobadas para este evento');
+                    loadingDiv.remove();
+                    return;
+                }
+
+                progressEl.textContent = `Encontradas ${snapshot.size} fotos. Preparando descarga...`;
+
+                // Download photos one by one
+                let downloadCount = 0;
+                const eventName = eventId.replace(/[^a-zA-Z0-9]/g, '_');
+
+                for (const doc of snapshot.docs) {
+                    const photo = doc.data();
+                    const base64Data = photo.imageBase64;
+
+                    if (base64Data) {
+                        downloadCount++;
+                        progressEl.textContent = `Descargando foto ${downloadCount} de ${snapshot.size}...`;
+
+                        // Create download link
+                        const link = document.createElement('a');
+                        link.href = base64Data;
+                        link.download = `${eventName}_foto_${downloadCount}.jpg`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
+                        // Small delay between downloads
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                    }
+                }
+
+                loadingDiv.remove();
+                alert(`✅ ${downloadCount} fotos descargadas exitosamente!`);
+
+            } catch (error) {
+                console.error('Error descargando fotos:', error);
+                alert('Error al descargar las fotos: ' + error.message);
+                const loader = document.getElementById('download-loader');
+                if (loader) loader.remove();
+            }
+        }
     </script>
 </body>
+
 </html>

@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Moderación</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@400;600;700&display=swap');
-        
+
         :root {
             /* Modern Blue Theme (Default) */
             --primary-color: #3498db;
@@ -84,57 +85,57 @@
             --secondary-font: 'Poppins', sans-serif;
             --transition-duration: 0.3s;
         }
-        
-        body { 
-            font-family: var(--secondary-font); 
-            background: var(--background-gradient); 
-            margin: 0; 
-            padding: 20px; 
+
+        body {
+            font-family: var(--secondary-font);
+            background: var(--background-gradient);
+            margin: 0;
+            padding: 20px;
             min-height: 100vh;
             color: var(--text-color);
         }
-        
-        h1 { 
-            font-family: var(--primary-font); 
-            color: var(--text-color); 
-            text-align: center; 
-            font-size: 2.5rem; 
+
+        h1 {
+            font-family: var(--primary-font);
+            color: var(--text-color);
+            text-align: center;
+            font-size: 2.5rem;
             margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
-        
-        .container { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
-            gap: 25px; 
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
             max-width: 1200px;
             margin: 0 auto;
         }
-        
-        .photo-card { 
-            background: rgba(255,255,255,0.95); 
-            border-radius: 20px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2); 
-            overflow: hidden; 
+
+        .photo-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
             transition: transform 0.3s ease;
             color: #333;
         }
-        
+
         .photo-card:hover {
             transform: translateY(-5px);
         }
-        
-        .photo-card img { 
-            width: 100%; 
-            height: 200px; 
-            object-fit: cover; 
-            display: block; 
+
+        .photo-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
         }
-        
+
         .photo-info {
             padding: 15px;
         }
-        
+
         .message-text {
             background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
             color: white;
@@ -142,82 +143,82 @@
             border-radius: 15px;
             margin-bottom: 15px;
             font-weight: 600;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
             min-height: 20px;
             display: flex;
             align-items: center;
         }
-        
+
         .no-message {
             background: #e9ecef !important;
             color: #6c757d !important;
             font-style: italic;
         }
-        
+
         .photo-meta {
             font-size: 0.85rem;
             color: #666;
             margin-bottom: 15px;
         }
-        
-        .actions { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 0 15px 15px; 
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 15px 15px;
             gap: 10px;
         }
-        
+
         .actions button {
-            border: none; 
-            padding: 12px 20px; 
-            border-radius: 25px; 
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
             cursor: pointer;
             font-weight: 700;
             font-family: var(--secondary-font);
             flex: 1;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
-        
+
         .approve-btn {
             background: linear-gradient(135deg, var(--secondary-color), #27ae60);
             color: white;
         }
-        
+
         .approve-btn:hover {
             background: linear-gradient(135deg, #27ae60, var(--secondary-color));
             transform: translateY(-2px);
         }
-        
+
         .reject-btn {
             background: linear-gradient(135deg, var(--accent-color), #c0392b);
             color: white;
         }
-        
+
         .reject-btn:hover {
             background: linear-gradient(135deg, #c0392b, var(--accent-color));
             transform: translateY(-2px);
         }
-        
+
         .share-section {
-            background: rgba(0,0,0,0.05);
+            background: rgba(0, 0, 0, 0.05);
             border-radius: 10px;
             padding: 10px;
             margin-top: 10px;
             display: none;
         }
-        
+
         .share-section.show {
             display: block;
         }
-        
+
         .share-buttons {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
             justify-content: center;
         }
-        
+
         .share-btn {
             padding: 8px 12px;
             border: none;
@@ -231,67 +232,91 @@
             align-items: center;
             gap: 4px;
         }
-        
+
         .share-btn:hover {
             transform: translateY(-1px);
         }
-        
+
         .share-facebook {
             background: #1877f2;
             color: white;
         }
-        
+
         .share-twitter {
             background: #1da1f2;
             color: white;
         }
-        
+
         .share-instagram {
-            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
             color: white;
         }
-        
+
         .share-whatsapp {
             background: #25d366;
             color: white;
         }
-        
+
         .share-linkedin {
             background: #0077b5;
             color: white;
         }
-        
+
         .share-copy {
             background: var(--primary-color);
             color: white;
         }
-        
+
         .loading {
             text-align: center;
             padding: 40px;
             font-size: 1.2rem;
-            color: rgba(255,255,255,0.8);
+            color: rgba(255, 255, 255, 0.8);
         }
-        
+
         .no-photos {
             text-align: center;
             padding: 60px 20px;
-            color: rgba(255,255,255,0.8);
+            color: rgba(255, 255, 255, 0.8);
             font-size: 1.1rem;
         }
-        
+
         @media (max-width: 768px) {
-            .container { 
-                grid-template-columns: 1fr; 
-                gap: 20px; 
+            .container {
+                grid-template-columns: 1fr;
+                gap: 20px;
             }
-            h1 { font-size: 2rem; }
+
+            h1 {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
+
 <body>
     <h1>Panel de Moderación - Fotos Pendientes</h1>
     <div id="pending-container" class="container"></div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqcCwQRLf0MHnOChKqWyassG7-70gd8ps",
+            authDomain: "momentos-en-vivo.firebaseapp.com",
+            projectId: "momentos-en-vivo",
+            storageBucket: "momentos-en-vivo.firebasestorage.app",
+            messagingSenderId: "403164580472",
+            appId: "1:403164580472:web:9451616b5c586e4d587b8d"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        console.log("Firebase & Firestore initialized in moderador");
+    </script>
 
     <script>
         const pendingContainer = document.getElementById('pending-container');
@@ -469,7 +494,7 @@
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
-            
+
             try {
                 document.execCommand('copy');
                 alert('✅ URL copiada al portapapeles');
@@ -477,94 +502,92 @@
                 console.error('Error en fallback copy:', err);
                 alert('❌ Error copiando la URL');
             }
-            
+
             document.body.removeChild(textArea);
         }
 
-        async function loadPendingPhotos() {
-            const url = isLocal ? `/api/get-photos?eventId=${eventId}` : `https://us-central1-momentos-en-vivo.cloudfunctions.net/api1/get-photos?eventId=${eventId}`;
-            const response = await fetch(url, {
-                headers: {
-                    'x-api-key': API_KEY
-                }
-            });
-            const photos = await response.json();
-            
-            pendingContainer.innerHTML = ''; // Limpia el contenedor
-
-            if (photos.length === 0) {
-                pendingContainer.innerHTML = '<div class="no-photos">📸 No hay fotos pendientes de moderación</div>';
+        // Load photos from Firestore
+        function loadPendingPhotos() {
+            if (!db) {
+                pendingContainer.innerHTML = '<div class="loading">Error: Firestore no disponible</div>';
                 return;
             }
 
-            photos.forEach(photo => {
-                // Determinar si es un objeto Cloudinary o un string (desarrollo local)
-                const isCloudinaryObject = typeof photo === 'object' && photo.secure_url;
-                const isLocalFilename = typeof photo === 'string';
+            pendingContainer.innerHTML = '<div class="loading">Cargando fotos...</div>';
 
-                let photoId, imageUrl, message = '', createdDate = '';
+            db.collection('photos')
+                .where('eventId', '==', eventId)
+                .where('status', '==', 'pending')
+                .orderBy('createdAt', 'desc')
+                .limit(50)
+                .onSnapshot((snapshot) => {
+                    pendingContainer.innerHTML = '';
 
-                if (isCloudinaryObject) {
-                    // Formato Cloudinary (producción)
-                    photoId = photo.public_id;
-
-                    // Construir URL completa para la imagen
-                    imageUrl = isLocal ? `/uploads/${photo.public_id.split('/').pop()}` : photo.secure_url;
-
-                    // Extraer el mensaje de los tags de Cloudinary
-                    if (photo.tags && Array.isArray(photo.tags)) {
-                        const messageTag = photo.tags.find(tag => tag.startsWith('msg:'));
-                        if (messageTag) {
-                            message = decodeURIComponent(messageTag.substring(4)); // Remover 'msg:' del inicio
-                        }
+                    if (snapshot.empty) {
+                        pendingContainer.innerHTML = '<div class="no-photos">📸 No hay fotos pendientes de moderación</div>';
+                        return;
                     }
 
-                    createdDate = new Date(photo.created_at).toLocaleString('es-ES');
-                    console.log('--- DEBUG Moderador: Foto Cloudinary:', photo.public_id, 'Tags:', photo.tags, 'Mensaje extraído:', message);
+                    snapshot.forEach((doc) => {
+                        const photo = doc.data();
+                        const photoId = doc.id;
+                        const imageUrl = photo.imageBase64 || '';
+                        const message = photo.message || '';
+                        const createdDate = new Date(photo.createdAt).toLocaleString('es-ES');
 
-                } else if (isLocalFilename) {
-                    // Formato local (desarrollo)
-                    photoId = photo; // El filename es el ID
-                    imageUrl = `/uploads/${photo}`;
-                    message = 'Foto subida localmente';
-                    createdDate = 'Desarrollo local';
-                    console.log('--- DEBUG Moderador: Foto local:', photo);
-                }
+                        const card = document.createElement('div');
+                        card.className = 'photo-card';
+                        card.innerHTML = `
+                            <img src="${imageUrl}" alt="Foto pendiente">
+                            <div class="photo-info">
+                                <div class="message-text ${message ? '' : 'no-message'}">
+                                    ${message || 'Sin mensaje'}
+                                </div>
+                                <div class="photo-meta">
+                                    📅 ${createdDate}
+                                </div>
+                            </div>
+                            <div class="actions">
+                                <button class="approve-btn">✅ Aprobar</button>
+                                <button class="reject-btn">❌ Rechazar</button>
+                            </div>
+                        `;
 
-                const card = document.createElement('div');
-                card.className = 'photo-card';
-                card.innerHTML = `
-                    <img src="${imageUrl}" alt="Foto pendiente">
-                    <div class="photo-info">
-                        <div class="message-text ${message ? '' : 'no-message'}">
-                            ${message || 'Sin mensaje'}
-                        </div>
-                        <div class="photo-meta">
-                            📅 ${createdDate}
-                        </div>
-                    </div>
-                    <div class="actions">
-                        <button class="approve-btn">✅ Aprobar</button>
-                        <button class="reject-btn">❌ Rechazar</button>
-                    </div>
-                    <div class="share-section" id="share-${photoId}">
-                        <div class="share-buttons" id="share-buttons-${photoId}">
-                            <!-- Botones de compartir se agregarán aquí dinámicamente -->
-                        </div>
-                    </div>
-                `;
+                        // Approve button - update status in Firestore
+                        card.querySelector('.approve-btn').addEventListener('click', async () => {
+                            try {
+                                await db.collection('photos').doc(photoId).update({ status: 'approved' });
+                                card.remove();
+                                showToast('Foto aprobada correctamente', 'success');
+                            } catch (error) {
+                                console.error('Error aprobando foto:', error);
+                                showToast('Error al aprobar la foto', 'error');
+                            }
+                        });
 
-                card.querySelector('.approve-btn').addEventListener('click', () => handleAction('approve', photoId, card));
-                card.querySelector('.reject-btn').addEventListener('click', () => handleAction('reject', photoId, card));
+                        // Reject button - update status in Firestore
+                        card.querySelector('.reject-btn').addEventListener('click', async () => {
+                            try {
+                                await db.collection('photos').doc(photoId).update({ status: 'rejected' });
+                                card.remove();
+                                showToast('Foto rechazada correctamente', 'success');
+                            } catch (error) {
+                                console.error('Error rechazando foto:', error);
+                                showToast('Error al rechazar la foto', 'error');
+                            }
+                        });
 
-                pendingContainer.appendChild(card);
-            });
+                        pendingContainer.appendChild(card);
+                    });
+                }, (error) => {
+                    console.error("Error loading photos from Firestore:", error);
+                    pendingContainer.innerHTML = '<div class="no-photos">❌ Error cargando fotos</div>';
+                });
         }
 
         loadPendingPhotos();
-        setInterval(loadPendingPhotos, 10000); // Revisa si hay fotos nuevas cada 10 segundos
     </script>
-    
+
     <script>
         // Función para mostrar notificaciones toast
         function showToast(message, type = 'info') {
@@ -585,12 +608,12 @@
                 transition: all 0.3s ease;
             `;
             document.body.appendChild(toast);
-            
+
             setTimeout(() => {
                 toast.style.opacity = '1';
                 toast.style.transform = 'translateY(0)';
             }, 10);
-            
+
             setTimeout(() => {
                 toast.style.opacity = '0';
                 toast.style.transform = 'translateY(-20px)';
@@ -598,7 +621,7 @@
             }, 3000);
         }
     </script>
-    
+
     <!-- Footer con información del creador -->
     <footer style="
         background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
@@ -620,4 +643,5 @@
         </div>
     </footer>
 </body>
+
 </html>

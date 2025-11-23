@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +26,7 @@
             background: white;
             padding: 40px;
             border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
             width: 100%;
             max-width: 400px;
             text-align: center;
@@ -91,7 +92,7 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .btn:disabled {
@@ -144,8 +145,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         @media (max-width: 480px) {
@@ -160,6 +166,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="login-container">
         <div class="logo">
@@ -191,11 +198,24 @@
         </a>
     </div>
 
+    <!-- Firebase SDKs -->
+    <script src="/__/firebase/10.8.0/firebase-app-compat.js"></script>
+    <script src="/__/firebase/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="/__/firebase/init.js"></script>
+
     <script>
-        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+        // Initialize Firestore
+        let db;
+        try {
+            db = firebase.firestore();
+        } catch (e) {
+            console.error("Error initializing Firestore", e);
+        }
+
+        document.getElementById('adminLoginForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const username = document.getElementById('username').value.trim();
+            const username = document.getElementById('username').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
             const loginBtn = document.getElementById('loginBtn');
             const messageDiv = document.getElementById('message');
@@ -209,35 +229,37 @@
             messageDiv.className = 'message';
 
             try {
-                // Simular verificación de credenciales (en producción esto iría a una API)
-                await new Promise(resolve => setTimeout(resolve, 1500));
-
-                // Credenciales hardcodeadas para demo
+                // 1. Check Hardcoded Admin
                 if (username === 'admin' && password === 'admin123') {
-                    // Login exitoso
-                    messageDiv.textContent = '✅ Acceso concedido. Redirigiendo al panel...';
-                    messageDiv.className = 'message success';
-                    messageDiv.style.display = 'block';
-
-                    // Guardar sesión en localStorage
-                    const adminSession = {
-                        username: username,
-                        timestamp: new Date().getTime(),
-                        role: 'admin'
-                    };
-                    localStorage.setItem('adminSession', JSON.stringify(adminSession));
-
-                    // Redirigir al panel de administración
-                    setTimeout(() => {
-                        window.location.href = 'admin.html';
-                    }, 1500);
-
-                } else {
-                    // Credenciales incorrectas
-                    throw new Error('Usuario o contraseña incorrectos');
+                    loginSuccess({ username: 'admin', role: 'admin' });
+                    return;
                 }
 
+                // 2. Check Firestore Users
+                if (db) {
+                    const snapshot = await db.collection('users')
+                        .where('email', '==', username)
+                        .where('password', '==', password) // Note: In production, use Firebase Auth or hashed passwords
+                        .get();
+
+                    if (!snapshot.empty) {
+                        const userDoc = snapshot.docs[0];
+                        const userData = userDoc.data();
+                        loginSuccess({
+                            username: userData.email,
+                            role: userData.isPremium ? 'premium' : 'user',
+                            userId: userDoc.id,
+                            fullName: userData.fullName
+                        });
+                        return;
+                    }
+                }
+
+                // Credenciales incorrectas
+                throw new Error('Usuario o contraseña incorrectos');
+
             } catch (error) {
+                console.error("Login error:", error);
                 messageDiv.textContent = '❌ ' + error.message;
                 messageDiv.className = 'message error';
                 messageDiv.style.display = 'block';
@@ -248,8 +270,24 @@
             }
         });
 
+        function loginSuccess(sessionData) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = '✅ Acceso concedido. Redirigiendo al panel...';
+            messageDiv.className = 'message success';
+            messageDiv.style.display = 'block';
+
+            // Guardar sesión
+            sessionData.timestamp = new Date().getTime();
+            localStorage.setItem('adminSession', JSON.stringify(sessionData));
+
+            // Redirigir
+            setTimeout(() => {
+                window.location.href = 'admin.html';
+            }, 1500);
+        }
+
         // Verificar si ya está autenticado
-        window.onload = function() {
+        window.onload = function () {
             const adminSession = localStorage.getItem('adminSession');
             if (adminSession) {
                 try {
@@ -269,4 +307,5 @@
         };
     </script>
 </body>
+
 </html>
