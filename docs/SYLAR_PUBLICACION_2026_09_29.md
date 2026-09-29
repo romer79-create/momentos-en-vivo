@@ -26,4 +26,11 @@ Un proyecto de Sylar.soluciones. Publicación autorizada expresamente por el pro
 
 Solo Firebase Hosting, proyecto `momentos-en-vivo`, cuenta `sylar.soluciones@gmail.com`. No se modifican funciones, reglas, eventos, fotos, secretos ni el estado de ventas. Referencia anterior de Hosting: `bf676322b85cc2f6`.
 
-Estado: preparado y comprobado localmente; completar el registro al verificar la publicación.
+Estado: publicado y verificado en https://momentos-en-vivo.web.app/.
+
+- Hosting: versión `4b6664f39052be08`, publicada el 29/09/2026 a las 04:17:26 UTC, 114 archivos.
+- El archivo público de Sylar coincide con el generado localmente (SHA-256 `ce95719bcafe2037289515fe10b33084ae04bcc6704d51b68f7fb9916b2cd786`).
+- Verificación pública: API versión 3, precios y plazos esperados, ventas desactivadas, rechazo de rutas privadas sin sesión y de webhook con firma inválida.
+- Navegador público: chat y respuesta para crear evento; guía en la sesión autenticada de diseño, con estado de invitación publicada; cierre devuelve el foco al personaje. Sin errores de consola observados en esas dos páginas. No se guardaron cambios del evento ni se hicieron nuevos pagos.
+- Captura local: `output/releases/sylar-publicado-20260929.png` (excluida de Git).
+- Código guardado en el commit local `e584238`. La subida a GitHub fue rechazada: la cuenta conectada `th3kill3r1979` no tiene permiso de escritura en `romer79-create/momentos-en-vivo`. Se solicitó al propietario completar el inicio de sesión con `romer79-create`; queda pendiente la subida, no la publicación web.
