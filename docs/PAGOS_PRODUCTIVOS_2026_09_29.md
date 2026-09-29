@@ -11,6 +11,7 @@ Momentos en Vivo — Un proyecto de Sylar.soluciones.
 - Una consulta independiente a `/users/me` confirmó vendedor **78132866**, país **AR**, cuenta real. No se guardaron ni imprimieron perfiles o claves.
 - `api1` y `billingMaintenance` se actualizaron satisfactoriamente en Node.js 22 con `PAYMENTS_MODE=live`, `PAYMENTS_CHECKOUT_ENABLED=false` y `PAYMENTS_SANDBOX_ADMIN=false`. La portada, las demás funciones y los eventos se conservaron.
 - La comprobación pública confirmó precios aprobados, ventas pausadas, acceso anónimo rechazado y Webhooks falsificados rechazados.
+- Una lectura independiente de Cloud Functions confirmó las dos funciones `ACTIVE`, runtime `nodejs22`, modo `live`, ventas pausadas y únicamente las dos claves productivas en versión 1. Sus actualizaciones son de las **20:13:33 UTC**. El comprobador es `scripts/check-payment-deployment.cjs`; acepta `--live` cuando se habiliten las compras.
 
 Las claves y los vendedores de prueba/reales están separados. Las funciones vinculan solo las claves del modo seleccionado. Un cambio a `live` sin sus propias claves y vendedor deja los cobros desactivados.
 
@@ -42,5 +43,7 @@ La primera publicación agotó el tiempo de análisis del código y no actualiz�
 Para abrir ventas tras la comprobación, cambiar únicamente `PAYMENTS_CHECKOUT_ENABLED=true`, conservar modo `live` y volver a desplegar esas dos funciones. Ejecutar `node scripts/check-public.cjs --live` y revisar Mis compras. Para pausar ventas, volver a `false` y redeplegar: se conserva la conciliación de compras reales.
 
 La configuración anterior a `live` se guardó localmente en `output/releases/payments-before-live-20260929.env`; las claves de prueba no se eliminaron. Volver globalmente a sandbox durante compras reales dejaría de conciliar esas órdenes, por lo que la pausa de ventas es la primera medida ante un incidente.
+
+El código y las pruebas se subieron a GitHub (`main` y `mejora/seguridad-eventos`) en el commit `b346274`. Los archivos privados de configuración y validación quedaron excluidos.
 
 Referencias: [credenciales oficiales](https://www.mercadopago.com.ar/developers/es/docs/your-integrations/credentials), [Webhooks para API de Preferencias](https://www.mercadopago.com.ar/developers/es/docs/checkout-pro-preferences/additional-content/notifications/webhooks).

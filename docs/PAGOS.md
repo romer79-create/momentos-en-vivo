@@ -2,7 +2,7 @@
 
 ## Estado y configuración
 
-El simulador local acredita eventos ficticios sin contactar a Mercado Pago. No equivale a una prueba del proveedor. La versión pública ya está desplegada con `PAYMENTS_MODE=sandbox`, `PAYMENTS_CHECKOUT_ENABLED=false` y `PAYMENTS_SANDBOX_ADMIN=true`: solo el administrador verificado puede iniciar compras de prueba. Los clientes y visitantes no pueden comprar todavía. Ninguna credencial privada debe entrar al navegador, Git, chat o registros. Ver [publicación confirmada y pendientes](RELEASE_2026_09_28.md).
+El simulador local acredita eventos ficticios sin contactar a Mercado Pago. No equivale a una prueba del proveedor. La versión pública está desplegada con `PAYMENTS_MODE=live`, `PAYMENTS_CHECKOUT_ENABLED=false` y `PAYMENTS_SANDBOX_ADMIN=false`: la conexión real está preparada y las ventas continúan pausadas hasta verificar el pago privado final. Ninguna credencial privada debe entrar al navegador, Git, chat o registros. Ver [estado productivo actual](PAGOS_PRODUCTIVOS_2026_09_29.md) y [registro histórico de pruebas](RELEASE_2026_09_28.md).
 
 El propietario creó la aplicación **Momentos en Vivo**, con **Checkout Pro / API de Preferencias**, y guardó su Access Token mediante el ingreso oculto. El 28 de septiembre de 2026 se verificó la versión 1 habilitada de `MERCADO_PAGO_ACCESS_TOKEN`: Mercado Pago confirmó vendedor de prueba **2954695377**, sitio `MLA` y país `AR`. Se completaron dos compras ficticias aprobadas: una se recuperó manualmente y otra mediante la conciliación programada. El simulador oficial envió un aviso firmado válido, sin duplicar saldo ni correo. Eso no certificó el disparo automático.
 
