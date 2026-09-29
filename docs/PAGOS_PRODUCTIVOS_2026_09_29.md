@@ -15,17 +15,23 @@ Momentos en Vivo — Un proyecto de Sylar.soluciones.
 
 Las claves y los vendedores de prueba/reales están separados. Las funciones vinculan solo las claves del modo seleccionado. Un cambio a `live` sin sus propias claves y vendedor deja los cobros desactivados.
 
-## Validación privada preparada
+## Validación privada completada
 
 Se creó una única orden de **ARS 100**, exclusiva de la cuenta del titular y marcada `validation:true`, mediante `scripts/prepare-live-validation.cjs`. No se modificó el catálogo comercial: un evento sigue costando ARS 65.000 y tres ARS 175.500; diez se cotizan.
 
-La preferencia devuelta confirmó aplicación **2940830163173** y vendedor **78132866**. El enlace lleva al Checkout Pro real. Crear la orden y el enlace no ejecutó ningún pago. El propietario debe confirmar el pago con una cuenta compradora real distinta de la vendedora; luego se verifica aviso automático, acreditación única y correo. Una devolución también requiere intervención del titular en Mercado Pago.
+La preferencia devuelta confirmó aplicación **2940830163173** y vendedor **78132866**. Crear la orden y el enlace no ejecutó ningún pago. Después, una cuenta compradora real distinta de la vendedora completó el cobro de ARS 100 y el propietario confirmó que le avisaron de su registro.
+
+La lectura de la orden confirmó estado **approved**, un único crédito real, una unidad disponible, vencimiento a los doce meses y correo de compra **sent**, con un solo intento. También figura un intento anterior rechazado, sin saldo acreditado ni incidencias.
+
+La acreditación se registró el **29/09/2026 a las 20:55:58.952 UTC** y el receptor confirmó `payment`, firma verificada, resultado `credited` y respuesta HTTP 200 a las **20:55:59.032 UTC**. La última comprobación de la orden era anterior al pago, a las 20:28:05 UTC; no se usó el simulador ni el botón de comprobación manual para acreditar esta compra. La correlación entre compra real, registro firmado y transacción confirma la entrega y acreditación automáticas. El diagnóstico de registros aislado no certifica ese recorrido.
+
+**Devolución pendiente:** el titular debe confirmar la devolución de los ARS 100 en Mercado Pago. No se ejecutó un reintegro ni se activó el crédito de validación en un evento. Después del reintegro se deberá comprobar el estado de la orden y la retirada del saldo sin usar.
 
 El identificador y enlace privados se conservan solo en los archivos locales ignorados de `output/releases/`. Reejecutar el preparador reutiliza la orden pendiente y su enlace; nunca vuelve a preparar una orden ya procesada. La preparación rechaza ventas públicas activas, sandbox, vendedores de prueba, cuentas sin verificación y preferencias de otra aplicación.
 
 `node scripts/check-live-validation.cjs` consulta únicamente la orden del titular, su saldo, lote, historial, correo e incidencias. No fuerza la conciliación ni simula una notificación. `node scripts/check-webhook-deliveries.cjs` inspecciona registros acotados sin cuerpos, firmas, identificadores privados ni credenciales. Es necesario correlacionar su resultado con el pago real: un aviso del simulador por sí solo no acredita entrega automática.
 
-**Pendiente en este punto:** completar el pago privado y verificar la notificación automática antes de abrir compras al público. No anunciar la integración como completamente validada hasta completar ese paso.
+**Pendiente en este punto:** autorización explícita para abrir las ventas reales al público y publicación de ese cambio. La revisión automática de permisos rechazó el intento de habilitación por requerir esa autorización concreta. El cambio local de `PAYMENTS_CHECKOUT_ENABLED` está preparado, pero la configuración publicada sigue en `false`. El pago privado y su notificación automática sí quedaron comprobados.
 
 ## Comprobaciones ejecutadas
 

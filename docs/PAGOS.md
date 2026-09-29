@@ -2,7 +2,7 @@
 
 ## Estado y configuración
 
-El simulador local acredita eventos ficticios sin contactar a Mercado Pago. No equivale a una prueba del proveedor. La versión pública está desplegada con `PAYMENTS_MODE=live`, `PAYMENTS_CHECKOUT_ENABLED=false` y `PAYMENTS_SANDBOX_ADMIN=false`: la conexión real está preparada y las ventas continúan pausadas hasta verificar el pago privado final. Ninguna credencial privada debe entrar al navegador, Git, chat o registros. Ver [estado productivo actual](PAGOS_PRODUCTIVOS_2026_09_29.md) y [registro histórico de pruebas](RELEASE_2026_09_28.md).
+El simulador local acredita eventos ficticios sin contactar a Mercado Pago. No equivale a una prueba del proveedor. La versión pública está desplegada con `PAYMENTS_MODE=live`, `PAYMENTS_CHECKOUT_ENABLED=false` y `PAYMENTS_SANDBOX_ADMIN=false`. El pago real privado de ARS 100 quedó aprobado, acreditado automáticamente mediante una notificación firmada y con un único correo enviado. Las ventas públicas siguen pausadas mientras se obtiene la autorización explícita de apertura exigida por la revisión automática de permisos y se publica ese cambio. Ninguna credencial privada debe entrar al navegador, Git, chat o registros. Ver [estado productivo actual](PAGOS_PRODUCTIVOS_2026_09_29.md) y [registro histórico de pruebas](RELEASE_2026_09_28.md).
 
 El propietario creó la aplicación **Momentos en Vivo**, con **Checkout Pro / API de Preferencias**, y guardó su Access Token mediante el ingreso oculto. El 28 de septiembre de 2026 se verificó la versión 1 habilitada de `MERCADO_PAGO_ACCESS_TOKEN`: Mercado Pago confirmó vendedor de prueba **2954695377**, sitio `MLA` y país `AR`. Se completaron dos compras ficticias aprobadas: una se recuperó manualmente y otra mediante la conciliación programada. El simulador oficial envió un aviso firmado válido, sin duplicar saldo ni correo. Eso no certificó el disparo automático.
 
@@ -20,7 +20,7 @@ El propietario copia el **Access Token** de **Prueba** usando su botón de copia
 
 La clave viaja a Firebase por entrada estándar, con cuerpos de diagnóstico omitidos. El programa no escribe la clave en archivos o argumentos, no muestra el perfil completo, no crea preferencias ni pagos, no despliega y no habilita cobros. Rechaza reemplazar la credencial si la configuración local tiene un modo de cobro habilitado. Muestra únicamente el ID de prueba confirmado. Seis pruebas con respuestas simuladas cubren rechazo de cuentas reales/extranjeras, errores y protección de la clave. `scripts/check-payments.cjs` realizó además la verificación real indicada arriba, leyendo el secreto únicamente en memoria y mostrando solo metadatos.
 
-La versión 1 de `MERCADO_PAGO_WEBHOOK_SECRET` está guardada, habilitada y vinculada a las funciones desplegadas. El receptor público rechaza firmas inválidas. Sigue pendiente confirmar una notificación auténtica de Mercado Pago y completar las compras de prueba antes de habilitar ventas. No repetir el ingreso inicial de claves salvo una rotación deliberada; los iniciadores rechazan reemplazos con el modo activo.
+La versión 1 de `MERCADO_PAGO_WEBHOOK_SECRET` está guardada y habilitada para sandbox; las funciones actualmente publicadas en `live` vinculan únicamente las claves productivas. El receptor público rechaza firmas inválidas. La notificación automática de una compra real quedó confirmada el 29/09/2026; ver el informe productivo para sus evidencias y el estado de apertura. No repetir el ingreso inicial de claves salvo una rotación deliberada; los iniciadores rechazan reemplazos con el modo activo.
 
 ### Ingreso inicial de la clave de Webhooks
 
@@ -80,7 +80,7 @@ Los saldos y lotes de prueba están separados de los reales. Un evento activado 
 
 `billingMaintenance` consulta órdenes pendientes y pagos aprobados cada 15 minutos, procesando hasta 25 órdenes por ejecución y cerrando hasta 100 eventos vencidos. Los aprobados se vuelven a comprobar diariamente; los pendientes, por hora. El servidor hace respetar los horarios aunque la tarea se retrase. No publica avisos externos.
 
-Pagos duplicados, errores de conciliación y reintegros generan `billingIncidents`. Reintegros o contracargos retiran unidades sin usar; no cierran eventos ya activados. Los reintegros parciales quedan en revisión y suspenden el saldo restante de esa compra. El panel administrativo ya muestra incidencias; su resolución y las alertas externas siguen pendientes. Los workers de avisos están publicados con SMTP; falta comprobar una entrega desde ellos. La limpieza automática continúa desactivada.
+Pagos duplicados, errores de conciliación y reintegros generan `billingIncidents`. Reintegros o contracargos retiran unidades sin usar; no cierran eventos ya activados. Los reintegros parciales quedan en revisión y suspenden el saldo restante de esa compra. El panel administrativo ya muestra incidencias; su resolución y las alertas externas siguen pendientes. Los workers de avisos están publicados con SMTP: el correo del pago real privado quedó enviado, con un único intento. La limpieza automática continúa desactivada.
 
 ## Antes de habilitar ventas
 
@@ -93,7 +93,7 @@ Pagos duplicados, errores de conciliación y reintegros generan `billingIncident
 
 Los ensayos locales no realizan cargos ni sustituyen una validación con el proveedor. Las compras ficticias publicadas y el paso a producción se documentan por separado.
 
-El primer ensayo publicado quedó aprobado después de corregir el acceso por `init_point` y la validación de cuentas de prueba: una unidad de saldo sandbox acreditada, sin duplicaciones, y correo automático enviado. Se recuperó el pago desde **Comprobar pago**. Posteriormente, el simulador oficial de Webhooks envió `payment.updated` sobre ese pago y obtuvo 200 OK; la lectura del registro confirmó una nueva comprobación y conservó un solo crédito y envío de correo. Falta comprobar el disparo automático al realizar una compra nueva, sin usar simulador ni refresco manual, y los demás escenarios antes de habilitar ventas. Ver el detalle en [el informe de publicación](RELEASE_2026_09_28.md#primer-checkout-de-prueba-y-bloqueo-de-acceso).
+El primer ensayo publicado quedó aprobado después de corregir el acceso por `init_point` y la validación de cuentas de prueba: una unidad de saldo sandbox acreditada, sin duplicaciones, y correo automático enviado. Se recuperó el pago desde **Comprobar pago**. Posteriormente, el simulador oficial de Webhooks envió `payment.updated` sobre ese pago y obtuvo 200 OK; la lectura del registro confirmó una nueva comprobación y conservó un solo crédito y envío de correo. Ese ensayo histórico no certificó el disparo automático: la compra real de ARS 100 del 29/09/2026 sí confirmó una nueva entrega firmada y acreditación sin simulador ni refresco manual. Ver [el ensayo histórico](RELEASE_2026_09_28.md#primer-checkout-de-prueba-y-bloqueo-de-acceso) y [la validación productiva actual](PAGOS_PRODUCTIVOS_2026_09_29.md).
 
 ## MCP oficial
 
