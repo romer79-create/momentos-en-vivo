@@ -1,0 +1,64 @@
+const { chromium } = require('playwright');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const { randomUUID } = require('node:crypto');
+const { wave } = require('./music-fixture.cjs');
+const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:5000';
+const output = path.resolve(process.env.TEST_OUTPUT || 'test-results/music'); fs.mkdirSync(output, { recursive: true });
+const email = process.env.TEST_USER_EMAIL || 'cliente@example.test';
+const results = [];
+(async () => {
+  const browser = await chromium.launch({ executablePath: 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe', headless: true });
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1050 } }); const page = await context.newPage(); page.setDefaultTimeout(25000);
+  const errors = []; const watch = p => { p.on('pageerror', e => errors.push(e.message)); p.on('console', m => { if (/Content Security Policy|violates the following/.test(m.text())) errors.push(m.text()); }); }; watch(page);
+  try {
+    const token = await fetch('http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: 'Prueba-local-123456', returnSecureToken: true }) }).then(r => r.json()).then(r => r.idToken); assert.ok(token);
+    const api = async (suffix, method = 'GET', body) => { const r = await fetch(`${base}/api${suffix}`, { method, headers: { Authorization: `Bearer ${token}`, ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined }); const data = await r.json(); assert.ok(r.ok, JSON.stringify(data)); return data; };
+    const event = await api('/events', 'POST', { name: 'Prueba de música propia', date: new Date(Date.now() + 86400000).toISOString().slice(0, 10), startTime: '21:00' }); const endpoint = `/events/${event.id}`;
+    await page.goto(`${base}/diseno.html?event=${event.id}`); await page.getByLabel('Correo electrónico', { exact: true }).fill(email); await page.getByLabel('Contraseña', { exact: true }).fill('Prueba-local-123456'); await page.getByRole('button', { name: 'Ingresar', exact: true }).click(); await page.getByRole('heading', { name: 'Diseñá tu momento' }).waitFor();
+    const presets = require('../functions/themes.json'); assert.equal(await page.locator('.theme-choice').count(), Object.keys(presets).length);
+    await page.getByRole('button', { name: 'Elegir Magia y hechizos', exact: true }).click();
+    const file = wave(5, 880); const before = wave(2, 440); before.copy(file, 44, 44);
+    await page.getByLabel('Archivo de música', { exact: true }).setInputFiles({ name: 'mi-cancion.wav', mimeType: 'audio/wav', buffer: file });
+    await page.getByLabel('Empezar desde el segundo', { exact: true }).fill('2');
+    const uploaded = page.waitForResponse(r => r.url().endsWith('/theme-music') && r.request().method() === 'POST');
+    await page.getByRole('button', { name: 'Guardar fragmento de música', exact: true }).click(); assert.equal((await uploaded).status(), 201);
+    await page.getByText('mi-cancion.wav · 3 segundos guardados', { exact: true }).waitFor();
+    assert.equal(await page.getByLabel('Música de la invitación', { exact: true }).inputValue(), 'custom');
+    await page.getByRole('button', { name: 'Escuchar música elegida', exact: true }).click(); await page.getByRole('button', { name: 'Detener música', exact: true }).click();
+    await page.getByRole('button', { name: 'Guardar diseño', exact: true }).click(); await page.getByText('Diseño guardado.', { exact: true }).waitFor();
+    await page.reload(); await page.getByText('mi-cancion.wav · 3 segundos guardados', { exact: true }).waitFor(); assert.equal(await page.getByLabel('Música de la invitación', { exact: true }).inputValue(), 'custom');
+    const stored = Buffer.from(await fetch(`${base}/api${endpoint}/theme-music`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.arrayBuffer()));
+    let crossings = 0; for (let i = 8000; i < 40000; i++) if (stored.readInt16LE(44 + i * 2) < 0 && stored.readInt16LE(44 + (i + 1) * 2) >= 0) crossings++;
+    assert.ok(Math.abs(crossings - 880) < 2, `Wrong excerpt: ${crossings}Hz`); results.push('Audio propio: conversión real, recorte desde el segundo elegido, persistencia y audición');
+    const id = randomUUID(); await api('/orders', 'POST', { id, planId: 'evento-1' }); await api(`/orders/${id}/simulate`, 'POST', { status: 'approved' }); await api(`${endpoint}/activate`, 'POST');
+    await page.reload(); await page.getByRole('button', { name: 'Publicar invitación', exact: true }).click(); await page.getByText('Diseño guardado e invitación publicada.', { exact: true }).waitFor();
+    const link = await page.getByLabel('Enlace de invitación', { exact: true }).inputValue();
+    const guestContext = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' }); const guest = await guestContext.newPage(); watch(guest); let musicReads = 0; guest.on('request', r => { if (r.url().endsWith('/theme-music')) musicReads++; });
+    await guest.goto(link); await guest.locator('.invite-sound').waitFor(); assert.equal(musicReads, 0, 'Music must be lazy, with no autoplay');
+    await guest.locator('.invite-sound').click(); await guest.waitForFunction(() => document.querySelector('.invite-sound')?.getAttribute('aria-pressed') === 'true'); assert.equal(musicReads, 1);
+    await guest.locator('.invite-sound').click(); await guest.locator('.invite-sound').click(); assert.equal(musicReads, 1); await guest.locator('.invite-sound').click();
+    results.push('Invitado: audio privado bajo demanda, sin descarga automática ni reproducción automática');
+    await page.bringToFront(); await page.getByRole('button', { name: 'Preparar video para WhatsApp', exact: true }).click(); await page.getByText(/Vista previa lista/).waitFor(); assert.equal(await page.getByLabel('Incluir mi música', { exact: true }).isChecked(), true);
+    await page.getByRole('button', { name: 'Crear video MP4', exact: true }).click(); await page.getByRole('button', { name: 'Descargar MP4', exact: true }).waitFor({ timeout: 40000 });
+    const downloading = page.waitForEvent('download'); await page.getByRole('button', { name: 'Descargar MP4', exact: true }).click(); const download = await downloading; const movie = path.join(output, 'musica-propia.mp4'); await download.saveAs(movie);
+    const bytes = fs.readFileSync(movie); assert.ok(bytes.includes(Buffer.from('mp4a')));
+    const media = await context.newPage(); await media.goto('about:blank');
+    const measured = await media.evaluate(async data => {
+      const bytes = Uint8Array.from(atob(data), c => c.charCodeAt(0)); const audio = new AudioContext();
+      try { const buffer = await audio.decodeAudioData(bytes.buffer); const samples = buffer.getChannelData(0); let n = 0; const start = Math.floor(buffer.sampleRate * .5), end = start + buffer.sampleRate;
+        for (let i = start; i < end; i++) if (samples[i] < 0 && samples[i + 1] >= 0) n++;
+        return { hz: n, duration: buffer.duration };
+      } finally { await audio.close(); }
+    }, bytes.toString('base64'));
+    assert.ok(Math.abs(measured.hz - 880) < 4, JSON.stringify(measured)); assert.ok(measured.duration > 15 && measured.duration < 19); await media.close();
+    await page.getByRole('button', { name: 'Cerrar', exact: true }).click(); results.push('MP4 real: AAC decodificado de 16 segundos con el fragmento propio de 880 Hz, no la música predeterminada');
+    await page.getByLabel('Tu idea para el evento', { exact: true }).fill('Mis 15 de Harry Potter, dorado y verde'); const url = new URL(await page.getByRole('link', { name: 'Consultar por WhatsApp' }).getAttribute('href')); assert.equal(url.pathname, '/5493764104660'); assert.match(url.searchParams.get('text'), /Harry Potter/); assert.match(url.searchParams.get('text'), new RegExp(event.id));
+    await page.getByRole('button', { name: 'Quitar música propia', exact: true }).click(); await page.getByRole('button', { name: 'Guardar diseño', exact: true }).click(); await page.getByText('Diseño guardado e invitación publicada.', { exact: true }).waitFor();
+    assert.equal((await api(endpoint)).themeMusic, null);
+    assert.equal((await fetch(`${base}/api${endpoint}/theme-music`, { headers: { Authorization: `Bearer ${token}` } })).status, 404);
+    results.push('Solicitud premium prepara la consulta sin enviarla ni cobrar; quitar música elimina el archivo privado');
+    assert.deepEqual(errors, []); fs.writeFileSync(path.join(output, 'results.json'), JSON.stringify({ ok: true, results, measured }, null, 2)); console.log(JSON.stringify({ ok: true, results, measured }, null, 2));
+  } finally { await browser.close(); }
+})().catch(error => { console.error(error); fs.writeFileSync(path.join(output, 'results.json'), JSON.stringify({ ok: false, results, error: error.stack }, null, 2)); process.exitCode = 1; });

@@ -1,25 +1,41 @@
 {
-  "name": "proyectos",
-  "version": "1.0.0",
-  "description": "",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron ."
+  "name": "momentos-en-vivo",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Fotografías para eventos, con acceso separado por cliente.",
+  "engines": {
+    "node": "22.x || 24.x"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "firebase-admin": "^12.0.0",
-    "firebase-functions": "^5.0.0",
-    "dotenv": "^17.2.2",
-    "express": "^4.19.2",
-    "formidable": "^3.5.4",
-    "jszip": "^3.10.1",
-    "lambda-multipart-parser": "^1.0.1",
-    "multer": "^1.4.5-lts.1"
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "start": "npm run build && firebase emulators:start --config firebase.local.json --project demo-momentos --only auth,firestore,storage,functions,hosting",
+    "preview:lan": "node scripts/lan-preview.cjs",
+    "test": "node --test tests/security.test.cjs tests/projection-state.test.cjs tests/music.test.cjs tests/frame-sequence.test.mjs tests/secret-setup.test.cjs tests/payment-setup.test.cjs tests/payment-gateway.test.cjs tests/webhook-setup.test.cjs tests/album-signing-setup.test.cjs tests/sandbox-admin.test.cjs tests/mercadopago-mcp.test.cjs",
+    "test:integration": "firebase emulators:exec --project demo-momentos --only auth,firestore,storage \"node --test --test-concurrency=1 tests/integration.test.cjs tests/commerce.test.cjs tests/presentation.test.cjs tests/moderation.test.cjs\"",
+    "test:browser": "node tests/browser.cjs",
+    "test:landing": "node tests/cover.cjs",
+    "test:automation": "node --test tests/automation.test.cjs",
+    "test:guidance": "node --test tests/event-guidance.test.cjs",
+    "test:themes": "node tests/themes-browser.cjs",
+    "test:live": "node tests/live-browser.cjs",
+    "test:invitations": "node tests/invitation-motion-browser.cjs",
+    "test:music": "node tests/music-browser.cjs",
+    "demo:seed": "node scripts/seed-demo.cjs",
+    "test:e2e": "npm run build && firebase emulators:exec --config firebase.local.json --project demo-momentos --only auth,firestore,storage,functions,hosting \"node scripts/browser-suite.cjs\"",
+    "test:sylar": "node --test tests/sylar-knowledge.test.mjs tests/sylar-presence.test.mjs"
   },
   "devDependencies": {
-    "electron": "^31.0.2"
+    "esbuild": "^0.25.0",
+    "firebase": "12.19.0",
+    "firebase-tools": "15.31.0",
+    "jszip": "^3.10.1",
+    "playwright": "^1.63.0",
+    "qrcode": "1.5.4"
+  },
+  "overrides": {
+    "@opentelemetry/core": "^2.8.0",
+    "gaxios": {
+      "uuid": "^11.1.1"
+    }
   }
 }

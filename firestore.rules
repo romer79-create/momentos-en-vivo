@@ -1,10 +1,7 @@
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
-    // Reglas de desarrollo: Permitir lectura/escritura a todos
-    // TODO: Restringir esto antes de pasar a producción real
-    match /{document=**} {
-      allow read, write: if true;
-    }
-  }
+ match /databases/{database}/documents {
+  // Browsers cannot bypass the API ownership checks.
+  match /{document=**} { allow read, write: if false; }
+ }
 }

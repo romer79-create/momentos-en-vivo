@@ -7,6 +7,8 @@ yarn-error.log*
 # Environment variables
 .env
 .env.local
+.env.*
+!.env.example
 .env.development.local
 .env.test.local
 .env.production.local
@@ -92,3 +94,24 @@ build/
 # Temporary files
 tmp/
 temp/
+
+# Local review and emulator outputs
+test-results/
+audit-*.json
+firebase.local.json
+event-map*.json
+migration-report*.json
+
+# Local video preparation tools and uncompressed intermediates
+output/portada-modelo/.tools/
+output/portada-modelo/video-raw/
+output/portada-modelo/video-sequence-v*/
+output/releases/
+
+# Local artwork, backups and preview build products
+output/
+local-preview/*
+!local-preview/sylar3d/
+local-preview/sylar3d/*.bundle.js
+local-preview/sylar3d/sylar-assistant.js
+local-preview/sylar3d/three.min.js

@@ -1,37 +1,69 @@
 {
-    "indexes": [
+  "indexes": [
+    { "collectionGroup": "creditLots", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "ownerId", "order": "ASCENDING" }, { "fieldPath": "mode", "order": "ASCENDING" }, { "fieldPath": "available", "order": "ASCENDING" }, { "fieldPath": "expiresAt", "order": "ASCENDING" }] },
+    { "collectionGroup": "creditLots", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "mode", "order": "ASCENDING" }, { "fieldPath": "available", "order": "ASCENDING" }, { "fieldPath": "expiresAt", "order": "ASCENDING" }] },
+    { "collectionGroup": "albumJobs", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "state", "order": "ASCENDING" }, { "fieldPath": "nextAttemptAt", "order": "ASCENDING" }] },
+    { "collectionGroup": "mailOutbox", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "state", "order": "ASCENDING" }, { "fieldPath": "availableAt", "order": "ASCENDING" }] },
+    { "collectionGroup": "events", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "purgePending", "order": "ASCENDING" }, { "fieldPath": "cleanupCheckAt", "order": "ASCENDING" }] },
+    { "collectionGroup": "photos", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "eventId", "order": "ASCENDING" }, { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "publishedAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "orders", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "mode", "order": "ASCENDING" }, { "fieldPath": "nextCheckAt", "order": "ASCENDING" }] },
+    { "collectionGroup": "orders", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "ownerId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "creditLots", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "ownerId", "order": "ASCENDING" }, { "fieldPath": "mode", "order": "ASCENDING" }, { "fieldPath": "available", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "ASCENDING" }] },
+    { "collectionGroup": "events", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "receivesUntil", "order": "ASCENDING" }] },
+    {
+      "collectionGroup": "photos",
+      "queryScope": "COLLECTION",
+      "fields": [
         {
-            "collectionGroup": "photos",
-            "queryScope": "COLLECTION",
-            "fields": [
-                {
-                    "fieldPath": "eventId",
-                    "order": "ASCENDING"
-                },
-                {
-                    "fieldPath": "status",
-                    "order": "ASCENDING"
-                },
-                {
-                    "fieldPath": "createdAt",
-                    "order": "DESCENDING"
-                }
-            ]
+          "fieldPath": "eventId",
+          "order": "ASCENDING"
         },
         {
-            "collectionGroup": "photos",
-            "queryScope": "COLLECTION",
-            "fields": [
-                {
-                    "fieldPath": "eventId",
-                    "order": "ASCENDING"
-                },
-                {
-                    "fieldPath": "createdAt",
-                    "order": "DESCENDING"
-                }
-            ]
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
         }
-    ],
-    "fieldOverrides": []
+      ]
+    },
+    {
+      "collectionGroup": "photos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "eventId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ownerId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": [
+    { "collectionGroup": "billingLimits", "fieldPath": "expiresAt", "ttl": true, "indexes": [] },
+    {
+      "collectionGroup": "uploadLimits",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    }
+  ]
 }

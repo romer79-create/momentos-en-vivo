@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sylar · Prueba local</title>
+  <link rel="stylesheet" href="/preview.css"><link rel="stylesheet" href="/guide.css"><script defer src="/guide.bundle.js"></script><script defer src="/sylar-package.js"></script><script defer src="/momentos-help.bundle.js"></script><script defer src="/preview.js"></script>
+</head>
+<body>
+  <header><a href="/">Momentos <span>en Vivo</span></a><span class="local-label">PRUEBA LOCAL</span></header>
+  <main>
+    <p class="eyebrow">UN PROYECTO DE SYLAR.SOLUCIONES</p>
+    <h1>Probemos una ayuda<br>con personalidad.</h1>
+    <p class="intro">Una muestra para ver cómo convive Sylar con el evento. Los datos de esta pantalla son ficticios.</p>
+    <div class="layout">
+      <section class="event-card" id="nuevo-evento" tabindex="-1"><p class="eyebrow">VISTA DE MUESTRA</p><h2>Nuestra celebración</h2><p class="muted">El asistente acompañará este espacio.</p><ol><li><b>1</b><span>Contanos qué celebrás<small>Nombre, fecha y hora.</small></span></li><li><b>2</b><span>Elegí un tema listo<small>Personalizarlo es opcional.</small></span></li><li><b>3</b><span>Revisá y compartí<small>Siempre sabés cómo seguir.</small></span></li></ol><div class="sample"><span>✦</span> Tus recuerdos empiezan acá.</div></section>
+      <section class="controls"><p class="eyebrow">SYLAR · AYUDA LOCAL</p><h2>Probalo a tu manera</h2><form id="settings"><label><input type="checkbox" name="compact" checked> Versión compacta</label><label><input type="checkbox" name="paused"> Pausar animaciones</label><label><input type="checkbox" name="hide"> Ocultar personaje</label><button type="submit" id="start" disabled>Preguntarle a Sylar</button><button type="button" id="open-guide">Ver guía del evento</button></form><p id="status" role="status">Preparando el personaje del paquete…</p><details class="animation-options"><summary>Probar sus animaciones</summary><label for="animation-state">Estado del personaje</label><select id="animation-state"><option value="idle">En reposo</option><option value="hello">Saludar</option><option value="attentive">Estar atento</option><option value="thinking">Pensar</option><option value="speaking">Responder</option><option value="happy">Celebrar</option><option value="sleeping">Descansar</option></select></details><button type="button" id="restart">Reiniciar prueba</button><p class="note">Nuestra mascota te guía con respuestas preparadas de Momentos en Vivo. Si no sabe, te ofrece contactar a Sylar.soluciones. No consulta tu cuenta ni hace cambios. Los mensajes se borran al reiniciar.</p></section>
+    </div>
+  </main><footer>Entorno local de Momentos en Vivo · Sin conexión a cuentas, pagos ni eventos reales.</footer>
+  <sylar-assistant id="sylar-demo" compact hidden></sylar-assistant>
+</body>
+</html>
+

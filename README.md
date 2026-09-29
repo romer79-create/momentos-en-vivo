@@ -1,277 +1,112 @@
-# 🎉 Momentos en Vivo
+# Momentos en Vivo
 
-**Sistema Profesional de Captura Fotográfica en Tiempo Real para Eventos**
+**Actualización del 28/09/2026:** versión publicada con portada animada, preparación guiada, precios aprobados ($65.000 / $175.500 / 10 eventos a consultar), saldo por 12 meses y álbum por partes. Ver [publicación confirmada y pendientes](docs/RELEASE_2026_09_28.md), [implementación y límites](docs/PULIDO_Y_AUTOMATIZACION.md) y [referencia de Kaptura](docs/REFERENCIA_KAPTURA.md). El ensayo de Mercado Pago está limitado al administrador; los cobros reales y el borrado automático siguen desactivados. Los workers de correo están desplegados y falta comprobar su entrega desde producción.
 
-[![Firebase](https://img.shields.io/badge/Firebase-039BE5?style=for-the-badge&logo=Firebase&logoColor=white)](https://firebase.google.com/)
-[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
-[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
+**Un proyecto de Sylar.soluciones.** Contacto: sylar.soluciones@gmail.com · +54 9 376 410-4660.
 
-## 📋 Descripción
+Fotos de invitados con moderación del cliente o publicación automática opcional bajo su responsabilidad, y proyección en vivo. Sitio: https://momentos-en-vivo.web.app
 
-Momentos en Vivo es un sistema completo y profesional diseñado para capturar fotos en tiempo real durante eventos como bodas, fiestas corporativas, conferencias y celebraciones. El sistema permite a los invitados tomar fotos usando sus smartphones y compartirlas instantáneamente en una pantalla de proyección.
+La versión 3 está publicada, con seguridad, saldo de eventos y una nueva portada interactiva. La limpieza autorizada de los eventos antiguos se completó durante mantenimiento. Ver [revisión y puesta en marcha](docs/PUBLICACION.md). `REVISION_INICIAL.md` describe el estado anterior a estos cambios.
 
-### ✨ Características Principales
+**Autoservicio:** cuentas verificadas pueden preparar borradores; el recorrido de compra y activación está implementado y probado localmente. El simulador no genera cargos. Mercado Pago tiene vendedor y secretos de prueba configurados, pero falta completar una compra auténtica de sandbox antes de habilitar ventas públicas. Ver [diseño del autoservicio](docs/AUTOSERVICIO.md) y [estado actual de pagos](docs/PAGOS.md).
 
-- 📸 **Captura en Tiempo Real**: Los invitados toman fotos con sus smartphones
-- 👮 **Moderación Inteligente**: Sistema automático y manual de aprobación de fotos
-- 📺 **Proyección Automática**: Slideshow continuo con transiciones suaves
-- 🎯 **Panel de Control**: Dashboard completo para gestión de eventos
-- 🔒 **Sistema Seguro**: Autenticación robusta y aislamiento de datos
-- 📱 **100% Móvil**: Compatible con todos los dispositivos
-- 🎨 **Temas Personalizables**: Múltiples diseños para diferentes eventos
-- ☁️ **Almacenamiento en la Nube**: Firebase Storage con CDN global
+**Temas e invitaciones:** catálogo de diseños editables, fondos/portadas/logos propios, invitación con ubicación y confirmación de asistencia, tarjeta PNG con QR y proyección a juego. Vista local en `/temas.html`; cada cliente accede al editor desde **Diseño e invitación**. Ver [funcionamiento, permisos y límites](docs/TEMAS_E_INVITACIONES.md).
 
-## 🚀 Demo en Vivo
+## Uso
 
-**🌐 URL de Producción:** [https://momentos-en-vivo.web.app](https://momentos-en-vivo.web.app)
+1. El cliente crea una cuenta y verifica su correo.
+2. Prepara un borrador, compra un evento o un paquete y activa cada evento con una unidad de su saldo. El administrador puede atender excepciones.
+3. Los invitados acceden con el QR del evento y envían una foto con un mensaje opcional.
+4. El cliente aprueba o rechaza las fotos. Puede activar Publicación automática con aceptación expresa para publicar automáticamente las nuevas fotos. La pantalla muestra únicamente las aprobadas, manual o automáticamente.
+5. Puede descargar las fotos por páginas, cerrar el evento o renovar sus enlaces.
 
-### 📋 Páginas Disponibles
+La [guía para clientes](web/manual.html) se publica en `/manual.html`. El enlace de invitados permite enviar fotos; el enlace independiente de proyección permite ver las aprobadas. Ambos se revocan al renovar enlaces. Cerrar el evento impide nuevas cargas y lecturas por esos enlaces, mientras el propietario conserva acceso al panel.
 
-| Página | URL | Descripción |
-|--------|-----|-------------|
-| 🏠 **Inicio** | `/` | Landing page con información del servicio |
-| 🎮 **Demo Gratuita** | `/demo-dashboard.html` | Panel de control para probar el sistema |
-| 📸 **Captura** | `/home.html?event=DEMO_ID` | Página para tomar fotos |
-| 👮 **Moderación** | `/moderador.html?event=DEMO_ID` | Panel para aprobar/rechazar fotos |
-| 📺 **Proyección** | `/proyeccion.html?event=DEMO_ID` | Pantalla de slideshow |
-| 👤 **Cliente** | `/cliente-panel.html` | Panel para clientes premium |
+## Aplicación activa
 
-## 🛠️ Tecnologías Utilizadas
+| Ruta | Función |
+| --- | --- |
+| `web/` | Interfaz de clientes, invitados, moderación y proyección |
+| `public/index.html`, `web/landing.*` | Portada oscura/dorada con demostración interactiva y catálogo |
+| `scripts/build.cjs` | Genera las pantallas y recursos de Hosting |
+| `functions/app.js`, `functions/security.js` | API con autorización en el servidor y validación de imágenes |
+| `functions/commerce.js` | Órdenes, Mercado Pago, saldo, activación y conciliación |
+| `functions/index.js` | API y mantenimiento programado, Node.js 22 |
+| `firestore.rules`, `storage.rules` | Impiden el acceso directo de clientes; los datos pasan por la API |
+| `tests/` | Pruebas de permisos, integración y navegador |
 
-### Backend
-- **Firebase Functions**: API serverless con Node.js
-- **Firebase Storage**: Almacenamiento de imágenes con CDN
-- **Firestore**: Base de datos NoSQL para metadata
-- **Firebase Hosting**: Hosting con SSL automático
+Los archivos antiguos de Electron, Express, Netlify y las guías anteriores se conservan como antecedentes. No forman parte del inicio o despliegue actual. No usar sus instrucciones, claves ni sesiones de demostración.
 
-### Frontend
-- **HTML5/CSS3**: Interfaz moderna y responsive
-- **JavaScript (ES6+)**: Lógica del cliente
-- **Fetch API**: Comunicación con el backend
-- **Canvas API**: Procesamiento de imágenes
-- **WebRTC**: Acceso a cámara del dispositivo
+## Desarrollo local
 
-### DevOps
-- **Git**: Control de versiones
-- **GitHub**: Repositorio remoto
-- **Firebase CLI**: Despliegue automatizado
-- **NPM**: Gestión de dependencias
+Requisitos: Node.js 22 recomendado (Node.js 24 también sirve para herramientas), npm y Java 21 para los emuladores. La primera instalación de dependencias y emuladores requiere Internet.
 
-## 📁 Estructura del Proyecto
-
-```
-momentos-en-vivo/
-├── 📁 functions/              # Firebase Functions (Backend)
-│   ├── index.js              # API principal
-│   ├── package.json          # Dependencias backend
-│   └── ...
-├── 📁 public/                # Frontend (Hosting)
-│   ├── index.html           # Página principal
-│   ├── home.html            # Captura de fotos
-│   ├── moderador.html       # Panel de moderación
-│   ├── proyeccion.html      # Slideshow
-│   ├── demo-dashboard.html  # Demo gratuita
-│   └── assets/              # Recursos estáticos
-├── 📁 netlify/               # Funciones Netlify (legacy)
-├── 📁 uploads/               # Fotos locales (desarrollo)
-├── 📁 approved/              # Fotos aprobadas (desarrollo)
-├── .firebaserc              # Configuración Firebase
-├── firebase.json            # Configuración proyecto
-├── firestore.rules          # Reglas base de datos
-├── storage.rules            # Reglas almacenamiento
-├── .gitignore              # Archivos ignorados
-└── README.md               # Esta documentación
+```powershell
+npm ci
+npm --prefix functions ci
+npm start
 ```
 
-## 🚀 Instalación y Configuración
+Los emuladores usan el proyecto ficticio `demo-momentos` y escuchan solo en `127.0.0.1`. Abrir http://127.0.0.1:5000/cliente-login.html. Para preparar cuentas ficticias, en otra terminal:
 
-### Prerrequisitos
-
-- Node.js 18+
-- Firebase CLI
-- Cuenta de Firebase
-- Git
-
-### 1. Clonar el Repositorio
-
-```bash
-git clone https://github.com/romer79-create/momentos-en-vivo.git
-cd momentos-en-vivo
+```powershell
+$env:FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9099'
+npm run demo:seed
 ```
 
-### 2. Instalar Dependencias
+| Cuenta local | Acceso |
+| --- | --- |
+| `cliente@example.test` | Cliente |
+| `otro@example.test` | Otro cliente aislado |
+| `admin@example.test` | Administrador |
 
-```bash
-# Dependencias del proyecto principal
-npm install
+Contraseña solo para estas cuentas ficticias: `Prueba-local-123456`. No existen en producción. Los datos del emulador son temporales.
 
-# Dependencias de Firebase Functions
-cd functions
-npm install
-cd ..
+### Probar desde un celular en la misma red
+
+Con los emuladores iniciados, ejecutar `npm run preview:lan -- 192.168.1.8 5050`, reemplazando la IP por la de la computadora si cambia. Abrir `http://192.168.1.8:5050/` en el teléfono y en la PC para que los nuevos QR y enlaces compartidos usen esa dirección. Usar las cuentas de prueba existentes; la pasarela solo permite iniciar sesión, consultar la sesión y renovar sus tokens, no gestionar cuentas del emulador.
+
+La pasarela temporal escucha únicamente en la IP privada indicada y admite conexiones de esa subred. Los emuladores y sus paneles siguen ligados a `127.0.0.1`; las rutas de administración de Auth no se publican. Se cierra con Ctrl+C y requiere que la computadora y los emuladores sigan encendidos. En esta prueba HTTP, la copia de enlaces se hace manualmente cuando el navegador no ofrece portapapeles. Los identificadores conservan aleatoriedad criptográfica aunque `randomUUID` no esté disponible.
+
+Las pruebas de navegador admiten `TEST_BASE_URL`, `TEST_USER_EMAIL` y `TEST_OUTPUT` para repetir el recorrido de temas desde una dirección LAN con datos ficticios. No se habilita ningún túnel público ni se despliega producción.
+
+## Pruebas
+
+Cerrar otros emuladores antes de ejecutar estas suites:
+
+```powershell
+npm test
+npm run test:integration
+npm run test:landing
+npx playwright install chromium
+npm run test:e2e
 ```
 
-### 3. Configurar Firebase
+En Windows se puede usar Edge instalado, sin descargar Chromium:
 
-```bash
-# Iniciar sesión en Firebase
-firebase login
-
-# Configurar proyecto (reemplaza con tu project ID)
-firebase use TU_PROJECT_ID
-
-# Configurar API key para funciones
-firebase functions:config:set api.key="TuClaveSuperSecreta"
+```powershell
+$env:BROWSER_EXECUTABLE = 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+npm run test:e2e
 ```
 
-### 4. Configurar Variables de Entorno
+`test:e2e` genera la interfaz, inicia emuladores, crea cuentas ficticias y recorre el flujo en un navegador. Guarda capturas y resultados en `test-results/` (ignorado por Git). `test:browser` ejecuta solo el recorrido contra emuladores ya preparados. Si el equipo tarda en descubrir las funciones al iniciar, se puede ampliar `FUNCTIONS_DISCOVERY_TIMEOUT` a `60` segundos.
 
-Crear archivo `.env.local`:
-```bash
-API_KEY=TuClaveSuperSecreta
-CLOUDINARY_CLOUD_NAME=tu_cloud_name
-CLOUDINARY_API_KEY=tu_api_key
-CLOUDINARY_API_SECRET=tu_api_secret
-PORT=3000
-```
+En Windows, la configuración local generada usa expresiones equivalentes para las cabeceras: corrige la normalización de rutas de Superstatic 10 y permite probar CSP de verdad. La configuración de producción conserva los patrones de Firebase Hosting. El recorrido del navegador verifica las cabeceras recibidas.
 
-### 5. Desplegar
+## Configuración y límites
 
-```bash
-# Desplegar funciones y hosting
-firebase deploy
+Producción carga la configuración pública de Firebase desde Hosting. Copiar `functions/.env.example` a `functions/.env.momentos-en-vivo` y completar la clave pública de App Check y, opcionalmente, el correo del propietario inicial. Nunca subir archivos `.env` ni credenciales a Git.
 
-# Solo hosting
-firebase deploy --only hosting
+- Firebase Auth exige correo verificado; los roles se validan en el servidor.
+- App Check es obligatorio para subir fotos en producción; el bypass solo se usa en emuladores.
+- Imágenes: hasta 20 MB seleccionados en el navegador, comprimidos antes de enviar. El servidor acepta hasta 5 MB decodificados y 25 megapíxeles, reencoda JPEG a un máximo de 1.920 px y elimina metadatos EXIF.
+- Hasta 3.000 fotos por evento, 100 eventos por cuenta y 120 intentos de carga por minuto por evento/red. Son límites iniciales, no una prueba de capacidad para eventos multitudinarios.
+- Moderación y ZIP: páginas de 50 fotos. Proyección: últimas 50 publicaciones, consulta cada 4 segundos y carrusel cada 7 segundos. Cada nueva publicación se destaca durante 6 segundos con el fondo difuminado, antes de incorporarse al carrusel. Las llegadas se encolan; las fotos retiradas se eliminan al actualizar. Al abrir la proyección no se repite el destaque de las fotos existentes. Respeta movimiento reducido y pausa el destaque si se oculta la pestaña.
+- Publicación automática: desactivado por defecto, habilita publicación automática de nuevas fotos y mensajes. Solo el titular puede activarlo aceptando expresamente su exclusiva responsabilidad; se guardan texto, versión, usuario y fecha. Se configura desde Mis eventos y Administrar fotos. No aprueba pendientes anteriores ni vuelve a publicar fotos rechazadas por un reintento. Mantiene autenticación, enlaces privados, App Check, validación, sanitización y cuotas. La política se vuelve a leer tras guardar la imagen para que desactivarla también afecte las cargas en curso.
+- Las fotos no se almacenan para uso sin conexión. La carga fallida puede reintentarse mientras se mantenga abierta la pestaña.
 
-# Solo funciones
-firebase deploy --only functions
-```
+Los enlaces funcionan como permisos de acceso: quien tenga el de proyección podrá ver fotos aprobadas. No compartirlos fuera del evento. Las nuevas imágenes se sirven por la API sin enlaces públicos permanentes de Storage.
 
-## 🎯 Uso del Sistema
+La consulta de proyección prioriza `publishedAt` y combina un lote por `createdAt` para conservar fotos anteriores que no tenían esa fecha. Un contador transaccional `photosVersion` permite consultar solo el evento cuando no cambian sus publicaciones, sin releer las fotos en cada sondeo; siempre se revalidan acceso y vencimiento. Antes del despliegue, publicar el índice compuesto `photos: eventId/status/publishedAt` incluido en `firestore.indexes.json` y esperar a que esté listo. Una foto aprobada tarde también entra en las últimas 50 publicaciones. Los cambios de estado de fotos deben pasar por la API para actualizar ese contador.
 
-### Para Usuarios Finales
-
-1. **Acceder a la Demo**: Visitar la URL principal y registrarse
-2. **Capturar Fotos**: Usar el enlace de captura en cualquier dispositivo
-3. **Ver Resultados**: Las fotos aparecen automáticamente en la proyección
-
-### Para Moderadores
-
-1. **Acceder al Panel**: Usar el enlace de moderación
-2. **Aprobar/Rechazar**: Revisar fotos pendientes
-3. **Gestionar Evento**: Controlar el flujo del evento
-
-### Para Administradores
-
-1. **Panel de Cliente**: Gestionar múltiples eventos
-2. **Estadísticas**: Ver métricas de uso
-3. **Configuración**: Personalizar temas y opciones
-
-## 🔧 API Endpoints
-
-### Funciones Firebase
-
-| Endpoint | Método | Descripción |
-|----------|--------|-------------|
-| `/upload` | POST | Subir foto con FormData |
-| `/upload-base64` | POST | Subir foto en base64 |
-| `/get-photos` | GET | Obtener fotos pendientes |
-| `/get-approved-photos` | GET | Obtener fotos aprobadas |
-| `/approve-photo` | POST | Aprobar foto |
-| `/reject-photo` | POST | Rechazar foto |
-| `/get-demo-photos` | GET | Fotos para demo |
-| `/social-share` | GET | Compartir en redes |
-
-### Autenticación
-
-Todas las APIs requieren header:
-```javascript
-headers: {
-  'x-api-key': 'TuClaveSuperSecreta',
-  'Content-Type': 'application/json'
-}
-```
-
-## 🎨 Temas Disponibles
-
-- `modern-blue` (predeterminado)
-- `romantic-pink`
-- `corporate-gray`
-- `party-neon`
-- `nature-green`
-- `sunset-orange`
-
-**Uso:** `?theme=nombre-del-tema`
-
-## 🔒 Seguridad
-
-- **API Keys**: Autenticación obligatoria
-- **Aislamiento**: Cada demo tiene su propio eventId
-- **Validación**: Verificación de tipos de archivo y tamaños
-- **CORS**: Configurado para dominios específicos
-- **Rate Limiting**: Protección contra abuso
-
-## 📊 Arquitectura
-
-```mermaid
-graph TB
-    A[Usuario] --> B[Frontend HTML/CSS/JS]
-    B --> C[Firebase Hosting]
-    B --> D[Firebase Functions]
-    D --> E[Firestore]
-    D --> F[Firebase Storage]
-    F --> G[CDN Global]
-    E --> H[Metadata de Fotos]
-    F --> I[Imágenes Optimizadas]
-```
-
-## 🚀 Despliegue Automático
-
-El proyecto incluye configuración completa para despliegue automático:
-
-- **Firebase Hosting**: Frontend estático
-- **Firebase Functions**: Backend serverless
-- **CDN Global**: Optimización automática
-- **SSL Automático**: Certificados Let's Encrypt
-
-## 📈 Métricas y Monitoreo
-
-- **Firebase Analytics**: Seguimiento de uso
-- **Cloud Logging**: Logs detallados
-- **Performance Monitoring**: Métricas de rendimiento
-- **Error Reporting**: Detección automática de errores
-
-## 🤝 Contribución
-
-1. Fork el proyecto
-2. Crear rama para feature (`git checkout -b feature/AmazingFeature`)
-3. Commit cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir Pull Request
-
-## 📝 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver archivo `LICENSE` para más detalles.
-
-## 📞 Contacto
-
-**Jorge Romero Daniel**
-- 📧 Email: romer79@gmail.com
-- 📱 Celular: +54 376 410 5310
-- 🌐 Web: [momentos-en-vivo.web.app](https://momentos-en-vivo.web.app)
-- 💼 LinkedIn: [Masamune Code](https://linkedin.com/in/masamunecode)
-
-## 🙏 Agradecimientos
-
-- Firebase por la plataforma increíble
-- Comunidad de desarrolladores
-- Todos los testers y usuarios beta
-
----
-
-**⭐ Si te gusta este proyecto, ¡dale una estrella en GitHub!**
-
-**🎉 ¡Gracias por usar Momentos en Vivo!**
+Pruebas específicas: `npm test` incluye la cola de proyección; `npm run test:live` recorre consentimiento, envío, destaque, cola, retiro y vuelta a revisión manual en navegador. `tests/moderation.test.cjs` usa cuentas y eventos aislados y elimina únicamente sus propios datos al terminar. Para ejecutar el navegador en la red, definir `TEST_BASE_URL` y `TEST_USER_EMAIL` con una cuenta de prueba; los resultados y capturas quedan en `test-results/live/`. La integración general incluye un reinicio de datos: ejecutarla solo en emuladores descartables, nunca sobre una sesión de pruebas que se quiera conservar.

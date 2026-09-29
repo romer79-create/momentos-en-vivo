@@ -1,0 +1,87 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE_PATH || 'playwright');
+const sharp = require('../functions/node_modules/sharp');
+const base = 'http://127.0.0.1:5000';
+const results = [];
+const output = path.resolve('test-results'); fs.mkdirSync(output, { recursive: true });
+async function login(page, email) {
+  await page.goto(`${base}/cliente-login.html`);
+  await page.getByLabel('Correo electrónico').fill(email);
+  await page.getByLabel('Contraseña', { exact: true }).fill('Prueba-local-123456');
+  await page.getByRole('button', { name: 'Ingresar', exact: true }).click();
+  await page.waitForURL('**/cliente-panel.html');
+  await page.getByRole('heading', { name: 'Momentos para compartir' }).waitFor();
+}
+(async () => {
+  const browser = await chromium.launch({ headless: true, ...(process.env.BROWSER_EXECUTABLE ? { executablePath: process.env.BROWSER_EXECUTABLE } : {}) });
+  try {
+    for (const route of ['/', '/index.html', '/compras.html', '/pago.html']) {
+      const response = await fetch(`${base}${route}`); assert.match(response.headers.get('content-security-policy') || '', /script-src 'self'/);
+    }
+    const organizer = await browser.newContext({ viewport: { width: 1440, height: 1000 } }); const page = await organizer.newPage();
+    const pageErrors = []; page.on('pageerror', e => pageErrors.push(e.message));
+    page.on('console', message => { if (message.type() === 'error' && /Content Security Policy/i.test(message.text())) pageErrors.push(message.text()); });
+    await login(page, 'cliente@example.test');
+    await page.getByRole('link', { name: 'Compras', exact: true }).click();
+    await page.getByRole('button', { name: 'Elegir 1 evento', exact: true }).click();
+    await page.getByRole('button', { name: 'Dejar pago pendiente', exact: true }).click();
+    await page.getByRole('button', { name: 'Aprobar pago de prueba', exact: true }).click();
+    await page.getByRole('link', { name: 'Preparar y activar mi evento', exact: true }).waitFor();
+    await page.screenshot({ path: path.join(output, 'compra.png'), fullPage: true });
+    await page.getByRole('link', { name: 'Preparar y activar mi evento', exact: true }).click();
+    results.push('Compra local pendiente/aprobada y acreditación sin intervención administrativa');
+    const name = `Celebración de prueba ${Date.now()}`;
+    const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+    const futureDate = new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);
+    await page.getByLabel('Nombre del evento').fill(name); await page.getByLabel('Fecha', { exact: true }).fill(futureDate); await page.getByLabel('Hora de inicio', { exact: true }).fill('00:00');
+    await page.getByRole('button', { name: 'Guardar y elegir diseño →' }).click();
+    await page.getByRole('heading', { name: 'Diseñá tu momento' }).waitFor();
+    await page.getByRole('button', { name: 'Guardar y revisar activación →' }).click();
+    const card = page.getByRole('article').filter({ has: page.getByRole('heading', { name }) });
+    await card.getByText('Borrador', { exact: true }).waitFor(); assert.equal(await card.getByRole('button', { name: 'Ver QR' }).count(), 0);
+    await card.getByRole('button', { name: 'Revisar y activar', exact: true }).click();
+    assert.equal(await page.getByRole('button', { name: 'Confirmar y usar 1 evento' }).isDisabled(), true);
+    await page.getByRole('checkbox', { name: 'Revisé la fecha, el horario y los plazos de mi evento.' }).check();
+    await page.getByRole('button', { name: 'Confirmar y usar 1 evento' }).click();
+    await card.getByText('Programado', { exact: true }).waitFor();
+    await card.getByText('Cambiar antes del inicio', { exact: true }).click();
+    await card.getByLabel('Nueva fecha', { exact: true }).fill(date);
+    await card.getByRole('button', { name: 'Guardar programación', exact: true }).click();
+    await card.getByText('Abierto', { exact: true }).waitFor();
+    await page.getByText('0 eventos disponibles', { exact: true }).waitFor();
+    results.push('Evento programado reprogramable antes del inicio sin un segundo consumo');
+    await card.getByRole('button', { name: 'Ver QR' }).click(); const guestLink = await page.getByRole('dialog').getByLabel('Enlace para invitados').inputValue();
+    assert.ok(guestLink.includes('#') && guestLink.split('#')[1].length >= 32); await page.getByRole('button', { name: 'Cerrar', exact: true }).click();
+    await page.screenshot({ path: path.join(output, 'panel.png'), fullPage: true }); results.push('Cuenta, creación de evento y QR local');
+    const popupPromise = page.waitForEvent('popup'); await card.getByRole('button', { name: 'Abrir proyección' }).click(); const projection = await popupPromise;
+    await projection.getByText('Los próximos recuerdos están por llegar.').waitFor();
+    const moderatorUrl = await card.getByRole('link', { name: 'Administrar fotos' }).getAttribute('href');
+    const guest = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, deviceScaleFactor: 1 }); const capture = await guest.newPage(); capture.on('pageerror', e => pageErrors.push(e.message));
+    await capture.goto(guestLink); await capture.getByRole('heading', { name }).waitFor();
+    const bytes = await sharp({ create: { width: 2400, height: 1600, channels: 3, background: '#d6a87c' } }).composite([{ input: Buffer.from('<svg width="2400" height="1600"><rect x="120" y="120" width="2160" height="1360" rx="80" fill="#305941"/><circle cx="1200" cy="630" r="240" fill="#d8f4a5"/><text x="1200" y="1100" text-anchor="middle" font-size="130" font-family="sans-serif" fill="white">Un momento de prueba</text></svg>') }]).jpeg().toBuffer();
+    await capture.locator('input[type=file]').setInputFiles({ name: 'prueba.jpg', mimeType: 'image/jpeg', buffer: bytes }); await capture.getByText('Lista para enviar.').waitFor();
+    const message = '<img src=x onerror=alert(1)> Un recuerdo para compartir'; await capture.getByLabel('Mensaje · opcional, hasta 200 caracteres').fill(message);
+    assert.equal(await capture.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    await capture.screenshot({ path: path.join(output, 'captura-movil.png'), fullPage: true });
+    await guest.setOffline(true); await capture.getByRole('button', { name: 'Enviar mi foto' }).click(); await capture.getByText(/La foto sigue lista para reintentar/).waitFor();
+    await guest.setOffline(false); await capture.getByRole('button', { name: 'Enviar mi foto' }).click(); await capture.getByText('¡Foto recibida! Se mostrará cuando el organizador la apruebe.').waitFor(); results.push('Carga móvil, redimensionado y recuperación después de perder conexión');
+    await page.goto(`${base}${moderatorUrl}`); await page.getByText(message, { exact: true }).waitFor();
+    assert.equal(await page.locator('img[onerror]').count(), 0); await page.getByRole('img', { name: 'Foto del evento' }).waitFor();
+    await page.waitForFunction(() => [...document.querySelectorAll('.photo img')].every(img => img.complete && img.naturalWidth > 0));
+    await page.screenshot({ path: path.join(output, 'moderacion.png'), fullPage: true });
+    await page.getByRole('button', { name: 'Aprobar', exact: true }).click(); await projection.getByText(message, { exact: true }).waitFor({ timeout: 20000 });
+    await projection.screenshot({ path: path.join(output, 'proyeccion.png'), fullPage: true }); results.push('Moderación, proyección y mensajes tratados como texto');
+    await page.getByLabel('Estado de las fotos').selectOption('approved'); await page.getByText(message, { exact: true }).waitFor();
+    const downloadEvent = page.waitForEvent('download'); await page.getByRole('button', { name: 'Descargar esta página (.zip)' }).click(); const download = await downloadEvent;
+    assert.equal(await download.failure(), null); results.push('Descarga ZIP de fotos autorizadas');
+    await page.getByRole('button', { name: 'Rechazar', exact: true }).click(); await projection.getByText('Los próximos recuerdos están por llegar.').waitFor({ timeout: 20000 }); results.push('Foto rechazada retirada de la proyección');
+    const otherContext = await browser.newContext(); const other = await otherContext.newPage(); await login(other, 'otro@example.test');
+    assert.equal(await other.getByRole('heading', { name }).count(), 0); await other.goto(`${base}${moderatorUrl}`); await other.getByText('No tenés acceso a este evento.').waitFor(); results.push('Otro cliente no puede abrir el evento');
+    await page.goto(`${base}/cliente-panel.html`); const ownCard = page.getByRole('article').filter({ has: page.getByRole('heading', { name }) });
+    await ownCard.getByText('Opciones del evento').click(); await ownCard.getByRole('button', { name: 'Cerrar recepción y proyección' }).click(); await capture.reload(); await capture.getByText('El enlace no es válido o el evento está cerrado.').waitFor(); results.push('Cierre del evento revoca el enlace de invitados');
+    assert.deepEqual(pageErrors, []); results.push('Sin errores JavaScript en las pantallas probadas');
+    fs.writeFileSync(path.join(output, 'browser-results.json'), JSON.stringify({ ok: true, results }, null, 2)); console.log(JSON.stringify({ ok: true, results }, null, 2));
+  } finally { await browser.close(); }
+})().catch(error => { console.error(error); fs.writeFileSync(path.join(output, 'browser-results.json'), JSON.stringify({ ok: false, results, error: error.message }, null, 2)); process.exitCode = 1; });

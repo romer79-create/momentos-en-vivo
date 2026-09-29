@@ -1,0 +1,14 @@
+{
+  "count": 1,
+  "width": 900,
+  "height": 900,
+  "files": ["camara.webp"],
+  "firstPose": "front",
+  "reverseMapping": false,
+  "poster": "camara.webp",
+  "posterIndex": 0,
+  "posterWasSelected": true,
+  "needsVisualReview": false,
+  "sourceType": "generated-still",
+  "clipPending": true
+}

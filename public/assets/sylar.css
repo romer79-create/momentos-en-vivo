@@ -1,0 +1,6 @@
+/* Keep space below forms and footers for the persistent help launcher. */
+body.has-sylar{padding-bottom:max(140px,env(safe-area-inset-bottom))}
+.has-sylar .guide-launcher{display:none}
+/* Native modal dialogs retain exclusive focus and visibility above the helper. */
+body:has(dialog[open])>sylar-assistant{visibility:hidden}
+@media(max-width:520px){body.has-sylar{padding-bottom:max(126px,env(safe-area-inset-bottom))}}

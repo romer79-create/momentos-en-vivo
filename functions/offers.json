@@ -1,0 +1,5 @@
+[
+  { "id": "evento-1", "title": "Un evento", "credits": 1, "currency": "ARS", "priceCents": 6500000 },
+  { "id": "pack-3", "title": "Pack de 3 eventos", "credits": 3, "currency": "ARS", "priceCents": 17550000 },
+  { "id": "pack-10", "title": "Pack de 10 eventos", "credits": 10, "currency": "ARS", "priceCents": null, "quoteOnly": true }
+]

@@ -1,0 +1,7 @@
+{
+  "photoLimit": 3000,
+  "receptionHours": 48,
+  "downloadDays": 30,
+  "creditMonths": 12,
+  "retentionPolicy": "retencion-avisada-v1"
+}

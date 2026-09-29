@@ -1,0 +1,14 @@
+{
+  "hosting": {
+    "site": "momentos-en-vivo",
+    "public": "maintenance",
+    "ignore": ["**/.*"],
+    "rewrites": [{ "source": "**", "destination": "/index.html" }],
+    "headers": [{ "source": "**", "headers": [
+      { "key": "Cache-Control", "value": "no-store" },
+      { "key": "Content-Security-Policy", "value": "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'" },
+      { "key": "X-Content-Type-Options", "value": "nosniff" },
+      { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+    ]}]
+  }
+}
