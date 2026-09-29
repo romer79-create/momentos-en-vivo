@@ -4,7 +4,9 @@
 
 El simulador local acredita eventos ficticios sin contactar a Mercado Pago. No equivale a una prueba del proveedor. La versión pública ya está desplegada con `PAYMENTS_MODE=sandbox`, `PAYMENTS_CHECKOUT_ENABLED=false` y `PAYMENTS_SANDBOX_ADMIN=true`: solo el administrador verificado puede iniciar compras de prueba. Los clientes y visitantes no pueden comprar todavía. Ninguna credencial privada debe entrar al navegador, Git, chat o registros. Ver [publicación confirmada y pendientes](RELEASE_2026_09_28.md).
 
-El propietario creó la aplicación **Momentos en Vivo**, con **Checkout Pro / API de Preferencias**, y guardó su Access Token mediante el ingreso oculto. El 28 de septiembre de 2026 se verificó la versión 1 habilitada de `MERCADO_PAGO_ACCESS_TOKEN`: Mercado Pago confirmó vendedor de prueba **2954695377**, sitio `MLA` y país `AR`. El vendedor está configurado en la versión publicada. No se hicieron pagos reales ni se completó aún una compra del proveedor.
+El propietario creó la aplicación **Momentos en Vivo**, con **Checkout Pro / API de Preferencias**, y guardó su Access Token mediante el ingreso oculto. El 28 de septiembre de 2026 se verificó la versión 1 habilitada de `MERCADO_PAGO_ACCESS_TOKEN`: Mercado Pago confirmó vendedor de prueba **2954695377**, sitio `MLA` y país `AR`. Se completaron dos compras ficticias aprobadas: una se recuperó manualmente y otra mediante la conciliación programada. El simulador oficial envió un aviso firmado válido, sin duplicar saldo ni correo. Eso no certificó el disparo automático.
+
+El 29/09/2026 se preparó el paso a producción: la URL productiva de Webhooks quedó guardada con únicamente **Pagos (legacy)** y se activaron las credenciales productivas. Los detalles y el estado actual están en [la comprobación productiva](PAGOS_PRODUCTIVOS_2026_09_29.md); ese informe prevalece sobre los registros históricos de sandbox.
 
 ### Ingreso inicial de la credencial de prueba
 
@@ -45,7 +47,8 @@ El archivo ignorado `functions/.env.momentos-en-vivo` acepta:
 | `PAYMENTS_MODE` | `disabled`, `sandbox` o `live` |
 | `PAYMENTS_CHECKOUT_ENABLED` | `true` habilita compras públicas si toda la configuración es válida; `false` las pausa sin detener la conciliación ni los avisos de pagos existentes |
 | `PAYMENTS_SANDBOX_ADMIN` | `true` permite compras exclusivamente a administradores verificados en modo `sandbox`; no habilita compras en `live` |
-| `MERCADO_PAGO_COLLECTOR_ID` | ID del vendedor que debe recibir el pago |
+| `MERCADO_PAGO_COLLECTOR_ID` | ID del vendedor de prueba |
+| `MERCADO_PAGO_LIVE_COLLECTOR_ID` | ID del vendedor real; obligatorio en `live` |
 | `PRICE_EVENT_1_CENTS` | Precio entero en centavos ARS de 1 evento |
 | `PRICE_PACK_3_CENTS` | Precio entero en centavos ARS de 3 eventos |
 | Pack de 10 | Solo cotización; no permite compra directa, aunque se configure un precio |
@@ -53,7 +56,9 @@ El archivo ignorado `functions/.env.momentos-en-vivo` acepta:
 | `EVENT_RECEPTION_HOURS` | Ventana desde la fecha/hora elegida, entre 1 y 168 horas |
 | `EVENT_DOWNLOAD_DAYS` | Días de descarga después de la recepción, entre 1 y 365 |
 
-Guardar `MERCADO_PAGO_ACCESS_TOKEN` y `MERCADO_PAGO_WEBHOOK_SECRET` en Firebase Secret Manager. Las funciones `api1` y `billingMaintenance` los vinculan cuando el modo es `sandbox` o `live`. Redeplegar ambas al cambiar el modo. Un plan sin precio no permite iniciar su compra; faltando credenciales, vendedor o condiciones, el catálogo deshabilita todos los cobros.
+Guardar las claves en Firebase Secret Manager: `MERCADO_PAGO_ACCESS_TOKEN` y `MERCADO_PAGO_WEBHOOK_SECRET` se usan exclusivamente en `sandbox`; `MERCADO_PAGO_LIVE_ACCESS_TOKEN` y `MERCADO_PAGO_LIVE_WEBHOOK_SECRET`, exclusivamente en `live`. Las funciones `api1` y `billingMaintenance` vinculan solo las correspondientes al modo seleccionado. No existe fallback de claves reales a claves de prueba. Redeplegar ambas al cambiar el modo. Un plan sin precio no permite iniciar su compra; faltando credenciales, vendedor o condiciones, el catálogo deshabilita todos los cobros.
+
+Para preparar las claves reales mientras las ventas están pausadas y la configuración sigue en `sandbox`/`disabled`, el titular usa `node 'D:\momentos en vivo\scripts\configure-live-payments.cjs'`. El ingreso es oculto, valida vendedor real argentino antes de guardar, conserva las claves de prueba y no activa ventas ni despliega. `scripts/check-live-payments.cjs` comprueba las versiones guardadas y devuelve únicamente metadatos.
 
 La oferta aprobada es **ARS 65.000 por un evento**, **ARS 175.500 por tres** (10% de descuento) y **consultar por diez**. Incluye 48 horas de recepción y 30 días de descarga desde el fin de recepción; el saldo sin activar vence a los 12 meses calendario de acreditarse. Se conserva el tope técnico de 3000 fotos. Los simuladores muestran los mismos importes y plazos, sin cobrar dinero real. El horario se interpreta en Argentina (UTC−3). Las compras anteriores sin vencimiento se conservan. Ver [condiciones y validación actuales](PULIDO_Y_AUTOMATIZACION.md).
 
@@ -86,7 +91,7 @@ Pagos duplicados, errores de conciliación y reintegros generan `billingIncident
 5. Configurar facturación y avisos operativos según la política aprobada. La pantalla de pago no es una factura fiscal.
 6. Después de los ensayos y la decisión de abrir ventas, cambiar a credenciales/ID del vendedor real, definir modo `live`, desactivar la excepción sandbox y habilitar explícitamente `PAYMENTS_CHECKOUT_ENABLED=true`. Redeplegar y comprobar el catálogo antes de anunciar la venta.
 
-No se efectuaron estos ensayos con Mercado Pago ni cargos reales durante el desarrollo local.
+Los ensayos locales no realizan cargos ni sustituyen una validación con el proveedor. Las compras ficticias publicadas y el paso a producción se documentan por separado.
 
 El primer ensayo publicado quedó aprobado después de corregir el acceso por `init_point` y la validación de cuentas de prueba: una unidad de saldo sandbox acreditada, sin duplicaciones, y correo automático enviado. Se recuperó el pago desde **Comprobar pago**. Posteriormente, el simulador oficial de Webhooks envió `payment.updated` sobre ese pago y obtuvo 200 OK; la lectura del registro confirmó una nueva comprobación y conservó un solo crédito y envío de correo. Falta comprobar el disparo automático al realizar una compra nueva, sin usar simulador ni refresco manual, y los demás escenarios antes de habilitar ventas. Ver el detalle en [el informe de publicación](RELEASE_2026_09_28.md#primer-checkout-de-prueba-y-bloqueo-de-acceso).
 

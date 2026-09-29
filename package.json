@@ -22,7 +22,8 @@
     "test:music": "node tests/music-browser.cjs",
     "demo:seed": "node scripts/seed-demo.cjs",
     "test:e2e": "npm run build && firebase emulators:exec --config firebase.local.json --project demo-momentos --only auth,firestore,storage,functions,hosting \"node scripts/browser-suite.cjs\"",
-    "test:sylar": "node --test tests/sylar-knowledge.test.mjs tests/sylar-presence.test.mjs"
+    "test:sylar": "node --test tests/sylar-knowledge.test.mjs tests/sylar-presence.test.mjs",
+    "test:payments-live": "node --test tests/live-payment-setup.test.cjs tests/live-validation.test.cjs"
   },
   "devDependencies": {
     "esbuild": "^0.25.0",

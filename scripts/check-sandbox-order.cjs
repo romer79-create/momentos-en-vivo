@@ -13,7 +13,8 @@ const { messageId } = require('../functions/notifications');
 const { safeCheckoutUrl } = require('../functions/commerce');
 const PROJECT = 'momentos-en-vivo', OWNER = 'sylar.soluciones@gmail.com';
 
-async function checkSandboxOrder(id) {
+async function checkSandboxOrder(id, { mode = 'sandbox' } = {}) {
+  if (!['sandbox', 'live'].includes(mode)) throw new Error('ORDER_MODE_REQUIRED');
   if (!/^[a-f0-9-]{36}$/.test(id || '')) throw new Error('ORDER_ID_REQUIRED');
   if (process.env.FIRESTORE_EMULATOR_HOST) throw new Error('EMULATOR_CONFIG_PRESENT');
   const account = firebaseAuth.findAccountByEmail(OWNER);
@@ -26,8 +27,8 @@ async function checkSandboxOrder(id) {
   const db = new Firestore({ projectId: PROJECT, credentials, preferRest: true });
   try {
     const order = (await db.collection('orders').doc(id).get()).data();
-    if (!owner.uid || !order || order.mode !== 'sandbox' || order.ownerId !== owner.uid) throw new Error('OWNER_SANDBOX_ORDER_REQUIRED');
-    const walletId = createHash('sha256').update(`sandbox:${order.ownerId}`).digest('hex');
+    if (!owner.uid || !order || order.mode !== mode || order.ownerId !== owner.uid) throw new Error('OWNER_ORDER_REQUIRED');
+    const walletId = createHash('sha256').update(`${mode}:${order.ownerId}`).digest('hex');
     const [wallet, lot, ledger, mail, payments, incidents] = await Promise.all([
       db.collection('wallets').doc(walletId).get(),
       db.collection('creditLots').doc(id).get(),
@@ -36,7 +37,7 @@ async function checkSandboxOrder(id) {
       db.collection('payments').where('orderId', '==', id).select('status', 'mode', 'providerLiveMode', 'verifiedSandboxAccounts', 'checkedAt', 'providerUpdatedAt').get(),
       db.collection('billingIncidents').where('orderId', '==', id).select('reason', 'resolved').get(),
     ]);
-    return { orderId: id, mode: order.mode, plan: order.planId, status: order.status,
+    return { orderId: id, mode: order.mode, validation: order.validation === true, plan: order.planId, status: order.status,
       priceCents: order.priceCents, currency: order.currency, credits: order.credits,
       checkoutPrepared: Boolean(order.preferenceId && order.checkoutUrl),
       checkoutHost: order.checkoutUrl ? new URL(order.checkoutUrl).hostname : null,

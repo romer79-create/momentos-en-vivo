@@ -12,13 +12,19 @@ function creditExpiry(at, months = 12) {
   const date = new Date(at), dayOfMonth = date.getUTCDate(); date.setUTCDate(1); date.setUTCMonth(date.getUTCMonth() + months);
   const last = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate(); date.setUTCDate(Math.min(dayOfMonth, last)); return date.getTime();
 }
+function paymentSecrets(mode) {
+  if (mode === 'live') return ['MERCADO_PAGO_LIVE_ACCESS_TOKEN', 'MERCADO_PAGO_LIVE_WEBHOOK_SECRET'];
+  return mode === 'sandbox' ? ['MERCADO_PAGO_ACCESS_TOKEN', 'MERCADO_PAGO_WEBHOOK_SECRET'] : [];
+}
 function configuration(env = process.env, emulator = false) {
   const mode = emulator ? 'local' : ['sandbox', 'live'].includes(env.PAYMENTS_MODE) ? env.PAYMENTS_MODE : 'disabled';
   const configured = (key, fallback, max) => env[key] === undefined || env[key] === '' ? fallback : positive(env[key], max);
   const terms = { photoLimit: configured('EVENT_PHOTO_LIMIT', approvedTerms.photoLimit, 3000), receptionHours: configured('EVENT_RECEPTION_HOURS', approvedTerms.receptionHours, 168), downloadDays: configured('EVENT_DOWNLOAD_DAYS', approvedTerms.downloadDays, 365), creditMonths: approvedTerms.creditMonths, retentionPolicy: POLICY };
   const priceKeys = { 'evento-1': 'PRICE_EVENT_1_CENTS', 'pack-3': 'PRICE_PACK_3_CENTS' };
   const plans = products.map(p => ({ ...p, priceCents: p.quoteOnly ? null : configured(priceKeys[p.id], p.priceCents, 1000000000) }));
-  const accessToken = env.MERCADO_PAGO_ACCESS_TOKEN || ''; const webhookSecret = env.MERCADO_PAGO_WEBHOOK_SECRET || ''; const collectorId = env.MERCADO_PAGO_COLLECTOR_ID || '';
+  const [tokenKey, webhookKey] = paymentSecrets(mode);
+  const accessToken = env[tokenKey] || ''; const webhookSecret = env[webhookKey] || '';
+  const collectorId = env[mode === 'live' ? 'MERCADO_PAGO_LIVE_COLLECTOR_ID' : 'MERCADO_PAGO_COLLECTOR_ID'] || '';
   const ready = mode === 'local' || (mode !== 'disabled' && accessToken && webhookSecret && /^\d+$/.test(collectorId) && Object.values(terms).every(Boolean));
   return { mode, terms, plans, accessToken, webhookSecret, collectorId: mode === 'local' ? 'local' : collectorId, sandboxBuyerId: env.MERCADO_PAGO_TEST_BUYER_ID || '', providerReady: Boolean(ready) && mode !== 'local', checkoutEnabled: Boolean(ready) && (mode === 'local' || env.PAYMENTS_CHECKOUT_ENABLED === 'true'), sandboxAdminCheckout: mode === 'sandbox' && env.PAYMENTS_SANDBOX_ADMIN === 'true', site: SITE };
 }
@@ -276,4 +282,4 @@ function createCommerce({ db, emulator = false, config = configuration(process.e
   }
   return { catalog, billingMode, balance, billing, createOrder, ownOrder: async (uid, id) => publicOrder(await ownOrder(uid, id), catalog().mode), applyPayment, simulate, refresh, webhook, previewActivation, activate, maintenance };
 }
-module.exports = { createCommerce, configuration, safeCheckoutUrl, publicOrder, creditExpiry, gateway };
+module.exports = { createCommerce, configuration, paymentSecrets, safeCheckoutUrl, publicOrder, creditExpiry, gateway };

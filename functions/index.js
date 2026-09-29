@@ -6,12 +6,12 @@ const { getAuth } = require('firebase-admin/auth');
 const { getStorage } = require('firebase-admin/storage');
 const { getAppCheck } = require('firebase-admin/app-check');
 const { createApp } = require('./app');
-const { createCommerce } = require('./commerce');
+const { createCommerce, paymentSecrets } = require('./commerce');
 const { createAlbums } = require('./albums');
 const { createNotifications } = require('./notifications');
 const { createRetention } = require('./retention');
 initializeApp();
-const secrets = ['sandbox', 'live'].includes(process.env.PAYMENTS_MODE) ? ['MERCADO_PAGO_ACCESS_TOKEN', 'MERCADO_PAGO_WEBHOOK_SECRET'] : [];
+const secrets = paymentSecrets(process.env.PAYMENTS_MODE);
 exports.api1 = functions.runWith({ memory: '512MB', timeoutSeconds: 120, maxInstances: 10, secrets }).https.onRequest(createApp({
  db: getFirestore(), auth: getAuth(), bucket: getStorage().bucket(), appCheck: getAppCheck(),
  emulator: process.env.FUNCTIONS_EMULATOR === 'true', siteKey: process.env.APP_CHECK_SITE_KEY || '', ownerEmail: process.env.OWNER_EMAIL || ''

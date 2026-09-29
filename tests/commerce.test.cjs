@@ -248,11 +248,33 @@ test('sandbox checkout can be limited to a server-verified admin while public an
 test('sandbox credits and activated events cannot be reused after switching to live', async () => {
   const f = setup(); const o = await order(f, 'pack-3'); await f.commerce.applyPayment(payment(f, o));
   const active = await draft(f); await f.commerce.activate(f.uid, active);
-  const live = createCommerce({ db, config: configuration({ ...env, PAYMENTS_MODE: 'live' }), provider: f.provider });
+  const live = createCommerce({ db, config: configuration({ ...env, PAYMENTS_MODE: 'live', MERCADO_PAGO_LIVE_ACCESS_TOKEN: 'APP_USR-live-fixture', MERCADO_PAGO_LIVE_WEBHOOK_SECRET: 'live-fixture-secret', MERCADO_PAGO_LIVE_COLLECTOR_ID: '123456' }), provider: f.provider });
   assert.equal(await live.balance(f.uid), 0); assert.equal(await f.commerce.balance(f.uid), 2);
   await rejects(live.activate(f.uid, await draft(f)), 402); await rejects(live.activate(f.uid, active), 409);
   await rejects(live.createOrder(f.uid, { id: o.id, planId: 'pack-3' }), 409);
   assert.equal((await live.ownOrder(f.uid, o.id)).mode, 'sandbox');
+});
+
+test('live signed approvals and refunds keep a single ledger and never change sandbox balance', async () => {
+  const liveEnv = { ...env, PAYMENTS_MODE: 'live', MERCADO_PAGO_LIVE_ACCESS_TOKEN: 'APP_USR-live-fixture', MERCADO_PAGO_LIVE_WEBHOOK_SECRET: 'live-fixture-secret', MERCADO_PAGO_LIVE_COLLECTOR_ID: '123456' };
+  const f = setup({ config: configuration(liveEnv), reportWebhook: () => {} });
+  const o = await order(f), p = payment(f, o, { live_mode: true }); f.payments.set(p.id, p);
+  const ts = String(f.now()), requestId = randomUUID();
+  const signed = secret => ({ query: { 'data.id': p.id, type: 'payment' }, body: { type: 'payment', data: { id: p.id } },
+    headers: { 'x-request-id': requestId, 'x-signature': `ts=${ts},v1=${createHmac('sha256', secret).update(`id:${p.id};request-id:${requestId};ts:${ts};`).digest('hex')}` } });
+  await rejects(f.commerce.webhook(signed(env.MERCADO_PAGO_WEBHOOK_SECRET)), 401);
+  await Promise.all(Array.from({ length: 4 }, () => f.commerce.webhook(signed(liveEnv.MERCADO_PAGO_LIVE_WEBHOOK_SECRET))));
+  assert.equal(await f.commerce.balance(f.uid), 1);
+  assert.equal((await db.collection('creditLedger').where('orderId', '==', o.id).get()).size, 1);
+  assert.equal((await db.collection('mailOutbox').where('entityId', '==', o.id).get()).size, 1);
+  const sandbox = createCommerce({ db, config: configuration(env), provider: f.provider });
+  assert.equal(await sandbox.balance(f.uid), 0);
+  f.advance(1000); f.payments.set(p.id, { ...p, status: 'refunded', transaction_amount_refunded: o.priceCents / 100, date_last_updated: new Date(f.now()).toISOString() });
+  await f.commerce.webhook(signed(liveEnv.MERCADO_PAGO_LIVE_WEBHOOK_SECRET));
+  await f.commerce.webhook(signed(liveEnv.MERCADO_PAGO_LIVE_WEBHOOK_SECRET));
+  assert.equal(await f.commerce.balance(f.uid), 0); assert.equal(await sandbox.balance(f.uid), 0);
+  assert.equal((await f.commerce.ownOrder(f.uid, o.id)).status, 'refunded');
+  assert.equal((await db.collection('creditLedger').doc(`reverse_${o.id}`).get()).data().delta, -1);
 });
 
 test('reconciliation recovers a missed notification and maintenance closes expired events', async () => {

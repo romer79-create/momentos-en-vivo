@@ -1,7 +1,7 @@
 'use strict';
 const path = require('node:path');
 const { spawn } = require('node:child_process');
-const allowed = new Set(['SMTP_PASSWORD', 'MERCADO_PAGO_ACCESS_TOKEN', 'MERCADO_PAGO_WEBHOOK_SECRET']);
+const allowed = new Set(['SMTP_PASSWORD', 'MERCADO_PAGO_ACCESS_TOKEN', 'MERCADO_PAGO_WEBHOOK_SECRET', 'MERCADO_PAGO_LIVE_ACCESS_TOKEN', 'MERCADO_PAGO_LIVE_WEBHOOK_SECRET']);
 
 function storeProjectSecret(name, value, spawnProcess = spawn) {
   if (!allowed.has(name) || typeof value !== 'string' || !value || value.length > 4096) throw new Error('Secreto no permitido.');
