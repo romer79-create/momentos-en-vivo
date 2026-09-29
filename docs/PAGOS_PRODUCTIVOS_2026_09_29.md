@@ -9,9 +9,12 @@ Momentos en Vivo — Un proyecto de Sylar.soluciones.
 - El titular aceptó las condiciones y activó las credenciales productivas.
 - El ingreso oculto guardó `MERCADO_PAGO_LIVE_ACCESS_TOKEN` y `MERCADO_PAGO_LIVE_WEBHOOK_SECRET`, versiones **1**, habilitadas.
 - Una consulta independiente a `/users/me` confirmó vendedor **78132866**, país **AR**, cuenta real. No se guardaron ni imprimieron perfiles o claves.
-- `api1` y `billingMaintenance` se actualizaron satisfactoriamente en Node.js 22 con `PAYMENTS_MODE=live`, `PAYMENTS_CHECKOUT_ENABLED=false` y `PAYMENTS_SANDBOX_ADMIN=false`. La portada, las demás funciones y los eventos se conservaron.
-- La comprobación pública confirmó precios aprobados, ventas pausadas, acceso anónimo rechazado y Webhooks falsificados rechazados.
-- Una lectura independiente de Cloud Functions confirmó las dos funciones `ACTIVE`, runtime `nodejs22`, modo `live`, ventas pausadas y únicamente las dos claves productivas en versión 1. Sus actualizaciones son de las **20:13:33 UTC**. El comprobador es `scripts/check-payment-deployment.cjs`; acepta `--live` cuando se habiliten las compras.
+- El propietario autorizó expresamente abrir las ventas reales después de confirmar el pago privado y revisar los importes: **ARS 65.000 por evento** y **ARS 175.500 por tres**; diez eventos siguen siendo por cotización.
+- `api1` y `billingMaintenance` se actualizaron satisfactoriamente en Node.js 22 con `PAYMENTS_MODE=live`, `PAYMENTS_CHECKOUT_ENABLED=true` y `PAYMENTS_SANDBOX_ADMIN=false`. La portada, las demás funciones y los eventos se conservaron.
+- `scripts/check-public.cjs --live` confirmó catálogo comercial activo, precios aprobados, acceso anónimo rechazado, Webhooks falsificados rechazados y configuración de App Check presente. Esta comprobación no realiza un pago; el recorrido real se verificó por separado con ARS 100.
+- `scripts/check-payment-deployment.cjs --live` confirmó mediante lectura independiente las dos funciones `ACTIVE`, runtime `nodejs22`, modo `live`, ventas activas y únicamente las dos claves productivas en versión 1. Las actualizaciones son de las **21:12:41.618 UTC** (`api1`) y **21:12:35.173 UTC** (`billingMaintenance`), el 29/09/2026.
+- La portada se recargó en el navegador y mostró los precios aprobados sin el aviso de compras deshabilitadas. Captura local: `output/releases/ventas-activas-20260929.jpg`.
+- El acceso sin sesión a `/compras.html` redirigió a `/cliente-login.html?next=%2Fcompras.html`, conservando el destino. En esa sesión de comprobación no se volvió a iniciar sesión ni se hizo otra compra después de abrir ventas; la prueba real acreditada y los controles posteriores son los detallados en este informe.
 
 Las claves y los vendedores de prueba/reales están separados. Las funciones vinculan solo las claves del modo seleccionado. Un cambio a `live` sin sus propias claves y vendedor deja los cobros desactivados.
 
@@ -31,7 +34,7 @@ El identificador y enlace privados se conservan solo en los archivos locales ign
 
 `node scripts/check-live-validation.cjs` consulta únicamente la orden del titular, su saldo, lote, historial, correo e incidencias. No fuerza la conciliación ni simula una notificación. `node scripts/check-webhook-deliveries.cjs` inspecciona registros acotados sin cuerpos, firmas, identificadores privados ni credenciales. Es necesario correlacionar su resultado con el pago real: un aviso del simulador por sí solo no acredita entrega automática.
 
-**Pendiente en este punto:** autorización explícita para abrir las ventas reales al público y publicación de ese cambio. La revisión automática de permisos rechazó el intento de habilitación por requerir esa autorización concreta. El cambio local de `PAYMENTS_CHECKOUT_ENABLED` está preparado, pero la configuración publicada sigue en `false`. El pago privado y su notificación automática sí quedaron comprobados.
+**Estado actual:** las ventas reales están abiertas con autorización explícita del propietario. La publicación y las comprobaciones posteriores finalizaron correctamente. El requisito de autorización de la revisión automática quedó resuelto antes de publicar. Sigue pendiente únicamente la devolución del cobro privado de validación y su comprobación posterior.
 
 ## Comprobaciones ejecutadas
 
@@ -44,12 +47,12 @@ El identificador y enlace privados se conservan solo en los archivos locales ign
 
 ## Publicación y vuelta atrás
 
-La primera publicación agotó el tiempo de análisis del código y no actualizó funciones. El segundo intento, con `FUNCTIONS_DISCOVERY_TIMEOUT=60`, actualizó correctamente solo `api1` y `billingMaintenance`.
+La primera publicación agotó el tiempo de análisis del código y no actualizó funciones. El segundo intento, con `FUNCTIONS_DISCOVERY_TIMEOUT=60`, actualizó correctamente solo `api1` y `billingMaintenance` con ventas pausadas. Tras la compra real y la autorización de apertura, se volvió a publicar únicamente esas dos funciones con ventas activas; el despliegue finalizó y ambas verificaciones posteriores aprobaron.
 
-Para abrir ventas tras la comprobación, cambiar únicamente `PAYMENTS_CHECKOUT_ENABLED=true`, conservar modo `live` y volver a desplegar esas dos funciones. Ejecutar `node scripts/check-public.cjs --live` y revisar Mis compras. Para pausar ventas, volver a `false` y redeplegar: se conserva la conciliación de compras reales.
+Para comprobar la configuración activa, ejecutar `node scripts/check-payment-deployment.cjs --live` y `node scripts/check-public.cjs --live`. Para pausar ventas, cambiar únicamente `PAYMENTS_CHECKOUT_ENABLED=false`, conservar modo `live` y redeplegar esas dos funciones: se conserva la conciliación de compras reales. Los comprobadores sin `--live` permiten verificar esa pausa.
 
 La configuración anterior a `live` se guardó localmente en `output/releases/payments-before-live-20260929.env`; las claves de prueba no se eliminaron. Volver globalmente a sandbox durante compras reales dejaría de conciliar esas órdenes, por lo que la pausa de ventas es la primera medida ante un incidente.
 
-El código y las pruebas se subieron a GitHub (`main` y `mejora/seguridad-eventos`) en el commit `b346274`. Los archivos privados de configuración y validación quedaron excluidos.
+El código y las pruebas se subieron a GitHub (`main` y `mejora/seguridad-eventos`) en el commit `b346274`; la acreditación automática se documentó en `50fb753`. La configuración publicada se verificó directamente en Firebase y mediante la API pública. Los archivos privados de configuración y validación quedaron excluidos de Git.
 
 Referencias: [credenciales oficiales](https://www.mercadopago.com.ar/developers/es/docs/your-integrations/credentials), [Webhooks para API de Preferencias](https://www.mercadopago.com.ar/developers/es/docs/checkout-pro-preferences/additional-content/notifications/webhooks).
